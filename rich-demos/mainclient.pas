@@ -13,7 +13,7 @@ uses
 {$ENDIF}
   SyncObjs, SysUtils, DateUtils, Variants, Classes, Graphics, Controls,
   Forms, Dialogs,  StdCtrls, ComCtrls, Grids,
-  ExtCtrls, Buttons, sc_info,
+  ExtCtrls, Buttons, sc_info, cp_info,
   snap7;
 
 const
@@ -26,18 +26,31 @@ type
   { TFormClient }
 
   TFormClient = class(TForm)
-    Button2: TButton;
+    CBConnType: TComboBox;
     EdIp: TEdit;
     BtnConnect: TButton;
-    Label1: TLabel;
+    EdLocTsapHI: TEdit;
+    EdRemTsapHI: TEdit;
+    EdLocTsapLO: TEdit;
+    EdRemTsapLO: TEdit;
     EdRack: TEdit;
+    EdSlot: TEdit;
+    Label1: TLabel;
+    BtnDisconnect: TButton;
     Label2: TLabel;
     Label3: TLabel;
-    EdSlot: TEdit;
-    BtnDisconnect: TButton;
+    Label58: TLabel;
+    Label59: TLabel;
+    Label60: TLabel;
+    Label61: TLabel;
+    Label62: TLabel;
+    Label63: TLabel;
+    Label64: TLabel;
+    Label65: TLabel;
     Label7: TLabel;
     EdPDUSize: TStaticText;
     PageControl: TPageControl;
+    PCC: TPageControl;
     StatusBar: TStatusBar;
     TabSheet1: TTabSheet;
     Label4: TLabel;
@@ -53,6 +66,7 @@ type
     BtnWrite: TButton;
     BtnAsyncRead: TButton;
     BtnAsyncWrite: TButton;
+    TabSheet2: TTabSheet;
     TabSheet3: TTabSheet;
     Label9: TLabel;
     Label10: TLabel;
@@ -91,6 +105,7 @@ type
     EdData_5: TEdit;
     MultiReadBtn: TButton;
     TabSheet4: TTabSheet;
+    TabSheet8: TTabSheet;
     TabZSL: TTabSheet;
     TabClock: TTabSheet;
     TabSheet7: TTabSheet;
@@ -276,7 +291,8 @@ type
     procedure BtnReadClick(Sender: TObject);
     procedure BtnWriteClick(Sender: TObject);
     procedure BtnAsyncReadClick(Sender: TObject);
-    procedure MemoUploadChange(Sender: TObject);
+    procedure Label63Click(Sender: TObject);
+    procedure Label64Click(Sender: TObject);
     procedure MultiReadBtnClick(Sender: TObject);
     procedure RGModeClick(Sender: TObject);
     procedure BtnAsyncWriteClick(Sender: TObject);
@@ -854,9 +870,14 @@ begin
   Read(true);
 end;
 
-procedure TFormClient.MemoUploadChange(Sender: TObject);
+procedure TFormClient.Label63Click(Sender: TObject);
 begin
+  SmartConnectInfo.ShowModal;
+end;
 
+procedure TFormClient.Label64Click(Sender: TObject);
+begin
+  ParamsConnectInfo.ShowModal;
 end;
 
 procedure TFormClient.BtnAsyncWriteClick(Sender: TObject);
@@ -943,13 +964,46 @@ end;
 procedure TFormClient.ClientConnect;
 Var
   Rack, Slot : integer;
+  ConnType   : word;
   RemoteAddress : AnsiString;
+  LocalTsapHI  : integer;
+  LocalTsapLO  : integer;
+  RemoteTsapHI : integer;
+  RemoteTsapLO : integer;
+  LocalTsap    : word;
+  RemoteTsap   : word;
+
+  function GetChar(ED : TEdit) : integer;
+  Var
+    B : byte;
+  begin
+    B:=StrToIntDef('$'+Ed.Text,0);
+    Ed.Text:=IntToHex(B,2);
+    Result:=B;
+  end;
+
 begin
   LastOP:='Connection';
-  Rack:=StrToIntDef(EdRack.Text,0);
-  Slot:=StrToIntDef(EdSlot.Text,0);
   RemoteAddress:=AnsiString(EdIp.Text);
-  LastError:=Client.ConnectTo(RemoteAddress,Rack,Slot);
+  if PCC.PageIndex=0 then
+  begin
+    ConnType:=CBConnType.ItemIndex+1;
+    Rack:=StrToIntDef(EdRack.Text,0);
+    Slot:=StrToIntDef(EdSlot.Text,0);
+    Client.SetConnectionType(ConnType);
+    LastError:=Client.ConnectTo(RemoteAddress,Rack,Slot);
+  end
+  else begin
+    LocalTsapHI  :=GetChar(EdLocTsapHI);
+    LocalTsapLO  :=GetChar(EdLocTsapLO);
+    RemoteTsapHI :=GetChar(EdRemTsapHI);
+    RemoteTsapLO :=GetChar(EdRemTsapLO);
+    LocalTsap    :=LocalTsapHI shl 8 + LocalTsapLO;
+    RemoteTsap   :=RemoteTsapHI shl 8 + RemoteTsapLO;
+    Client.SetConnectionParams(RemoteAddress, LocalTSAP, RemoteTSAP);
+    LastError    :=Client.Connect;
+  end;
+
   Elapse;
   Connected:=LastError=0;
   if Connected then
@@ -1454,7 +1508,6 @@ end;
 
 procedure TFormClient.Button2Click(Sender: TObject);
 begin
-  SmartConnectInfo.ShowModal;
 end;
 
 
@@ -1976,10 +2029,12 @@ begin
     BtnConnect.Enabled:=false;
     BtnDisconnect.Enabled:=true;
     PageControl.Enabled:=true;
+    PCC.Enabled:=false;
     EdIp.Enabled:=false;
     EdRack.Enabled:=false;
     EdSlot.Enabled:=false;
-    GetSysInfo;
+    if PCC.ActivePageIndex=0 then
+      GetSysInfo;
   end
   else begin
     ClearPages;
@@ -1987,6 +2042,7 @@ begin
     BtnDisconnect.Enabled:=false;
     PageControl.Enabled:=false;
     PageControl.ActivePageIndex:=0;
+    PCC.Enabled:=true;
     EdIp.Enabled:=true;
     edRack.Enabled:=true;
     edSlot.Enabled:=true;

@@ -3,6 +3,8 @@ EXPORTS
   Cli_Create
   Cli_Destroy
   Cli_ConnectTo
+  Cli_SetConnectionParams
+  Cli_SetConnectionType
   Cli_Connect
   Cli_Disconnect
   Cli_GetParam
@@ -82,6 +84,7 @@ EXPORTS
   Cli_CheckAsCompletion
   Cli_WaitAsCompletion
   Cli_ErrorText
+  Cli_GetConnected
   Srv_Create
   Srv_Destroy
   Srv_GetParam
@@ -100,6 +103,7 @@ EXPORTS
   Srv_GetMask
   Srv_SetMask
   Srv_SetEventsCallback
+  Srv_SetReadEventsCallback
   Srv_ErrorText
   Srv_EventText
   Par_Create

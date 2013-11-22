@@ -1,5 +1,5 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                       1.0.0.0 |
+|  PROJECT SNAP7                                                         1.1.0 |
 |==============================================================================|
 |  Copyright (C) 2013, Davide Nardella                                         |
 |  All rights reserved.                                                        |
@@ -80,6 +80,8 @@ EXPORTSPEC S7Object S7API lv_Cli_Create();
 EXPORTSPEC void S7API lv_Cli_Destroy(S7Object &Client);
 EXPORTSPEC int S7API lv_Cli_Connect(S7Object Client);
 EXPORTSPEC int S7API lv_Cli_ConnectTo(S7Object Client, const char *Address, int Rack, int Slot);
+EXPORTSPEC int S7API lv_Cli_SetConnectionParams(S7Object Client, const char *Address, word LocalTSAP, word RemoteTSAP);
+EXPORTSPEC int S7API lv_Cli_SetConnectionType(S7Object Client, word ConnectionType);
 EXPORTSPEC int S7API lv_Cli_Disconnect(S7Object Client);
 EXPORTSPEC int S7API lv_Cli_GetParam(S7Object Client, int ParamNumber, void *pValue);
 EXPORTSPEC int S7API lv_Cli_SetParam(S7Object Client, int ParamNumber, void *pValue);

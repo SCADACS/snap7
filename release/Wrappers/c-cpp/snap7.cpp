@@ -1,5 +1,5 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                       1.0.0.0 |
+|  PROJECT SNAP7                                                         1.1.0 |
 |==============================================================================|
 |  Copyright (C) 2013, Davide Nardella                                         |
 |  All rights reserved.                                                        |
@@ -51,6 +51,16 @@ int TS7Client::Connect()
 int TS7Client::ConnectTo(const char *RemAddress, int Rack, int Slot)
 {
     return Cli_ConnectTo(Client, RemAddress, Rack, Slot);
+}
+//---------------------------------------------------------------------------
+int TS7Client::SetConnectionParams(const char *RemAddress, word LocalTSAP, word RemoteTSAP)
+{
+    return Cli_SetConnectionParams(Client, RemAddress, LocalTSAP, RemoteTSAP);
+}
+//---------------------------------------------------------------------------
+int TS7Client::SetConnectionType(word ConnectionType)
+{
+    return Cli_SetConnectionType(Client, ConnectionType);
 }
 //---------------------------------------------------------------------------
 int TS7Client::Disconnect()
@@ -326,6 +336,15 @@ int TS7Client::PlcStatus()
         return Result;
 }
 //---------------------------------------------------------------------------
+bool TS7Client::Connected()
+{
+	int ClientStatus;
+	if (Cli_GetConnected(Client ,&ClientStatus)==0)
+		return ClientStatus!=0;
+	else
+		return false;
+}
+//---------------------------------------------------------------------------
 int TS7Client::SetAsCallback(pfn_CliCompletion pCompletion, void *usrPtr)
 {
     return Cli_SetAsCallback(Client, pCompletion, usrPtr);
@@ -501,6 +520,11 @@ int TS7Server::SetParam(int ParamNumber, void *pValue)
 int TS7Server::SetEventsCallback(pfn_SrvCallBack PCallBack, void *UsrPtr)
 {
     return Srv_SetEventsCallback(Server, PCallBack, UsrPtr);
+}
+//---------------------------------------------------------------------------
+int TS7Server::SetReadEventsCallback(pfn_SrvCallBack PCallBack, void *UsrPtr)
+{
+    return Srv_SetReadEventsCallback(Server, PCallBack, UsrPtr);
 }
 //---------------------------------------------------------------------------
 bool TS7Server::PickEvent(TSrvEvent *pEvent)

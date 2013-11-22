@@ -1,14 +1,59 @@
+======================================================================[2013-11-10]
+Version 1.1.0 - New Minor release (full compatible with 1.0.0)
+----------------------------------------------------------------------------------
+- LOGO 0BA7 Ethernet support (as client/server and Network I/O blocks)
+- S7200 (via CP243) experimental support
+- New Callback for S7Server that allow writing full synchronous gateways (protocol
+  translators)
+- New rich-demos
+- Some bug fixed
+- Documentation inproved and updated.
+==================================================================================
 
-================================================================================
-Version 1.0.0
-================================================================================
+[Added]
 
-2013/09/03 + First public release.
+- Cli_GetConnected function added.
+  It returns the connection status of the client.
 
-================================================================================
-+-------------+
-| + Added     |
-| - Removed   |
-| * BugFix    |
-| ! Improved  |
-+-------------+
+- Cli_SetConnectionType function added.
+  For a Client it's possible to connect to a PLC as PG/OP/S7 Basic.
+
+- Cli_SetConnectionParams function added.
+  For a Client now it's possible to specifying Local and Remote TSAP before the
+  connection.
+  Needed for LOGO, S7200 and future hardware compatible with S7Protocol.
+
+- Srv_SetReadEventsCallback function added.
+  It allows to trap the read event from a client *before* the data getting.
+
+- New ClientDemo and ServerDemo for the latter functions were supplied.
+
+- LOGO examples were supplied.
+
+- New rich-demos for Cubieboard 2 (under Cubian OS)
+
+- Glibc_2.11 for Linux x86_64 Release
+
+- Full documentation updated.
+
+[Fixed]
+
+- Expression bug in line 491 of /examples/pascal/client.dpr
+  "if ParamCount=4" must be "if ParamCount=3"
+  (thanks to Jean-Noel Voirol)
+
+- Bug in S7Worker (Snap7Server) that returned "Data mismatch" error in MultiWrite
+  function when writing ODD amount of bytes in items with index>1
+
+- Bug in TSAP calculation in S7Client connection that sent wrong connection
+  telegram to S7400 when the CPU was in Rack>1
+  (thanks to hujingqi for the detailed analysis)
+
+
+======================================================================[2013-09-03]
+Version 1.0.0 
+==================================================================================
+
+- First public release.
+
+==================================================================================

@@ -48,6 +48,11 @@ class ServerDemo
         Console.WriteLine(Server.EventText(ref Event));
     }
 
+    static void ReadEventCallBack(IntPtr usrPtr, ref S7Server.USrvEvent Event, int Size)
+    {
+        Console.WriteLine(Server.EventText(ref Event));
+    }
+
     static void Main(string[] args)
     {
         Server = new S7Server();
@@ -60,9 +65,10 @@ class ServerDemo
         Server.RegisterArea(S7Server.srvAreaDB, 2, ref DB2, DB2.Length);
         Server.RegisterArea(S7Server.srvAreaDB, 3, ref DB3, DB3.Length);
         
-        // Set the event callback to show something : it's not strictly needed.
-        // If you comment next line the server still works fine.
+        // Exclude read event to avoid the double report        
+        Server.EventMask = ~S7Server.evcDataRead;
         Server.SetEventsCallBack(EventCallBack, IntPtr.Zero);
+        Server.SetReadEventsCallBack(ReadEventCallBack, IntPtr.Zero);
 
         // Uncomment next line if you don't want to see wrapped messages 
         // (Note : Doesn't work in Mono 2.10)

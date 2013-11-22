@@ -1,5 +1,5 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.0.0 |
+|  PROJECT SNAP7                                                         1.1.0 |
 |==============================================================================|
 |  Copyright (C) 2013, Davide Nardella                                         |
 |  All rights reserved.                                                        |
@@ -110,12 +110,12 @@ int TSnap7Peer::PeerConnect( )
     int Result;
 
     ClrError();
-    Result = isoConnect();
-    if (Result == 0)
-    {
-	Result = NegotiatePDULength();
-	if (Result != 0)
-            PeerDisconnect();
-    }
+	Result = isoConnect();
+	if (Result == 0)
+	{
+		Result = NegotiatePDULength();
+		if (Result != 0)
+			PeerDisconnect();
+	}
     return Result;
 }

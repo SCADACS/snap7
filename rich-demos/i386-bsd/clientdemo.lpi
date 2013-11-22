@@ -53,7 +53,7 @@
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
       <OtherUnitFiles Value=".."/>
-      <UnitOutputDirectory Value="lib"/>
+      <UnitOutputDirectory Value="tmp"/>
     </SearchPaths>
     <Linking>
       <Debugging>

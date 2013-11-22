@@ -1,5 +1,5 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.0.0 |
+|  PROJECT SNAP7                                                         1.1.0 |
 |==============================================================================|
 |  Copyright (C) 2013, Davide Nardella                                         |
 |  All rights reserved.                                                        |
@@ -80,6 +80,28 @@ void S7API Cli_Destroy(S7Object &Client)
         delete PSnap7Client(Client);
         Client=0;
     }
+}
+//---------------------------------------------------------------------------
+int Cli_SetConnectionParams(S7Object Client, const char *Address, word LocalTSAP, word RemoteTSAP)
+{
+    if (Client)
+    {
+        PSnap7Client(Client)->SetConnectionParams(Address, LocalTSAP, RemoteTSAP);
+        return 0;
+    }
+    else
+        return errLibInvalidObject;
+}
+//---------------------------------------------------------------------------
+int Cli_SetConnectionType(S7Object Client, word ConnectionType)
+{
+    if (Client)
+    {
+        PSnap7Client(Client)->SetConnectionType(ConnectionType);
+        return 0;
+    }
+    else
+        return errLibInvalidObject;
 }
 //---------------------------------------------------------------------------
 int S7API Cli_ConnectTo(S7Object Client, const char *Address, int Rack, int Slot)
@@ -527,6 +549,18 @@ int S7API Cli_ErrorText(int Error, char *Text, int TextLen)
 	return 0;
 }
 //---------------------------------------------------------------------------
+int S7API Cli_GetConnected(S7Object Client, int &Connected)
+{
+    Connected=0;
+	if (Client)
+    {
+		Connected=PSnap7Client(Client)->Connected;
+		return 0;
+	}
+    else
+        return errLibInvalidObject;
+}
+//---------------------------------------------------------------------------
 int S7API Cli_AsReadArea(S7Object Client, int Area, int DBNumber, int Start, int Amount, int WordLen, void *pUsrData)
 {
     if (Client)
@@ -943,6 +977,14 @@ int S7API Srv_SetEventsCallback(S7Object Server, pfn_SrvCallBack pCallback, void
 {
 	if (Server)
 		return PSnap7Server(Server)->SetEventsCallBack(pCallback, usrPtr);
+	else
+		return errLibInvalidObject;
+}
+//---------------------------------------------------------------------------
+int S7API Srv_SetReadEventsCallback(S7Object Server, pfn_SrvCallBack pCallback, void *usrPtr)
+{
+	if (Server)
+		return PSnap7Server(Server)->SetReadEventsCallBack(pCallback, usrPtr);
 	else
 		return errLibInvalidObject;
 }

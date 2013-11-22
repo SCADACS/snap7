@@ -4,15 +4,16 @@
     <PathDelim Value="\"/>
     <Version Value="9"/>
     <BuildModes Active="Default"/>
-    <Units Count="11">
+    <Units Count="12">
       <Unit0>
         <Filename Value="clientdemo.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="clientdemo"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
-        <CursorPos X="1" Y="23"/>
+        <CursorPos X="64" Y="22"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -51,7 +52,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="mainclient"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="5"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="11" Y="1"/>
@@ -65,7 +66,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="sc_info"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="6"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="38" Y="26"/>
@@ -75,7 +76,7 @@
       <Unit7>
         <Filename Value="..\snap7.pas"/>
         <UnitName Value="snap7"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="2"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1017"/>
         <CursorPos X="13" Y="1024"/>
@@ -84,7 +85,7 @@
       </Unit7>
       <Unit8>
         <Filename Value="..\..\src\lib\snap7_libmain.h"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="3"/>
         <WindowIndex Value="0"/>
         <TopLine Value="171"/>
         <CursorPos X="1" Y="197"/>
@@ -94,11 +95,10 @@
       </Unit8>
       <Unit9>
         <Filename Value="..\..\src\lib\snap7_libmain.cpp"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="4"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="951"/>
-        <CursorPos X="14" Y="109"/>
+        <TopLine Value="97"/>
+        <CursorPos X="67" Y="115"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="C++"/>
@@ -111,6 +111,16 @@
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit10>
+      <Unit11>
+        <Filename Value="..\cp_info.pas"/>
+        <UnitName Value="cp_info"/>
+        <EditorIndex Value="1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="44" Y="26"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit11>
     </Units>
     <General>
       <ActiveWindowIndexAtStart Value="0"/>

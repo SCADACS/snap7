@@ -1,5 +1,5 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.0.0 |
+|  PROJECT SNAP7                                                         1.1.0 |
 |==============================================================================|
 |  Copyright (C) 2013, Davide Nardella                                         |
 |  All rights reserved.                                                        |
@@ -128,6 +128,8 @@ protected:
     bool ExecuteRecv();
     void DoEvent(longword Code, word RetCode, word Param1, word Param2,
       word Param3, word Param4);
+    void DoReadEvent(longword Code, word RetCode, word Param1, word Param2,
+      word Param3, word Param4);
     void FragmentSkipped(int Size);
     // Entry parse
     bool IsoPerformCommand(int &Size);
@@ -199,6 +201,9 @@ typedef TS7Worker *PS7Worker;
 class TSnap7Server : public TCustomMsgServer
 {
 private:
+    // Read Callback related
+    pfn_SrvCallBack OnReadEvent;
+    void *FReadUsrPtr;
     void DisposeAll();
     int FindFirstFreeDB();
     int IndexOfDB(word DBNumber);
@@ -213,6 +218,9 @@ protected:
     int RegisterSys(int AreaCode, void *pUsrData, word Size);
     int UnregisterDB(word DBNumber);
     int UnregisterSys(int AreaCode);
+    // The Read event
+    void DoReadEvent(int Sender, longword Code, word RetCode, word Param1,
+      word Param2, word Param3, word Param4);
 public:
     int WorkInterval;
     byte CpuStatus;
@@ -225,6 +233,8 @@ public:
     int UnregisterArea(int AreaCode, word Index);
     int LockArea(int AreaCode, word DBNumber);
     int UnlockArea(int AreaCode, word DBNumber);
+    // Sets Event callback
+    int SetReadEventsCallBack(pfn_SrvCallBack PCallBack, void *UsrPtr);
     friend class TS7Worker;
 };
 typedef TSnap7Server *PSnap7Server;

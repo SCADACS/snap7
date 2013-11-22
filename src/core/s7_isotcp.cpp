@@ -1,5 +1,5 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.0.0 |
+|  PROJECT SNAP7                                                         1.1.0 |
 |==============================================================================|
 |  Copyright (C) 2013, Davide Nardella                                         |
 |  All rights reserved.                                                        |
@@ -159,8 +159,16 @@ void TIsoTcpSocket::IsoParsePDU(TIsoControlPDU pdu)
 //---------------------------------------------------------------------------
 int TIsoTcpSocket::IsoConfirmConnection(u_char PDUType)
 {
-    ClrIsoError();
+    PIsoControlPDU CPDU = PIsoControlPDU(&PDU);
+	u_short TempRef;
+
+	ClrIsoError();
 	PDU.COTP.PDUType=PDUType;
+	// Exchange SrcRef<->DstRef, not strictly needed by COTP 8073 but S7PLC as client needs it.
+	TempRef=CPDU->COTP.DstRef;
+	CPDU->COTP.DstRef=CPDU->COTP.SrcRef;
+	CPDU->COTP.SrcRef=0x0100;//TempRef;
+
 	return SendPacket(&PDU,PDUSize(&PDU));
 }
 //---------------------------------------------------------------------------

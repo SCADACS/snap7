@@ -1,7 +1,7 @@
 object FormClient: TFormClient
-  Left = 219
+  Left = 288
   Height = 664
-  Top = 171
+  Top = 131
   Width = 753
   BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
   Caption = 'FormClient'
@@ -19,7 +19,7 @@ object FormClient: TFormClient
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poScreenCenter
-  LCLVersion = '1.0.6.0'
+  LCLVersion = '1.0.12.0'
   Visible = True
   object Label1: TLabel
     Left = 11
@@ -29,24 +29,8 @@ object FormClient: TFormClient
     Caption = 'IP'
     ParentColor = False
   end
-  object Label2: TLabel
-    Left = 115
-    Height = 14
-    Top = 9
-    Width = 24
-    Caption = 'Rack'
-    ParentColor = False
-  end
-  object Label3: TLabel
-    Left = 163
-    Height = 14
-    Top = 9
-    Width = 19
-    Caption = 'Slot'
-    ParentColor = False
-  end
   object Label7: TLabel
-    Left = 352
+    Left = 456
     Height = 14
     Top = 9
     Width = 76
@@ -70,35 +54,17 @@ object FormClient: TFormClient
     OnClick = BtnConnectClick
     TabOrder = 1
   end
-  object EdRack: TEdit
-    Left = 112
-    Height = 21
-    Top = 24
-    Width = 41
-    OnKeyPress = EdRackKeyPress
-    TabOrder = 2
-    Text = '0'
-  end
-  object EdSlot: TEdit
-    Left = 160
-    Height = 21
-    Top = 24
-    Width = 41
-    OnKeyPress = EdRackKeyPress
-    TabOrder = 3
-    Text = '2'
-  end
   object BtnDisconnect: TButton
-    Left = 112
+    Left = 8
     Height = 25
-    Top = 51
-    Width = 89
+    Top = 80
+    Width = 98
     Caption = 'Disconnect'
     OnClick = BtnDisconnectClick
-    TabOrder = 4
+    TabOrder = 2
   end
   object EdPDUSize: TStaticText
-    Left = 352
+    Left = 456
     Height = 18
     Top = 26
     Width = 75
@@ -106,15 +72,15 @@ object FormClient: TFormClient
     Caption = ' 0'
     Color = 13434828
     ParentColor = False
-    TabOrder = 5
+    TabOrder = 3
     Transparent = False
   end
   object PageControl: TPageControl
     Left = 0
-    Height = 547
-    Top = 94
+    Height = 531
+    Top = 110
     Width = 753
-    ActivePage = TabClock
+    ActivePage = TabSheet6
     Align = alBottom
     Anchors = [akTop, akBottom]
     Font.Color = clWindowText
@@ -122,14 +88,14 @@ object FormClient: TFormClient
     Font.Name = 'Sans'
     MultiLine = True
     ParentFont = False
-    TabIndex = 7
-    TabOrder = 6
+    TabIndex = 0
+    TabOrder = 4
     OnChange = PageControlChange
     Options = [nboMultiLine]
     object TabSheet6: TTabSheet
       Caption = 'System Info'
-      ClientHeight = 528
-      ClientWidth = 751
+      ClientHeight = 504
+      ClientWidth = 745
       ImageIndex = 9
       object GroupBox5: TGroupBox
         Left = 17
@@ -142,39 +108,39 @@ object FormClient: TFormClient
         TabOrder = 2
         object Label44: TLabel
           Left = 10
-          Height = 14
+          Height = 15
           Top = 13
-          Width = 112
+          Width = 99
           Caption = 'Max PDU size (byte)'
           ParentColor = False
         end
         object Label45: TLabel
           Left = 10
-          Height = 14
+          Height = 15
           Top = 45
-          Width = 132
+          Width = 115
           Caption = 'Max active connections'
           ParentColor = False
         end
         object Label46: TLabel
           Left = 10
-          Height = 14
+          Height = 15
           Top = 77
-          Width = 106
+          Width = 91
           Caption = 'Max MPI rate (bps)'
           ParentColor = False
         end
         object Label47: TLabel
           Left = 10
-          Height = 14
+          Height = 15
           Top = 109
-          Width = 152
+          Width = 128
           Caption = 'Max comm. bus rare (bps)'
           ParentColor = False
         end
         object EdPdu: TEdit
           Left = 171
-          Height = 20
+          Height = 23
           Top = 9
           Width = 278
           Font.CharSet = ANSI_CHARSET
@@ -188,7 +154,7 @@ object FormClient: TFormClient
         end
         object EdConnections: TEdit
           Left = 171
-          Height = 20
+          Height = 23
           Top = 41
           Width = 278
           Font.CharSet = ANSI_CHARSET
@@ -202,7 +168,7 @@ object FormClient: TFormClient
         end
         object EdMpiRate: TEdit
           Left = 171
-          Height = 20
+          Height = 23
           Top = 73
           Width = 278
           Font.CharSet = ANSI_CHARSET
@@ -216,7 +182,7 @@ object FormClient: TFormClient
         end
         object EdBusRate: TEdit
           Left = 171
-          Height = 20
+          Height = 23
           Top = 105
           Width = 278
           Font.CharSet = ANSI_CHARSET
@@ -240,47 +206,47 @@ object FormClient: TFormClient
         TabOrder = 1
         object Label41: TLabel
           Left = 10
-          Height = 14
+          Height = 15
           Top = 13
-          Width = 107
+          Width = 91
           Caption = 'Module Type Name'
           ParentColor = False
         end
         object Label42: TLabel
           Left = 10
-          Height = 14
+          Height = 15
           Top = 45
-          Width = 82
+          Width = 67
           Caption = 'Serial number'
           ParentColor = False
         end
         object Label43: TLabel
           Left = 10
-          Height = 14
+          Height = 15
           Top = 77
-          Width = 96
+          Width = 84
           Caption = 'Vendor copyright'
           ParentColor = False
         end
         object Label51: TLabel
           Left = 10
-          Height = 14
+          Height = 15
           Top = 109
-          Width = 53
+          Width = 46
           Caption = 'AS Name'
           ParentColor = False
         end
         object Label52: TLabel
           Left = 10
-          Height = 14
+          Height = 15
           Top = 141
-          Width = 78
+          Width = 65
           Caption = 'Module Name'
           ParentColor = False
         end
         object EdModuleTypeName: TEdit
           Left = 171
-          Height = 20
+          Height = 23
           Top = 9
           Width = 278
           Font.CharSet = ANSI_CHARSET
@@ -294,7 +260,7 @@ object FormClient: TFormClient
         end
         object EdSerialNumber: TEdit
           Left = 171
-          Height = 20
+          Height = 23
           Top = 41
           Width = 278
           Font.CharSet = ANSI_CHARSET
@@ -308,7 +274,7 @@ object FormClient: TFormClient
         end
         object EdCopyright: TEdit
           Left = 171
-          Height = 20
+          Height = 23
           Top = 73
           Width = 278
           Font.CharSet = ANSI_CHARSET
@@ -322,7 +288,7 @@ object FormClient: TFormClient
         end
         object EdASName: TEdit
           Left = 171
-          Height = 20
+          Height = 23
           Top = 105
           Width = 278
           Font.CharSet = ANSI_CHARSET
@@ -336,7 +302,7 @@ object FormClient: TFormClient
         end
         object EdModuleName: TEdit
           Left = 171
-          Height = 20
+          Height = 23
           Top = 137
           Width = 278
           Font.CharSet = ANSI_CHARSET
@@ -360,23 +326,23 @@ object FormClient: TFormClient
         TabOrder = 0
         object Label40: TLabel
           Left = 10
-          Height = 14
+          Height = 15
           Top = 13
-          Width = 65
+          Width = 56
           Caption = 'Order code'
           ParentColor = False
         end
         object Label36: TLabel
           Left = 330
-          Height = 14
+          Height = 15
           Top = 13
-          Width = 43
+          Width = 38
           Caption = 'Version'
           ParentColor = False
         end
         object edOrderCode: TEdit
           Left = 139
-          Height = 20
+          Height = 23
           Top = 9
           Width = 174
           Font.CharSet = ANSI_CHARSET
@@ -390,7 +356,7 @@ object FormClient: TFormClient
         end
         object EdVersion: TEdit
           Left = 379
-          Height = 19
+          Height = 22
           Top = 9
           Width = 68
           Alignment = taCenter
@@ -407,56 +373,65 @@ object FormClient: TFormClient
         OnClick = Button13Click
         TabOrder = 3
       end
+      object Label65: TLabel
+        Left = 18
+        Height = 29
+        Top = 467
+        Width = 614
+        Alignment = taCenter
+        Caption = 'If TSAP Tab is used for the connection, The system Info is not called automatically (you should press the button "Refresh Info").'#13#10'This because some PLC (S7200/LOGO) don''t offer these informations.'
+        ParentColor = False
+      end
     end
     object TabSheet1: TTabSheet
       Caption = 'Data read/write'
-      ClientHeight = 528
-      ClientWidth = 751
+      ClientHeight = 504
+      ClientWidth = 745
       object Label4: TLabel
         Left = 616
-        Height = 14
+        Height = 15
         Top = 8
-        Width = 27
+        Width = 25
         Caption = 'Area'
         ParentColor = False
       end
       object LblDBNum: TLabel
         Left = 616
-        Height = 14
+        Height = 15
         Top = 48
-        Width = 66
+        Width = 55
         Caption = 'DB Number'
         ParentColor = False
       end
       object Label5: TLabel
         Left = 616
-        Height = 14
+        Height = 15
         Top = 88
-        Width = 29
+        Width = 24
         Caption = 'Start'
         ParentColor = False
       end
       object Label6: TLabel
         Left = 616
-        Height = 14
+        Height = 15
         Top = 128
-        Width = 44
+        Width = 38
         Caption = 'Amount'
         ParentColor = False
       end
       object Label19: TLabel
         Left = 616
-        Height = 14
+        Height = 15
         Top = 174
-        Width = 48
+        Width = 45
         Caption = 'WordLen'
         ParentColor = False
       end
       object LblArea: TLabel
         Left = 616
-        Height = 30
+        Height = 27
         Top = 226
-        Width = 123
+        Width = 108
         Alignment = taCenter
         Caption = 'Area and WordLen '#13#10'mismatch'
         Font.Color = clRed
@@ -469,7 +444,7 @@ object FormClient: TFormClient
       end
       object DataGrid: TStringGrid
         Left = 0
-        Height = 516
+        Height = 504
         Top = 0
         Width = 601
         Align = alLeft
@@ -515,7 +490,7 @@ object FormClient: TFormClient
       end
       object EdDBNum: TEdit
         Left = 616
-        Height = 23
+        Height = 22
         Top = 64
         Width = 105
         OnKeyPress = EdRackKeyPress
@@ -524,7 +499,7 @@ object FormClient: TFormClient
       end
       object EdStart: TEdit
         Left = 616
-        Height = 23
+        Height = 22
         Top = 104
         Width = 105
         OnKeyPress = EdRackKeyPress
@@ -533,7 +508,7 @@ object FormClient: TFormClient
       end
       object EdAmount: TEdit
         Left = 616
-        Height = 23
+        Height = 22
         Top = 144
         Width = 105
         OnKeyPress = EdRackKeyPress
@@ -602,46 +577,46 @@ object FormClient: TFormClient
     end
     object TabSheet3: TTabSheet
       Caption = 'Multi read/write'
-      ClientHeight = 528
-      ClientWidth = 751
+      ClientHeight = 504
+      ClientWidth = 745
       ImageIndex = 2
       object Label9: TLabel
         Left = 32
-        Height = 14
+        Height = 15
         Top = 24
-        Width = 27
+        Width = 25
         Caption = 'Area'
         ParentColor = False
       end
       object Label10: TLabel
         Left = 140
-        Height = 14
+        Height = 15
         Top = 24
-        Width = 66
+        Width = 55
         Caption = 'DB Number'
         ParentColor = False
       end
       object Label11: TLabel
         Left = 218
-        Height = 14
+        Height = 15
         Top = 24
-        Width = 29
+        Width = 24
         Caption = 'Start'
         ParentColor = False
       end
       object Label12: TLabel
         Left = 277
-        Height = 14
+        Height = 15
         Top = 24
-        Width = 24
+        Width = 22
         Caption = 'Size'
         ParentColor = False
       end
       object Label13: TLabel
         Left = 12
-        Height = 16
+        Height = 17
         Top = 41
-        Width = 10
+        Width = 9
         Caption = '1'
         Font.Color = clWindowText
         Font.Height = -13
@@ -652,9 +627,9 @@ object FormClient: TFormClient
       end
       object Label14: TLabel
         Left = 12
-        Height = 16
+        Height = 17
         Top = 65
-        Width = 10
+        Width = 9
         Caption = '2'
         Font.Color = clWindowText
         Font.Height = -13
@@ -665,9 +640,9 @@ object FormClient: TFormClient
       end
       object Label15: TLabel
         Left = 12
-        Height = 16
+        Height = 17
         Top = 89
-        Width = 10
+        Width = 9
         Caption = '3'
         Font.Color = clWindowText
         Font.Height = -13
@@ -678,9 +653,9 @@ object FormClient: TFormClient
       end
       object Label16: TLabel
         Left = 12
-        Height = 16
+        Height = 17
         Top = 113
-        Width = 10
+        Width = 9
         Caption = '4'
         Font.Color = clWindowText
         Font.Height = -13
@@ -691,9 +666,9 @@ object FormClient: TFormClient
       end
       object Label17: TLabel
         Left = 12
-        Height = 16
+        Height = 17
         Top = 137
-        Width = 10
+        Width = 9
         Caption = '5'
         Font.Color = clWindowText
         Font.Height = -13
@@ -704,17 +679,17 @@ object FormClient: TFormClient
       end
       object Label18: TLabel
         Left = 325
-        Height = 14
+        Height = 15
         Top = 24
-        Width = 57
+        Width = 48
         Caption = 'Data read'
         ParentColor = False
       end
       object Label20: TLabel
         Left = 12
-        Height = 16
+        Height = 17
         Top = 201
-        Width = 10
+        Width = 9
         Caption = '1'
         Font.Color = clWindowText
         Font.Height = -13
@@ -725,9 +700,9 @@ object FormClient: TFormClient
       end
       object Label21: TLabel
         Left = 12
-        Height = 16
+        Height = 17
         Top = 225
-        Width = 10
+        Width = 9
         Caption = '2'
         Font.Color = clWindowText
         Font.Height = -13
@@ -738,9 +713,9 @@ object FormClient: TFormClient
       end
       object Label22: TLabel
         Left = 12
-        Height = 16
+        Height = 17
         Top = 249
-        Width = 10
+        Width = 9
         Caption = '3'
         Font.Color = clWindowText
         Font.Height = -13
@@ -751,9 +726,9 @@ object FormClient: TFormClient
       end
       object Label23: TLabel
         Left = 12
-        Height = 16
+        Height = 17
         Top = 273
-        Width = 10
+        Width = 9
         Caption = '4'
         Font.Color = clWindowText
         Font.Height = -13
@@ -764,9 +739,9 @@ object FormClient: TFormClient
       end
       object Label24: TLabel
         Left = 12
-        Height = 16
+        Height = 17
         Top = 297
-        Width = 10
+        Width = 9
         Caption = '5'
         Font.Color = clWindowText
         Font.Height = -13
@@ -777,25 +752,25 @@ object FormClient: TFormClient
       end
       object Label25: TLabel
         Left = 32
-        Height = 14
+        Height = 15
         Top = 179
-        Width = 36
+        Width = 31
         Caption = 'Result'
         ParentColor = False
       end
       object Label53: TLabel
         Left = 325
-        Height = 14
+        Height = 15
         Top = 179
-        Width = 113
+        Width = 97
         Caption = 'Data write (fill char)'
         ParentColor = False
       end
       object Label55: TLabel
         Left = 45
-        Height = 62
+        Height = 57
         Top = 349
-        Width = 678
+        Width = 569
         Alignment = taCenter
         Caption = 'These function can read/write multiple vars in the same call. The limitation is that the total size cannot exceed the '#10'PDU size negotiated. The big advantage is that every var is indipendent from each other (you can mix DB, Merkers ...).'#10'Up to 20 vars can be defined, in this demo, for simplicity we use only 5 items.'#10'There is no Async support for these functions since they are executed in a single telegram exchange.'
         ParentColor = False
@@ -803,17 +778,17 @@ object FormClient: TFormClient
       end
       object Label38: TLabel
         Left = 486
-        Height = 14
+        Height = 15
         Top = 179
-        Width = 80
+        Width = 70
         Caption = 'ReadMultiVars'
         ParentColor = False
       end
       object Label39: TLabel
         Left = 486
-        Height = 14
+        Height = 15
         Top = 263
-        Width = 80
+        Width = 70
         Caption = 'WriteMultiVars'
         ParentColor = False
       end
@@ -839,7 +814,7 @@ object FormClient: TFormClient
       end
       object EdDBNum_1: TEdit
         Left = 144
-        Height = 23
+        Height = 22
         Top = 40
         Width = 53
         OnKeyPress = EdRackKeyPress
@@ -848,7 +823,7 @@ object FormClient: TFormClient
       end
       object EdStart_1: TEdit
         Left = 204
-        Height = 23
+        Height = 22
         Top = 40
         Width = 53
         OnKeyPress = EdRackKeyPress
@@ -857,7 +832,7 @@ object FormClient: TFormClient
       end
       object EdAmount_1: TEdit
         Left = 264
-        Height = 23
+        Height = 22
         Top = 40
         Width = 53
         OnKeyPress = EdRackKeyPress
@@ -866,9 +841,9 @@ object FormClient: TFormClient
       end
       object EdData_1: TEdit
         Left = 323
-        Height = 23
+        Height = 22
         Top = 40
-        Width = 413
+        Width = 407
         Anchors = [akTop, akLeft, akRight]
         TabOrder = 4
       end
@@ -894,7 +869,7 @@ object FormClient: TFormClient
       end
       object EdDBNum_2: TEdit
         Left = 144
-        Height = 23
+        Height = 22
         Top = 64
         Width = 53
         OnKeyPress = EdRackKeyPress
@@ -903,7 +878,7 @@ object FormClient: TFormClient
       end
       object EdStart_2: TEdit
         Left = 204
-        Height = 23
+        Height = 22
         Top = 64
         Width = 53
         OnKeyPress = EdRackKeyPress
@@ -912,7 +887,7 @@ object FormClient: TFormClient
       end
       object EdAmount_2: TEdit
         Left = 264
-        Height = 23
+        Height = 22
         Top = 64
         Width = 53
         OnKeyPress = EdRackKeyPress
@@ -921,9 +896,9 @@ object FormClient: TFormClient
       end
       object EdData_2: TEdit
         Left = 323
-        Height = 23
+        Height = 22
         Top = 64
-        Width = 413
+        Width = 407
         Anchors = [akTop, akLeft, akRight]
         TabOrder = 9
       end
@@ -949,7 +924,7 @@ object FormClient: TFormClient
       end
       object EdDBNum_3: TEdit
         Left = 144
-        Height = 23
+        Height = 22
         Top = 88
         Width = 53
         OnKeyPress = EdRackKeyPress
@@ -958,7 +933,7 @@ object FormClient: TFormClient
       end
       object EdStart_3: TEdit
         Left = 204
-        Height = 23
+        Height = 22
         Top = 88
         Width = 53
         OnKeyPress = EdRackKeyPress
@@ -967,7 +942,7 @@ object FormClient: TFormClient
       end
       object EdAmount_3: TEdit
         Left = 264
-        Height = 23
+        Height = 22
         Top = 88
         Width = 53
         OnKeyPress = EdRackKeyPress
@@ -976,9 +951,9 @@ object FormClient: TFormClient
       end
       object EdData_3: TEdit
         Left = 323
-        Height = 23
+        Height = 22
         Top = 88
-        Width = 413
+        Width = 407
         Anchors = [akTop, akLeft, akRight]
         TabOrder = 14
       end
@@ -1004,7 +979,7 @@ object FormClient: TFormClient
       end
       object EdDBNum_4: TEdit
         Left = 144
-        Height = 23
+        Height = 22
         Top = 112
         Width = 53
         OnKeyPress = EdRackKeyPress
@@ -1013,7 +988,7 @@ object FormClient: TFormClient
       end
       object EdStart_4: TEdit
         Left = 204
-        Height = 23
+        Height = 22
         Top = 112
         Width = 53
         OnKeyPress = EdRackKeyPress
@@ -1022,7 +997,7 @@ object FormClient: TFormClient
       end
       object EdAmount_4: TEdit
         Left = 264
-        Height = 23
+        Height = 22
         Top = 112
         Width = 53
         OnKeyPress = EdRackKeyPress
@@ -1031,9 +1006,9 @@ object FormClient: TFormClient
       end
       object EdData_4: TEdit
         Left = 323
-        Height = 23
+        Height = 22
         Top = 112
-        Width = 413
+        Width = 407
         Anchors = [akTop, akLeft, akRight]
         TabOrder = 19
       end
@@ -1059,7 +1034,7 @@ object FormClient: TFormClient
       end
       object EdDBNum_5: TEdit
         Left = 144
-        Height = 23
+        Height = 22
         Top = 136
         Width = 53
         OnKeyPress = EdRackKeyPress
@@ -1068,7 +1043,7 @@ object FormClient: TFormClient
       end
       object EdStart_5: TEdit
         Left = 204
-        Height = 23
+        Height = 22
         Top = 136
         Width = 53
         OnKeyPress = EdRackKeyPress
@@ -1077,7 +1052,7 @@ object FormClient: TFormClient
       end
       object EdAmount_5: TEdit
         Left = 264
-        Height = 23
+        Height = 22
         Top = 136
         Width = 53
         OnKeyPress = EdRackKeyPress
@@ -1086,14 +1061,14 @@ object FormClient: TFormClient
       end
       object EdData_5: TEdit
         Left = 323
-        Height = 23
+        Height = 22
         Top = 136
-        Width = 413
+        Width = 407
         Anchors = [akTop, akLeft, akRight]
         TabOrder = 24
       end
       object MultiReadBtn: TButton
-        Left = 480
+        Left = 474
         Height = 25
         Top = 195
         Width = 105
@@ -1103,7 +1078,7 @@ object FormClient: TFormClient
         TabOrder = 30
       end
       object MultiWriteBtn: TButton
-        Left = 480
+        Left = 474
         Height = 25
         Top = 280
         Width = 104
@@ -1114,52 +1089,52 @@ object FormClient: TFormClient
       end
       object EdResult_1: TEdit
         Left = 32
-        Height = 23
+        Height = 22
         Top = 200
-        Width = 256
+        Width = 250
         Anchors = [akTop, akLeft, akRight]
         ReadOnly = True
         TabOrder = 25
       end
       object EdResult_2: TEdit
         Left = 32
-        Height = 23
+        Height = 22
         Top = 224
-        Width = 256
+        Width = 250
         Anchors = [akTop, akLeft, akRight]
         ReadOnly = True
         TabOrder = 26
       end
       object EdResult_3: TEdit
         Left = 32
-        Height = 23
+        Height = 22
         Top = 248
-        Width = 256
+        Width = 250
         Anchors = [akTop, akLeft, akRight]
         ReadOnly = True
         TabOrder = 27
       end
       object EdResult_4: TEdit
         Left = 32
-        Height = 23
+        Height = 22
         Top = 272
-        Width = 256
+        Width = 250
         Anchors = [akTop, akLeft, akRight]
         ReadOnly = True
         TabOrder = 28
       end
       object EdResult_5: TEdit
         Left = 32
-        Height = 23
+        Height = 22
         Top = 296
-        Width = 256
+        Width = 250
         Anchors = [akTop, akLeft, akRight]
         ReadOnly = True
         TabOrder = 29
       end
       object ChEd_1: TEdit
         Left = 323
-        Height = 23
+        Height = 22
         Top = 200
         Width = 41
         TabOrder = 32
@@ -1167,7 +1142,7 @@ object FormClient: TFormClient
       end
       object ChEd_2: TEdit
         Left = 323
-        Height = 23
+        Height = 22
         Top = 224
         Width = 41
         TabOrder = 33
@@ -1175,7 +1150,7 @@ object FormClient: TFormClient
       end
       object ChEd_3: TEdit
         Left = 323
-        Height = 23
+        Height = 22
         Top = 248
         Width = 41
         TabOrder = 34
@@ -1183,7 +1158,7 @@ object FormClient: TFormClient
       end
       object ChEd_4: TEdit
         Left = 323
-        Height = 23
+        Height = 22
         Top = 272
         Width = 41
         TabOrder = 35
@@ -1191,7 +1166,7 @@ object FormClient: TFormClient
       end
       object ChEd_5: TEdit
         Left = 323
-        Height = 23
+        Height = 22
         Top = 296
         Width = 41
         TabOrder = 36
@@ -1200,7 +1175,7 @@ object FormClient: TFormClient
     end
     object TabSheet4: TTabSheet
       Caption = 'Directory'
-      ClientHeight = 520
+      ClientHeight = 504
       ClientWidth = 745
       ImageIndex = 3
       object GroupBox1: TGroupBox
@@ -1541,38 +1516,38 @@ object FormClient: TFormClient
     end
     object TabSheet5: TTabSheet
       Caption = 'Block - Up/Download'
-      ClientHeight = 528
-      ClientWidth = 751
+      ClientHeight = 504
+      ClientWidth = 745
       ImageIndex = 10
       object Label48: TLabel
         Left = 7
-        Height = 14
+        Height = 15
         Top = 13
-        Width = 60
+        Width = 53
         Caption = 'Block Type'
         ParentColor = False
       end
       object Label50: TLabel
         Left = 89
-        Height = 14
+        Height = 15
         Top = 13
-        Width = 80
+        Width = 67
         Caption = 'Block Number'
         ParentColor = False
       end
       object lblUpld: TLabel
         Left = 7
-        Height = 14
+        Height = 15
         Top = 64
-        Width = 115
+        Width = 96
         Caption = 'Block Dump : 0 byte'
         ParentColor = False
       end
       object lblNewNumber: TLabel
         Left = 505
-        Height = 14
+        Height = 15
         Top = 358
-        Width = 108
+        Width = 93
         Caption = 'New Block Number'
         ParentColor = False
       end
@@ -1606,7 +1581,7 @@ object FormClient: TFormClient
       end
       object EdNum: TEdit
         Left = 87
-        Height = 23
+        Height = 22
         Top = 29
         Width = 65
         OnKeyPress = EdRackKeyPress
@@ -1622,7 +1597,6 @@ object FormClient: TFormClient
         Font.Color = clWindowText
         Font.Height = -11
         Font.Name = 'Courier New'
-        OnChange = MemoUploadChange
         ParentFont = False
         ReadOnly = True
         ScrollBars = ssVertical
@@ -1649,9 +1623,9 @@ object FormClient: TFormClient
       end
       object ChkFull: TCheckBox
         Left = 165
-        Height = 22
+        Height = 19
         Top = 403
-        Width = 85
+        Width = 72
         Caption = 'Full Upload'
         Checked = True
         OnClick = ChkFullClick
@@ -1673,7 +1647,7 @@ object FormClient: TFormClient
       end
       object EdNewNumber: TEdit
         Left = 505
-        Height = 23
+        Height = 22
         Top = 373
         Width = 65
         OnKeyPress = EdRackKeyPress
@@ -1728,28 +1702,28 @@ object FormClient: TFormClient
     end
     object TabSheet7: TTabSheet
       Caption = 'Block - DB Get/Fill'
-      ClientHeight = 528
-      ClientWidth = 751
+      ClientHeight = 504
+      ClientWidth = 745
       ImageIndex = 6
       object Label37: TLabel
         Left = 8
-        Height = 14
+        Height = 15
         Top = 16
-        Width = 66
+        Width = 55
         Caption = 'DB Number'
         ParentColor = False
       end
       object LblDBDump: TLabel
         Left = 8
-        Height = 14
+        Height = 15
         Top = 64
-        Width = 108
+        Width = 90
         Caption = 'DB Dump : 0 bytes'
         ParentColor = False
       end
       object EdDBNumGet: TEdit
         Left = 5
-        Height = 23
+        Height = 22
         Top = 32
         Width = 72
         OnKeyPress = EdIDKeyPress
@@ -1800,23 +1774,23 @@ object FormClient: TFormClient
         TabOrder = 4
         object Label56: TLabel
           Left = 24
-          Height = 14
+          Height = 15
           Top = 24
-          Width = 66
+          Width = 55
           Caption = 'DB Number'
           ParentColor = False
         end
         object Label57: TLabel
           Left = 116
-          Height = 14
+          Height = 15
           Top = 24
-          Width = 46
+          Width = 39
           Caption = 'Fill Char'
           ParentColor = False
         end
         object EdDBFill: TEdit
           Left = 21
-          Height = 23
+          Height = 22
           Top = 40
           Width = 72
           OnKeyPress = EdIDKeyPress
@@ -1825,7 +1799,7 @@ object FormClient: TFormClient
         end
         object EdFill: TEdit
           Left = 114
-          Height = 23
+          Height = 22
           Top = 40
           Width = 41
           TabOrder = 1
@@ -1859,46 +1833,46 @@ object FormClient: TFormClient
     end
     object TabZSL: TTabSheet
       Caption = 'Read SZL'
-      ClientHeight = 528
-      ClientWidth = 751
+      ClientHeight = 504
+      ClientWidth = 745
       ImageIndex = 4
       object Label34: TLabel
         Left = 220
-        Height = 14
+        Height = 15
         Top = 16
-        Width = 12
+        Width = 10
         Caption = 'ID'
         ParentColor = False
       end
       object Label35: TLabel
         Left = 308
-        Height = 14
+        Height = 15
         Top = 16
-        Width = 31
+        Width = 27
         Caption = 'Index'
         ParentColor = False
       end
       object lblSZLdump: TLabel
         Left = 220
-        Height = 14
+        Height = 15
         Top = 64
-        Width = 115
+        Width = 96
         Caption = 'SZL Dump : 0 bytes'
         ParentColor = False
       end
       object lblSZLCount: TLabel
         Left = 41
-        Height = 14
+        Height = 15
         Top = 63
-        Width = 102
+        Width = 86
         Caption = 'List of All SZL IDs'
         ParentColor = False
       end
       object lblSZL: TLabel
         Left = 4
-        Height = 30
+        Height = 27
         Top = 400
-        Width = 218
+        Width = 194
         Alignment = taCenter
         Caption = 'DoubleClick item to get SZL'#13#10'(maybe Index should be changed)'
         Font.Color = clGreen
@@ -1935,7 +1909,7 @@ object FormClient: TFormClient
       end
       object EdID: TEdit
         Left = 221
-        Height = 23
+        Height = 22
         Top = 32
         Width = 72
         OnKeyPress = EdIDKeyPress
@@ -1944,7 +1918,7 @@ object FormClient: TFormClient
       end
       object EdIndex: TEdit
         Left = 309
-        Height = 23
+        Height = 22
         Top = 32
         Width = 72
         OnKeyPress = EdIDKeyPress
@@ -1987,7 +1961,7 @@ object FormClient: TFormClient
     end
     object TabClock: TTabSheet
       Caption = 'Date/Time'
-      ClientHeight = 520
+      ClientHeight = 504
       ClientWidth = 745
       ImageIndex = 5
       object GrPGDateTime: TGroupBox
@@ -2064,8 +2038,8 @@ object FormClient: TFormClient
     end
     object TabControl: TTabSheet
       Caption = 'Control'
-      ClientHeight = 528
-      ClientWidth = 751
+      ClientHeight = 504
+      ClientWidth = 745
       ImageIndex = 8
       object GroupBox4: TGroupBox
         Left = 8
@@ -2080,7 +2054,7 @@ object FormClient: TFormClient
           Left = 13
           Height = 20
           Top = 8
-          Width = 84
+          Width = 77
           Alignment = taCenter
           Caption = 'Unknown'
           Font.Color = clGray
@@ -2119,9 +2093,9 @@ object FormClient: TFormClient
         end
         object ChkStatusRefresh: TCheckBox
           Left = 13
-          Height = 22
+          Height = 19
           Top = 86
-          Width = 116
+          Width = 88
           Caption = 'Cyclic refresh'
           Checked = True
           OnClick = ChkStatusRefreshClick
@@ -2152,7 +2126,7 @@ object FormClient: TFormClient
           Left = 18
           Height = 15
           Top = 45
-          Width = 76
+          Width = 63
           Caption = 'Timeout (ms)'
           ParentColor = False
         end
@@ -2160,13 +2134,13 @@ object FormClient: TFormClient
           Left = 344
           Height = 15
           Top = 28
-          Width = 286
+          Width = 246
           Caption = '<--These functions work only if the CPU is in STOP'
           ParentColor = False
         end
         object EdTimeout: TEdit
           Left = 18
-          Height = 24
+          Height = 22
           Top = 64
           Width = 121
           OnKeyPress = EdRackKeyPress
@@ -2213,7 +2187,7 @@ object FormClient: TFormClient
     end
     object TabSecurity: TTabSheet
       Caption = 'Security'
-      ClientHeight = 520
+      ClientHeight = 504
       ClientWidth = 745
       ImageIndex = 7
       object Button1: TButton
@@ -2411,7 +2385,7 @@ object FormClient: TFormClient
     end
   end
   object RGMode: TRadioGroup
-    Left = 217
+    Left = 320
     Height = 83
     Top = 8
     Width = 129
@@ -2434,7 +2408,7 @@ object FormClient: TFormClient
       'Callback'
     )
     OnClick = RGModeClick
-    TabOrder = 7
+    TabOrder = 5
   end
   object StatusBar: TStatusBar
     Left = 0
@@ -2453,53 +2427,232 @@ object FormClient: TFormClient
       end>
     SimplePanel = False
   end
-  object Button2: TButton
-    Left = 352
-    Height = 25
-    Top = 64
-    Width = 288
+  object PCC: TPageControl
+    Left = 112
+    Height = 81
+    Top = 24
+    Width = 195
+    ActivePage = TabSheet2
+    TabIndex = 0
+    TabOrder = 7
+    object TabSheet2: TTabSheet
+      Caption = 'Rack/Slot'
+      ClientHeight = 55
+      ClientWidth = 187
+      object Label2: TLabel
+        Left = 97
+        Height = 14
+        Top = 7
+        Width = 24
+        Caption = 'Rack'
+        ParentColor = False
+      end
+      object Label3: TLabel
+        Left = 145
+        Height = 14
+        Top = 7
+        Width = 19
+        Caption = 'Slot'
+        ParentColor = False
+      end
+      object EdRack: TEdit
+        Left = 94
+        Height = 21
+        Top = 22
+        Width = 41
+        OnKeyPress = EdRackKeyPress
+        TabOrder = 0
+        Text = '0'
+      end
+      object EdSlot: TEdit
+        Left = 136
+        Height = 21
+        Top = 22
+        Width = 41
+        OnKeyPress = EdRackKeyPress
+        TabOrder = 1
+        Text = '2'
+      end
+      object CBConnType: TComboBox
+        Left = 4
+        Height = 21
+        Top = 22
+        Width = 76
+        ItemHeight = 13
+        ItemIndex = 0
+        Items.Strings = (
+          'PG'
+          'OP'
+          'S7 BASIC'
+        )
+        Style = csDropDownList
+        TabOrder = 2
+        Text = 'PG'
+      end
+      object Label62: TLabel
+        Left = 4
+        Height = 14
+        Top = 7
+        Width = 55
+        Caption = 'Connect as'
+        ParentColor = False
+      end
+    end
+    object TabSheet8: TTabSheet
+      Caption = 'TSAP'
+      ClientHeight = 55
+      ClientWidth = 187
+      object EdLocTsapHI: TEdit
+        Left = 4
+        Height = 21
+        Top = 22
+        Width = 35
+        Alignment = taCenter
+        TabOrder = 0
+        Text = '02'
+      end
+      object Label58: TLabel
+        Left = 42
+        Height = 24
+        Top = 22
+        Width = 7
+        Alignment = taCenter
+        Caption = '.'
+        Font.Color = clWindowText
+        Font.Height = -19
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object EdLocTsapLO: TEdit
+        Left = 48
+        Height = 21
+        Top = 22
+        Width = 37
+        Alignment = taCenter
+        TabOrder = 1
+        Text = '00'
+      end
+      object Label59: TLabel
+        Left = 6
+        Height = 14
+        Top = 7
+        Width = 78
+        Caption = 'LOC TSAP (hex)'
+        ParentColor = False
+      end
+      object EdRemTsapHI: TEdit
+        Left = 100
+        Height = 21
+        Top = 22
+        Width = 35
+        Alignment = taCenter
+        TabOrder = 2
+        Text = '02'
+      end
+      object Label60: TLabel
+        Left = 138
+        Height = 24
+        Top = 22
+        Width = 7
+        Alignment = taCenter
+        Caption = '.'
+        Font.Color = clWindowText
+        Font.Height = -19
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object EdRemTsapLO: TEdit
+        Left = 144
+        Height = 21
+        Top = 22
+        Width = 37
+        Alignment = taCenter
+        TabOrder = 3
+        Text = '00'
+      end
+      object Label61: TLabel
+        Left = 102
+        Height = 14
+        Top = 7
+        Width = 79
+        Caption = 'REM TSAP (hex)'
+        ParentColor = False
+      end
+    end
+  end
+  object Label63: TLabel
+    Cursor = crHandPoint
+    Left = 456
+    Height = 14
+    Top = 56
+    Width = 179
     Caption = 'What''s the "smart connect" feature ?'
-    Font.Color = clWindowText
-    Font.Height = -13
-    Font.Name = 'Sans'
-    Font.Style = [fsItalic]
-    OnClick = Button2Click
+    Font.CharSet = ANSI_CHARSET
+    Font.Color = clBlue
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    Font.Style = [fsUnderline]
+    ParentColor = False
     ParentFont = False
-    TabOrder = 9
+    OnClick = Label63Click
+  end
+  object Label64: TLabel
+    Cursor = crHandPoint
+    Left = 456
+    Height = 14
+    Top = 80
+    Width = 245
+    Caption = 'Which parameters should I use for the connection?'
+    Font.CharSet = ANSI_CHARSET
+    Font.Color = clBlue
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    Font.Style = [fsUnderline]
+    ParentColor = False
+    ParentFont = False
+    OnClick = Label64Click
   end
   object TimClock: TTimer
     Enabled = False
     Interval = 500
     OnTimer = TimClockTimer
-    left = 400
-    top = 56
+    left = 560
+    top = 184
   end
   object TimStatus: TTimer
     Enabled = False
     Interval = 500
     OnTimer = TimStatusTimer
-    left = 448
-    top = 56
+    left = 608
+    top = 184
   end
   object SaveDialog: TSaveDialog
     DefaultExt = '.*.mc7'
     Filter = 'mc7 file (*.mc7)|*.mc7'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofExtensionDifferent, ofPathMustExist, ofEnableSizing]
-    left = 496
-    top = 56
+    left = 656
+    top = 184
   end
   object OpenDialog: TOpenDialog
     DefaultExt = '.*.mc7'
     Filter = 'mc7 file (*.mc7)|*.mc7'
     Options = [ofHideReadOnly, ofPathMustExist, ofFileMustExist, ofEnableSizing]
-    left = 536
-    top = 56
+    left = 696
+    top = 184
   end
   object TimSecurity: TTimer
     Enabled = False
     Interval = 500
     OnTimer = TimSecurityTimer
-    left = 360
-    top = 56
+    left = 520
+    top = 184
   end
 end

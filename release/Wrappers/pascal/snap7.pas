@@ -1,5 +1,5 @@
 (*=============================================================================|
-|  PROJECT SNAP7                                                         1.0.0 |
+|  PROJECT SNAP7                                                       1.0.0.0 |
 |==============================================================================|
 |  Copyright (C) 2013, Davide Nardella                                         |
 |  All rights reserved.                                                        |
@@ -28,7 +28,7 @@
 |                                                                              |
 |  Compatibility :                                                             |
 |     Delphi/Embarcadero RAD : All 32/64 bit releases (Windows)                |
-|     FreePascal             : 2.4.0+  32/64 bit      (Windows/Unix)           |
+|     FreePascal (1)         : 2.4.0+  32/64 bit      (Windows/Unix)           |
 |                                                                              |
 |=============================================================================*)
 unit snap7;
@@ -100,9 +100,9 @@ Const
 //------------------------------------------------------------------------------
 //                                  PARAMS LIST
 //------------------------------------------------------------------------------
-  p_u16_LocalPort  	     = 1;
-  p_u16_RemotePort 	     = 2;
-  p_i32_PingTimeout	     = 3;
+  p_u16_LocalPort        = 1;
+  p_u16_RemotePort       = 2;
+  p_i32_PingTimeout      = 3;
   p_i32_SendTimeout      = 4;
   p_i32_RecvTimeout      = 5;
   p_i32_WorkInterval     = 6;
@@ -160,6 +160,11 @@ Const
   errCliCannotChangeParam      = $02600000;
 
   MaxVars     = 20; // Max vars that can be transferred with MultiRead/MultiWrite
+
+// Client Connection Type
+  CONNTYPE_PG                 = $01;  // Connect to the PLC as a PG
+  CONNTYPE_OP                 = $02;  // Connect to the PLC as an OP
+  CONNTYPE_BASIC              = $03;  // Basic connection
 
 // Area ID
   S7AreaPE   =	$81;
@@ -335,6 +340,10 @@ procedure Cli_Destroy(var Client : S7Object);
 {$IFDEF MSWINDOWS}stdcall;{$ELSE}cdecl;{$ENDIF}
 function Cli_ConnectTo(Client : S7Object; Address : PAnsiChar; Rack, Slot : integer) : integer;
 {$IFDEF MSWINDOWS}stdcall;{$ELSE}cdecl;{$ENDIF}
+function Cli_SetConnectionParams(Client : S7Object; Address : PAnsiChar; LocalTSAP, RemoteTSAP : word) : integer;
+{$IFDEF MSWINDOWS}stdcall;{$ELSE}cdecl;{$ENDIF}
+function Cli_SetConnectionType(Client : S7Object; ConnectionType : word) : integer;
+{$IFDEF MSWINDOWS}stdcall;{$ELSE}cdecl;{$ENDIF}
 function Cli_Connect(Client : S7Object) : integer;
 {$IFDEF MSWINDOWS}stdcall;{$ELSE}cdecl;{$ENDIF}
 function Cli_Disconnect(Client : S7Object) : integer;
@@ -503,6 +512,8 @@ function Cli_GetLastError(Client : S7Object; var LastError : integer) : integer;
 function Cli_GetPduLength(Client : S7Object; Var Requested, Negotiated : integer) : integer;
 {$IFDEF MSWINDOWS}stdcall;{$ELSE}cdecl;{$ENDIF}
 function Cli_ErrorText(Error : integer; Text : PAnsiChar; TextLen : integer) : integer;
+{$IFDEF MSWINDOWS}stdcall;{$ELSE}cdecl;{$ENDIF}
+function Cli_GetConnected(Client : S7Object; var IsConnected : integer) : integer;
 {$IFDEF MSWINDOWS}stdcall;{$ELSE}cdecl;{$ENDIF}
 
 //******************************************************************************
@@ -780,6 +791,8 @@ function Par_ErrorText(Error : integer; Text : PAnsiChar; TextLen : integer) : i
 //******************************************************************************
 Type
 
+  { TS7Client }
+
   TS7Client = class
   private
     HC : S7Object;
@@ -788,6 +801,8 @@ Type
     destructor Destroy; override;
     // Control functions
     function ConnectTo(Address : AnsiString; Rack, Slot : integer) : integer;
+    function SetConnectionParams(Address : AnsiString; LocalTSAP, RemoteTSAP : word) : integer;
+    function SetConnectionType(ConnectionType : word) : integer;
     function Connect : integer;
     function Disconnect : integer;
     function GetParam(ParamNumber : integer; pValue : pointer) : integer;
@@ -879,6 +894,7 @@ Type
     function PduLength : integer;
     function PduRequested : integer;
     function PlcStatus : integer;
+    function Connected : boolean;
   end;
 //******************************************************************************
 //                                 SNAP7SERVER CLASS
@@ -1033,6 +1049,8 @@ end;
 function Cli_Create;                  external snaplib name 'Cli_Create';
 procedure Cli_Destroy;                external snaplib name 'Cli_Destroy';
 function Cli_ConnectTo;               external snaplib name 'Cli_ConnectTo';
+function Cli_SetConnectionParams      external snaplib name 'Cli_SetConnectionParams';
+function Cli_SetConnectionType        external snaplib name 'Cli_SetConnectionType';
 function Cli_Disconnect;              external snaplib name 'Cli_Disconnect';
 function Cli_Connect;                 external snaplib name 'Cli_Connect';
 function Cli_GetParam;                external snaplib name 'Cli_GetParam';
@@ -1112,6 +1130,7 @@ function Cli_CheckAsCompletion;       external snaplib name 'Cli_CheckAsCompleti
 function Cli_WaitAsCompletion;        external snaplib name 'Cli_WaitAsCompletion';
 function Cli_IsoExchangeBuffer;       external snaplib name 'Cli_IsoExchangeBuffer';
 function Cli_ErrorText;               external snaplib name 'Cli_ErrorText';
+function Cli_GetConnected;            external snaplib name 'Cli_GetConnected';
 //******************************************************************************
 //                               SERVER FORWARDS
 //******************************************************************************
@@ -1176,6 +1195,16 @@ end;
 function TS7Client.ConnectTo(Address : AnsiString; Rack,Slot : integer) : integer;
 begin
   Result:=Cli_ConnectTo(HC,PAnsiChar(Address), Rack, Slot)
+end;
+//------------------------------------------------------------------------------
+function TS7Client.SetConnectionParams(Address: AnsiString; LocalTSAP, RemoteTSAP: word ) : integer;
+begin
+  Result:=Cli_SetConnectionParams(HC,PAnsiChar(Address), LocalTSAP, RemoteTSAP)
+end;
+//------------------------------------------------------------------------------
+function TS7Client.SetConnectionType(ConnectionType : word ) : integer;
+begin
+  Result:=Cli_SetConnectionType(HC, ConnectionType)
 end;
 //------------------------------------------------------------------------------
 function TS7Client.Connect : integer;
@@ -1402,6 +1431,16 @@ begin
   Return:=Cli_GetPlcStatus(HC, Result);
   if (Return<>0) then
     Result:=Return;
+end;
+//------------------------------------------------------------------------------
+function TS7Client.Connected: boolean;
+Var
+  IsConnected : integer;
+begin
+  if Cli_GetConnected(HC, IsConnected)=0 then
+    Result:=IsConnected<>0
+  else
+    Result:=false;
 end;
 //------------------------------------------------------------------------------
 function TS7Client.PlcStop : integer;

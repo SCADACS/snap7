@@ -1,5 +1,5 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.0.0 |
+|  PROJECT SNAP7                                                         1.1.0 |
 |==============================================================================|
 |  Copyright (C) 2013, Davide Nardella                                         |
 |  All rights reserved.                                                        |
@@ -24,7 +24,11 @@
 |  If not, see  http://www.gnu.org/licenses/                                   |
 |==============================================================================|
 |                                                                              |
-|  Server Example                                                              |
+|  New Server Example (1.1.0)                                                  |
+|  Here we set ReadEventCallback to get in advance which area the client needs |
+|  then we fill this area with a counter.                                      |
+|  The purpose is to show how to modify an area before it be trasferred to the |
+|  client                                                                      |
 |                                                                              |
 |=============================================================================*/
 #include <stdio.h>
@@ -36,6 +40,7 @@
      unsigned char DB1[512];  // Our DB1
      unsigned char DB2[128];  // Our DB2
      unsigned char DB3[1024]; // Our DB3
+	 byte cnt = 0;
 
 // Here we use the callback to show the log, this is not the best choice since
 // the callback is synchronous with the client access, i.e. the server cannot
@@ -46,6 +51,23 @@ void S7API EventCallBack(void *usrPtr, PSrvEvent PEvent, int Size)
 {
     // print the event
     printf("%s\n",SrvEventText(PEvent).c_str());
+};
+
+// The read event callback is called multiple times in presence of multiread var request
+void S7API ReadEventCallBack(void *usrPtr, PSrvEvent PEvent, int Size)
+{
+    // print the read event
+    printf("%s\n",SrvEventText(PEvent).c_str());
+	if (PEvent->EvtParam1==S7AreaDB)
+	{
+		// EvtParam1 contains the DB number.
+		switch (PEvent->EvtParam2)
+		{
+		case 1 : memset(&DB1, ++cnt, sizeof(DB1));break;
+		case 2 : memset(&DB2, ++cnt, sizeof(DB2));break;
+		case 3 : memset(&DB3, ++cnt, sizeof(DB3));break;
+		}
+	}
 };
 
 int main(int argc, char* argv[])
@@ -62,10 +84,11 @@ int main(int argc, char* argv[])
     Server->RegisterArea(srvAreaDB, 2, &DB2, sizeof(DB2));
     Server->RegisterArea(srvAreaDB, 3, &DB3, sizeof(DB3));
 
-    // Set the event callback to show something : it's not strictly needed.
-    // If you comment next line the server still works fine.
+    // We mask the read event to avoid the double trigger for the same event                  
+	Server->SetEventsMask(~evcDataRead);
     Server->SetEventsCallback(EventCallBack, NULL);
-
+	// Set the Read Callback
+	Server->SetReadEventsCallback(ReadEventCallBack, NULL);
     // Start the server onto the default adapter.
     // To select an adapter we have to use Server->StartTo("192.168.x.y").
     // Start() is the same of StartTo("0.0.0.0");

@@ -1,5 +1,5 @@
 ﻿/*=============================================================================|
-|  PROJECT SNAP7                                                       1.0.0.0 |
+|  PROJECT SNAP7                                                         1.1.0 |
 |==============================================================================|
 |  Copyright (C) 2013, Davide Nardella                                         |
 |  All rights reserved.                                                        |
@@ -150,6 +150,11 @@ namespace Snap7
 
         // Max number of vars (multiread/write)
         public static readonly int MaxVars = 20;
+
+        // Client Connection Type
+        public static readonly UInt16 CONNTYPE_PG    = 0x01;  // Connect to the PLC as a PG
+        public static readonly UInt16 CONNTYPE_OP    = 0x02;  // Connect to the PLC as an OP
+        public static readonly UInt16 CONNTYPE_BASIC = 0x03;  // Basic connection 
 
         // Job
         private const int JobComplete = 0;
@@ -381,6 +386,25 @@ namespace Snap7
         public int ConnectTo(string Address, int Rack, int Slot)
         {
             return Cli_ConnectTo(Client, Address, Rack, Slot);
+        }
+
+        [DllImport(S7Consts.Snap7LibName)]
+        protected static extern int Cli_SetConnectionParams(IntPtr Client,
+            [MarshalAs(UnmanagedType.LPStr)] string Address,
+            UInt16 LocalTSAP,
+            UInt16 RemoteTSAP
+            );
+
+        public int SetConnectionParams(string Address, UInt16 LocalTSAP, UInt16 RemoteTSAP)
+        {
+            return Cli_SetConnectionParams(Client, Address, LocalTSAP, RemoteTSAP);
+        }
+
+        [DllImport(S7Consts.Snap7LibName)]
+        protected static extern int Cli_SetConnectionType(IntPtr Client, UInt16 ConnectionType);
+        public int SetConnectionType(UInt16 ConnectionType)
+        {
+            return Cli_SetConnectionType(Client, ConnectionType);
         }
 
         [DllImport(S7Consts.Snap7LibName)]
@@ -1153,6 +1177,17 @@ namespace Snap7
             return Message.ToString();
         }
 
+        [DllImport(S7Consts.Snap7LibName)]
+        protected static extern int Cli_GetConnected(IntPtr Client, ref UInt32 IsConnected);
+        public bool Connected()
+        {
+            UInt32 IsConnected = new UInt32();
+            if (Cli_GetConnected(Client, ref IsConnected) == 0)
+                return IsConnected!=0;
+            else
+                return false;
+        }
+
         #endregion
     }
 
@@ -1464,6 +1499,13 @@ namespace Snap7
         public int SetEventsCallBack(TSrvCallback Callback, IntPtr usrPtr)
         {
             return Srv_SetEventsCallback(Server, Callback, usrPtr);
+        }
+
+        [DllImport(S7Consts.Snap7LibName)]
+        protected static extern int Srv_SetReadEventsCallback(IntPtr Server, TSrvCallback Callback, IntPtr usrPtr);
+        public int SetReadEventsCallBack(TSrvCallback Callback, IntPtr usrPtr)
+        {
+            return Srv_SetReadEventsCallback(Server, Callback, usrPtr);
         }
 
         [DllImport(S7Consts.Snap7LibName)]

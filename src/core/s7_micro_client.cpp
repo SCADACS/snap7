@@ -1,5 +1,5 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.0.0 |
+|  PROJECT SNAP7                                                         1.1.0 |
 |==============================================================================|
 |  Copyright (C) 2013, Davide Nardella                                         |
 |  All rights reserved.                                                        |
@@ -28,8 +28,6 @@
 
 TSnap7MicroClient::TSnap7MicroClient()
 {
-	Rack =0;
-	Slot =2;
 	SrcRef =0x0100; // RFC0983 states that SrcRef and DetRef should be 0
 			// and, in any case, they are ignored.
 			// S7 instead requires a number != 0
@@ -40,7 +38,8 @@ TSnap7MicroClient::TSnap7MicroClient()
 			// Seems that every non zero value is good enough...
 	DstRef  =0x0000;
 	SrcTSap =0x0100;
-	DstTSap =0x0000; // It's filled with Rack and Slot (see ConnectTo)
+	DstTSap =0x0000; // It's filled by connection functions
+    ConnectionType = CONNTYPE_PG; // Default connection type
 	memset(&Job,0,sizeof(TSnap7Job));
 }
 //---------------------------------------------------------------------------
@@ -2621,19 +2620,29 @@ int TSnap7MicroClient::Reset(bool DoReconnect)
 //---------------------------------------------------------------------------
 int TSnap7MicroClient::Connect()
 {
-     int Result;
-     DstTSap =((Rack+1)<<8) + Slot;
-     JobStart=SysGetTick();
-     Result  =PeerConnect();
-     Job.Time=SysGetTick()-JobStart;
-     return Result;
+	 int Result;
+	 JobStart=SysGetTick();
+	 Result  =PeerConnect();
+	 Job.Time=SysGetTick()-JobStart;
+	 return Result;
 }
 //---------------------------------------------------------------------------
-int TSnap7MicroClient::ConnectTo(const char *RemAddress, int IRack, int ISlot)
+void TSnap7MicroClient::SetConnectionType(word ConnType)
 {
-    Rack=IRack;
-    Slot=ISlot;
-	strncpy(RemoteAddress,RemAddress,16);
+    ConnectionType=ConnType;
+}
+//---------------------------------------------------------------------------
+void TSnap7MicroClient::SetConnectionParams(const char *RemAddress, word LocalTSAP, word RemoteTSAP)
+{
+     SrcTSap = LocalTSAP;
+     DstTSap = RemoteTSAP;
+     strncpy(RemoteAddress, RemAddress, 16);
+}
+//---------------------------------------------------------------------------
+int TSnap7MicroClient::ConnectTo(const char *RemAddress, int Rack, int Slot)
+{
+    word RemoteTSAP = (ConnectionType<<8)+(Rack*0x20)+Slot;
+    SetConnectionParams(RemAddress, SrcTSap, RemoteTSAP);
     return Connect();
 }
 //---------------------------------------------------------------------------
@@ -2679,7 +2688,7 @@ int TSnap7MicroClient::SetParam(int ParamNumber, void *pValue)
     {
 	case p_u16_RemotePort:
 		if (!Connected)
-                    RemotePort=*Puint16_t(pValue);
+            RemotePort=*Puint16_t(pValue);
 		else
 		    return errCliCannotChangeParam;
 		break;

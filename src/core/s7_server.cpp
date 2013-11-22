@@ -1,5 +1,5 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.0.0 |
+|  PROJECT SNAP7                                                         1.1.0 |
 |==============================================================================|
 |  Copyright (C) 2013, Davide Nardella                                         |
 |  All rights reserved.                                                        |
@@ -155,6 +155,12 @@ void TS7Worker::DoEvent(longword Code, word RetCode, word Param1, word Param2,
     FServer->DoEvent(ClientHandle,Code,RetCode,Param1,Param2,Param3,Param4);
 }
 //------------------------------------------------------------------------------
+void TS7Worker::DoReadEvent(longword Code, word RetCode, word Param1, word Param2,
+  word Param3, word Param4)
+{
+    FServer->DoReadEvent(ClientHandle,Code,RetCode,Param1,Param2,Param3,Param4);
+}
+//------------------------------------------------------------------------------
 void TS7Worker::FragmentSkipped(int Size)
 {
 // do nothing could be used for debug purpose
@@ -304,6 +310,7 @@ word TS7Worker::ReadArea(PResFunReadItem ResItemData, PReqFunReadItem ReqItemPar
     PS7Area P;
     word DBNum;
     longword Start, Size, ASize;
+	longword OriginalSize;
     longword *PAdd;
     byte BitIndex, ByteVal;
     int Multiplier;
@@ -327,7 +334,7 @@ word TS7Worker::ReadArea(PResFunReadItem ResItemData, PReqFunReadItem ReqItemPar
 	P=GetArea(ReqItemPar->Area, DBNum);
 
 	if (P==NULL)
-            return RA_NotFound(ResItemData, EV);
+        return RA_NotFound(ResItemData, EV);
 
     pcs=P->cs;
 
@@ -353,11 +360,11 @@ word TS7Worker::ReadArea(PResFunReadItem ResItemData, PReqFunReadItem ReqItemPar
 
     // Calcs size
     Size=Multiplier*SwapWord(ReqItemPar->Length);
-
+	OriginalSize=Size;
     // S7 doesn't xfer odd byte amount
-    if ( Size % 2 != 0)
-       Size++;
-    EV.EvSize=Size;
+	if ( Size % 2 != 0)
+	   Size++;
+	EV.EvSize=Size;
 
     // The sum of the items must not exceed the PDU size negotiated
     if (PDURemainder-Size<=0)
@@ -365,8 +372,8 @@ word TS7Worker::ReadArea(PResFunReadItem ResItemData, PReqFunReadItem ReqItemPar
     else
         PDURemainder-=Size;
 
-    // More then 1 bit is not supported by S7 CPU
-    if ((ReqItemPar->TransportSize==S7WLBit) && (Size>1))
+    // More then 1 bit is not supported by S7 CPU (OriginalSize and not Size)
+    if ((ReqItemPar->TransportSize==S7WLBit) && (OriginalSize>1))
         return RA_OutOfRange(ResItemData, EV);
 
     // Calcs the start point
@@ -386,11 +393,13 @@ word TS7Worker::ReadArea(PResFunReadItem ResItemData, PReqFunReadItem ReqItemPar
         return RA_OutOfRange(ResItemData, EV);
 
     Source=P->PData+Start;
-    // Lock the area
+    // Read Event (before copy data)
+    DoReadEvent(evcDataRead,0,EV.EvArea,EV.EvIndex,EV.EvStart,EV.EvSize);	
+	// Lock the area
     pcs->Enter();
     // Get Data
     memcpy(&ResItemData->Data, Source, Size);
-    // Unlock the area
+	// Unlock the area
     pcs->Leave();
 
     ResItemData->ReturnCode=0xFF;
@@ -425,7 +434,7 @@ word TS7Worker::ReadArea(PResFunReadItem ResItemData, PReqFunReadItem ReqItemPar
       case S7WLCounter:
         {
           ResItemData->TransportSize=TS_ResOctet;
-          ResItemData->DataLength=SwapWord(Size);
+		  ResItemData->DataLength=SwapWord(Size);
         };break;
     }
     EV.EvRetCode=evrNoError;
@@ -460,8 +469,8 @@ bool TS7Worker::PerformFunctionRead()
     Offset=sizeof(TResFunReadParams);      // = 2
 
     for (c = 0; c < ItemsCount; c++)
-    {
-        ResData[c]=PResFunReadItem(pbyte(ResParams)+Offset);
+	{
+		ResData[c]=PResFunReadItem(pbyte(ResParams)+Offset);
         ItemSize=ReadArea(ResData[c],&ReqParams->Items[c],PDURemainder, EV);
         Offset+=(ItemSize+4);
         // For multiple items we have to create multiple events
@@ -495,7 +504,7 @@ bool TS7Worker::PerformFunctionRead()
 //==============================================================================
 byte TS7Worker::WA_NotFound(TEv &EV)
 {
-    EV.EvRetCode=evrErrAreaNotFound;
+	EV.EvRetCode=evrErrAreaNotFound;
     return Code7ResItemNotAvailable;
 }
 //------------------------------------------------------------------------------
@@ -520,17 +529,17 @@ byte TS7Worker::WA_DataSizeMismatch(TEv &EV)
 byte TS7Worker::WriteArea(PReqFunWriteDataItem ReqItemData, PReqFunWriteItem ReqItemPar,
      TEv &EV)
 {
-    int Multiplier;
+	int Multiplier;
     PS7Area P = NULL;
     word DBNum;
     longword *PAdd;
-    PSnapCriticalSection pcs;
-    longword Start, Size, ASize, DataLen;
-    pbyte Target;
-    byte BitIndex;
+	PSnapCriticalSection pcs;
+	longword Start, Size, ASize, DataLen;
+	pbyte Target;
+	byte BitIndex;
 
     EV.EvStart   =0;
-    EV.EvSize    =0;
+	EV.EvSize    =0;
     EV.EvRetCode =evrNoError;
     EV.EvIndex   =0;
 
@@ -565,10 +574,10 @@ byte TS7Worker::WriteArea(PReqFunWriteDataItem ReqItemData, PReqFunWriteItem Req
     if ((ReqItemPar->Area==S7AreaTM) ^ (ReqItemPar->TransportSize==S7WLTimer))
         return WA_OutOfRange(EV);
 
-    if ((ReqItemPar->Area==S7AreaCT) ^ (ReqItemPar->TransportSize==S7WLCounter))
+	if ((ReqItemPar->Area==S7AreaCT) ^ (ReqItemPar->TransportSize==S7WLCounter))
         return WA_OutOfRange(EV);
 
-    // Calcs size
+	// Calcs size
     Size=Multiplier*SwapWord(ReqItemPar->Length);
     EV.EvSize=Size;
 
@@ -597,11 +606,10 @@ byte TS7Worker::WriteArea(PReqFunWriteDataItem ReqItemData, PReqFunWriteItem Req
     // Checks data size coherence
     DataLen=SwapWord(ReqItemData->DataLength);
 
-
-    if (ReqItemData->TransportSize==TS_ResByte)
+	if (ReqItemData->TransportSize==TS_ResByte)
         DataLen=DataLen / 8;
 
-    if (DataLen!=Size)
+	if (DataLen!=Size)
         return WA_DataSizeMismatch(EV);
 
     if (ReqItemPar->TransportSize==S7WLBit)
@@ -627,33 +635,40 @@ bool TS7Worker::PerformFunctionWrite()
     TReqFunWriteData ReqData;
     PResFunWrite ResData;
     TS7Answer23 Answer;
+	int L;
 
-    uintptr_t StartData;
-    int c, ItemsCount;
-    int ResDSize;
-    TEv EV;
+	uintptr_t StartData;
+	int c, ItemsCount;
+	int ResDSize;
+	TEv EV;
 
-    // Stage 1 : Setup pointers and initial check
-    ReqParams=PReqFunWriteParams(pbyte(PDUH_in)+sizeof(TS7ReqHeader));
-    ResData  =PResFunWrite(pbyte(&Answer)+ResHeaderSize23);
+	// Stage 1 : Setup pointers and initial check
+	ReqParams=PReqFunWriteParams(pbyte(PDUH_in)+sizeof(TS7ReqHeader));
+	ResData  =PResFunWrite(pbyte(&Answer)+ResHeaderSize23);
 
-    StartData=sizeof(TS7ReqHeader)+SwapWord(PDUH_in->ParLen);
+	StartData=sizeof(TS7ReqHeader)+SwapWord(PDUH_in->ParLen);
 
-    ItemsCount=ReqParams->ItemsCount;
-    ResDSize  =ResHeaderSize23+2+ItemsCount;
-    for (c = 0; c < ItemsCount; c++)
-    {
-        ReqData[c]=PReqFunWriteDataItem(pbyte(PDUH_in)+StartData);
-        StartData+=(SwapWord(ReqData[c]->DataLength) / 8)+4;
-    }
+	ItemsCount=ReqParams->ItemsCount;
+	ResDSize  =ResHeaderSize23+2+ItemsCount;
+	for (c = 0; c < ItemsCount; c++)
+	{
+		ReqData[c]=PReqFunWriteDataItem(pbyte(PDUH_in)+StartData);
+		if (ReqData[c]->TransportSize==TS_ResBit)
+			L=SwapWord(ReqData[c]->DataLength);
+		else
+			L=(SwapWord(ReqData[c]->DataLength)/8);
+		StartData+=L+4;
+		// the datalength is always even
+		if ( L % 2 != 0) StartData++;
+	}
 
-    ResData->FunWrite =pduFuncWrite;
-    ResData->ItemCount=ReqParams->ItemsCount;
+	ResData->FunWrite =pduFuncWrite;
+	ResData->ItemCount=ReqParams->ItemsCount;
 
-    // Stage 2 : Write data
-    for (c = 0; c < ItemsCount; c++)
-    {
-      ResData->Data[c]=WriteArea(ReqData[c],&ReqParams->Items[c], EV);
+	// Stage 2 : Write data
+	for (c = 0; c < ItemsCount; c++)
+	{
+	  ResData->Data[c]=WriteArea(ReqData[c],&ReqParams->Items[c], EV);
       // For multiple items we have to create multiple events
       if (ItemsCount>1)
            DoEvent(evcDataWrite,EV.EvRetCode,EV.EvArea,EV.EvIndex,EV.EvStart,EV.EvSize);
@@ -692,8 +707,8 @@ bool TS7Worker::PerformFunctionNegotiate()
     // Prepares the answer
     Answer.Header.P=0x32;
     Answer.Header.PDUType=0x03;
-    Answer.Header.AB_EX=0x0000;
-    Answer.Header.Sequence=PDUH_in->Sequence;
+	Answer.Header.AB_EX=0x0000;
+	Answer.Header.Sequence=PDUH_in->Sequence;
     Answer.Header.ParLen=SwapWord(sizeof(TResFunNegotiateParams));
     Answer.Header.DataLen=0x0000;
     Answer.Header.Error=0x0000;
@@ -1908,4 +1923,39 @@ int TSnap7Server::UnlockArea(int AreaCode, word DBNumber)
 		  return errSrvInvalidParams;
 }
 //------------------------------------------------------------------------------
+int TSnap7Server::SetReadEventsCallBack(pfn_SrvCallBack PCallBack, void *UsrPtr) 
+{
+    OnReadEvent = PCallBack;
+    FReadUsrPtr = UsrPtr;
+    return 0;
+}
+//---------------------------------------------------------------------------
+void TSnap7Server::DoReadEvent(int Sender, longword Code, word RetCode, word Param1,
+  word Param2, word Param3, word Param4)
+{
+    TSrvEvent SrvReadEvent;
+    if (!Destroying && (OnReadEvent != NULL))
+    {
+        CSEvent->Enter();
+
+        time(&SrvReadEvent.EvtTime);
+        SrvReadEvent.EvtSender = Sender;
+        SrvReadEvent.EvtCode = Code;
+        SrvReadEvent.EvtRetCode = RetCode;
+        SrvReadEvent.EvtParam1 = Param1;
+        SrvReadEvent.EvtParam2 = Param2;
+        SrvReadEvent.EvtParam3 = Param3;
+        SrvReadEvent.EvtParam4 = Param4;
+
+        try
+        { // callback is outside here, we have to shield it
+            OnReadEvent(FReadUsrPtr, &SrvReadEvent, sizeof (TSrvEvent));
+        } catch (...)
+        {
+        };
+        CSEvent->Leave();
+    };
+}
+//---------------------------------------------------------------------------
+
 

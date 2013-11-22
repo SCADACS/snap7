@@ -1,5 +1,5 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.0.0 |
+|  PROJECT SNAP7                                                         1.1.0 |
 |==============================================================================|
 |  Copyright (C) 2013, Davide Nardella                                         |
 |  All rights reserved.                                                        |
@@ -43,6 +43,8 @@ typedef uintptr_t S7Object; // multi platform/processor object reference
 EXPORTSPEC S7Object S7API Cli_Create();
 EXPORTSPEC void S7API Cli_Destroy(S7Object &Client);
 EXPORTSPEC int S7API Cli_Connect(S7Object Client);
+EXPORTSPEC int S7API Cli_SetConnectionParams(S7Object Client, const char *Address, word LocalTSAP, word RemoteTSAP);
+EXPORTSPEC int S7API Cli_SetConnectionType(S7Object Client, word ConnectionType);
 EXPORTSPEC int S7API Cli_ConnectTo(S7Object Client, const char *Address, int Rack, int Slot);
 EXPORTSPEC int S7API Cli_Disconnect(S7Object Client);
 EXPORTSPEC int S7API Cli_GetParam(S7Object Client, int ParamNumber, void *pValue);
@@ -106,6 +108,7 @@ EXPORTSPEC int S7API Cli_GetExecTime(S7Object Client, int &Time);
 EXPORTSPEC int S7API Cli_GetLastError(S7Object Client, int &LastError);
 EXPORTSPEC int S7API Cli_GetPduLength(S7Object Client, int &Requested, int &Negotiated);
 EXPORTSPEC int S7API Cli_ErrorText(int Error, char *Text, int TextLen);
+EXPORTSPEC int S7API Cli_GetConnected(S7Object Client, int &Connected);
 //==============================================================================
 //  CLIENT EXPORT LIST - Async functions
 //==============================================================================
@@ -156,6 +159,7 @@ EXPORTSPEC int S7API Srv_PickEvent(S7Object Server, TSrvEvent *pEvent, int &EvtR
 EXPORTSPEC int S7API Srv_GetMask(S7Object Server, int MaskKind, longword &Mask);
 EXPORTSPEC int S7API Srv_SetMask(S7Object Server, int MaskKind, longword Mask);
 EXPORTSPEC int S7API Srv_SetEventsCallback(S7Object Server, pfn_SrvCallBack pCallback, void *usrPtr);
+EXPORTSPEC int S7API Srv_SetReadEventsCallback(S7Object Server, pfn_SrvCallBack pCallback, void *usrPtr);
 EXPORTSPEC int S7API Srv_EventText(TSrvEvent &Event, char *Text, int TextLen);
 // Misc
 EXPORTSPEC int S7API Srv_GetStatus(S7Object Server, int &ServerStatus, int &CpuStatus, int &ClientsCount);

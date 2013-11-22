@@ -1,5 +1,5 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                       1.0.0.0 |
+|  PROJECT SNAP7                                                         1.1.0 |
 |==============================================================================|
 |  Copyright (C) 2013, Davide Nardella                                         |
 |  All rights reserved.                                                        |
@@ -49,7 +49,7 @@
 # define OS_SOLARIS
 #endif
 
-#if BSD>0
+#if BSD>=0
 # define OS_BSD
 #endif
 
@@ -237,6 +237,11 @@ const longword errCliCannotChangeParam      = 0x02600000;
 
 const int MaxVars     = 20; // Max vars that can be transferred with MultiRead/MultiWrite
 
+// Client Connection Type
+const word CONNTYPE_PG                      = 0x0001;  // Connect to the PLC as a PG
+const word CONNTYPE_OP                      = 0x0002;  // Connect to the PLC as an OP
+const word CONNTYPE_BASIC                   = 0x0003;  // Basic connection
+
 // Area ID
 const byte S7AreaPE   =	0x81;
 const byte S7AreaPA   =	0x82;
@@ -388,6 +393,8 @@ typedef void (S7API *pfn_CliCompletion) (void *usrPtr, int opCode, int opResult)
 S7Object S7API Cli_Create();
 void S7API Cli_Destroy(S7Object *Client);
 int S7API Cli_ConnectTo(S7Object Client, const char *Address, int Rack, int Slot);
+int S7API Cli_SetConnectionParams(S7Object Client, const char *Address, word LocalTSAP, word RemoteTSAP);
+int S7API Cli_SetConnectionType(S7Object Client, word ConnectionType);
 int S7API Cli_Connect(S7Object Client);
 int S7API Cli_Disconnect(S7Object Client);
 int S7API Cli_GetParam(S7Object Client, int ParamNumber, void *pValue);
@@ -451,6 +458,8 @@ int S7API Cli_GetExecTime(S7Object Client, int *Time);
 int S7API Cli_GetLastError(S7Object Client, int *LastError);
 int S7API Cli_GetPduLength(S7Object Client, int *Requested, int *Negotiated);
 int S7API Cli_ErrorText(int Error, char *Text, int TextLen);
+// 1.1.0
+int S7API Cli_GetConnected(S7Object Client, int *Connected);
 //------------------------------------------------------------------------------
 //  Async functions
 //------------------------------------------------------------------------------
@@ -623,6 +632,7 @@ int S7API Srv_PickEvent(S7Object Server, TSrvEvent *pEvent, int *EvtReady);
 int S7API Srv_GetMask(S7Object Server, int MaskKind, longword *Mask);
 int S7API Srv_SetMask(S7Object Server, int MaskKind, longword Mask);
 int S7API Srv_SetEventsCallback(S7Object Server, pfn_SrvCallBack pCallback, void *usrPtr);
+int S7API Srv_SetReadEventsCallback(S7Object Server, pfn_SrvCallBack pCallback, void *usrPtr);
 int S7API Srv_EventText(TSrvEvent *Event, char *Text, int TextLen);
 int S7API Srv_ErrorText(int Error, char *Text, int TextLen);
 
@@ -713,6 +723,8 @@ public:
     // Control functions
     int Connect();
     int ConnectTo(const char *RemAddress, int Rack, int Slot);
+    int SetConnectionParams(const char *RemAddress, word LocalTSAP, word RemoteTSAP);
+    int SetConnectionType(word ConnectionType);
     int Disconnect();
     int GetParam(int ParamNumber, void *pValue);
     int SetParam(int ParamNumber, void *pValue);
@@ -772,6 +784,7 @@ public:
 	int PDURequested();
 	int PDULength();
 	int PlcStatus();
+	bool Connected();
 	// Async functions
 	int SetAsCallback(pfn_CliCompletion pCompletion, void *usrPtr);
 	bool CheckAsCompletion(int *opResult);
@@ -820,6 +833,7 @@ public:
     int SetParam(int ParamNumber, void *pValue);
 	// Events
 	int SetEventsCallback(pfn_SrvCallBack PCallBack, void *UsrPtr);
+	int SetReadEventsCallback(pfn_SrvCallBack PCallBack, void *UsrPtr);
 	bool PickEvent(TSrvEvent *pEvent);
 	void ClearEvents();
     longword GetEventsMask();

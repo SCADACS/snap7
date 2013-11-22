@@ -1,7 +1,7 @@
 object PartnerForm: TPartnerForm
-  Left = 279
+  Left = 233
   Height = 550
-  Top = 190
+  Top = 137
   Width = 748
   Caption = 'PartnerForm'
   ClientHeight = 550
@@ -17,12 +17,12 @@ object PartnerForm: TPartnerForm
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '1.0.8.0'
+  LCLVersion = '1.0.12.0'
   Visible = True
   object PageControl: TPageControl
     Left = 0
     Height = 441
-    Top = 88
+    Top = 86
     Width = 748
     ActivePage = TabBRecv
     Align = alBottom
@@ -120,38 +120,38 @@ object PartnerForm: TPartnerForm
     end
     object TabBRecv: TTabSheet
       Caption = 'BRecv'
-      ClientHeight = 409
-      ClientWidth = 742
+      ClientHeight = 415
+      ClientWidth = 740
       ImageIndex = 1
       object lbldump: TLabel
         Left = 4
-        Height = 15
+        Height = 14
         Top = 8
-        Width = 118
+        Width = 100
         Caption = 'Data Dump : 0 bytes'
         ParentColor = False
       end
       object Label8: TLabel
         Left = 529
-        Height = 15
+        Height = 14
         Top = 8
-        Width = 26
+        Width = 25
         Caption = 'R_ID'
         ParentColor = False
       end
       object Label13: TLabel
         Left = 532
-        Height = 15
+        Height = 14
         Top = 156
-        Width = 76
+        Width = 63
         Caption = 'Timeout (ms)'
         ParentColor = False
       end
       object BRecvLbl: TLabel
         Left = 504
-        Height = 66
+        Height = 53
         Top = 245
-        Width = 218
+        Width = 186
         Alignment = taCenter
         Caption = 'After pressing this button, '#10'You should "Bsend" in the PLC. '#10'If not, after "timeout" ms the function '#10'will return errParRecvTimeout'
         ParentColor = False
@@ -174,7 +174,7 @@ object PartnerForm: TPartnerForm
       end
       object EdR_ID_In: TEdit
         Left = 529
-        Height = 24
+        Height = 21
         Top = 26
         Width = 130
         ReadOnly = True
@@ -195,7 +195,7 @@ object PartnerForm: TPartnerForm
       end
       object EdTimeout: TEdit
         Left = 529
-        Height = 24
+        Height = 21
         Top = 172
         Width = 132
         TabOrder = 3
@@ -256,8 +256,8 @@ object PartnerForm: TPartnerForm
   end
   object SB: TStatusBar
     Left = 0
-    Height = 21
-    Top = 529
+    Height = 23
+    Top = 527
     Width = 748
     Panels = <    
       item
@@ -278,12 +278,12 @@ object PartnerForm: TPartnerForm
     Top = 7
     Width = 207
     Caption = 'Remote Partner (PLC)'
-    ClientHeight = 57
+    ClientHeight = 55
     ClientWidth = 203
     TabOrder = 1
     object Label5: TLabel
       Left = 13
-      Height = 15
+      Height = 14
       Top = 7
       Width = 11
       Caption = 'IP'
@@ -291,9 +291,9 @@ object PartnerForm: TPartnerForm
     end
     object Label6: TLabel
       Left = 129
-      Height = 15
+      Height = 14
       Top = 7
-      Width = 63
+      Width = 55
       Caption = 'TSAP (hex)'
       ParentColor = False
     end
@@ -301,7 +301,7 @@ object PartnerForm: TPartnerForm
       Left = 152
       Height = 24
       Top = 22
-      Width = 8
+      Width = 7
       Alignment = taCenter
       Caption = '.'
       Font.Color = clWindowText
@@ -313,7 +313,7 @@ object PartnerForm: TPartnerForm
     end
     object EdRemoteIP: TEdit
       Left = 10
-      Height = 24
+      Height = 21
       Top = 22
       Width = 98
       TabOrder = 0
@@ -321,7 +321,7 @@ object PartnerForm: TPartnerForm
     end
     object EdRemTsapHI: TEdit
       Left = 114
-      Height = 24
+      Height = 21
       Top = 22
       Width = 35
       Alignment = taCenter
@@ -330,7 +330,7 @@ object PartnerForm: TPartnerForm
     end
     object EdRemTsapLO: TEdit
       Left = 162
-      Height = 24
+      Height = 21
       Top = 22
       Width = 37
       Alignment = taCenter
@@ -362,12 +362,12 @@ object PartnerForm: TPartnerForm
     Top = 7
     Width = 207
     Caption = 'Local Partner (Smart7)'
-    ClientHeight = 57
+    ClientHeight = 55
     ClientWidth = 203
     TabOrder = 0
     object Label2: TLabel
       Left = 13
-      Height = 15
+      Height = 14
       Top = 7
       Width = 11
       Caption = 'IP'
@@ -375,9 +375,9 @@ object PartnerForm: TPartnerForm
     end
     object Label3: TLabel
       Left = 129
-      Height = 15
+      Height = 14
       Top = 7
-      Width = 63
+      Width = 55
       Caption = 'TSAP (hex)'
       ParentColor = False
     end
@@ -385,7 +385,7 @@ object PartnerForm: TPartnerForm
       Left = 152
       Height = 24
       Top = 22
-      Width = 8
+      Width = 7
       Alignment = taCenter
       Caption = '.'
       Font.Color = clWindowText
@@ -397,7 +397,7 @@ object PartnerForm: TPartnerForm
     end
     object EdLocalIP: TEdit
       Left = 10
-      Height = 24
+      Height = 21
       Top = 22
       Width = 98
       TabOrder = 0
@@ -405,7 +405,7 @@ object PartnerForm: TPartnerForm
     end
     object EdLocTsapHI: TEdit
       Left = 114
-      Height = 24
+      Height = 21
       Top = 22
       Width = 35
       Alignment = taCenter
@@ -414,7 +414,7 @@ object PartnerForm: TPartnerForm
     end
     object EdLocTsapLO: TEdit
       Left = 162
-      Height = 24
+      Height = 21
       Top = 22
       Width = 37
       Alignment = taCenter
@@ -437,7 +437,7 @@ object PartnerForm: TPartnerForm
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 65
+    ClientHeight = 63
     ClientWidth = 99
     ItemIndex = 0
     Items.Strings = (
@@ -463,7 +463,7 @@ object PartnerForm: TPartnerForm
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 65
+    ClientHeight = 63
     ClientWidth = 147
     ItemIndex = 2
     Items.Strings = (
@@ -500,4 +500,4 @@ object PartnerForm: TPartnerForm
     left = 640
     top = 424
   end
-end
+end

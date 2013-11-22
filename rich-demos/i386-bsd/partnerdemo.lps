@@ -9,7 +9,7 @@
         <Filename Value="partnerdemo.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="partnerdemo"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="1"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="13" Y="6"/>
@@ -111,8 +111,8 @@
         <UnitName Value="MainPartner"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="40"/>
-        <CursorPos X="22" Y="54"/>
+        <TopLine Value="1"/>
+        <CursorPos X="33" Y="10"/>
         <UsageCount Value="12"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -175,7 +175,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="frmPartner"/>
-        <EditorIndex Value="3"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
         <WindowIndex Value="0"/>
         <TopLine Value="193"/>
         <CursorPos X="18" Y="198"/>
@@ -189,13 +190,10 @@
         <ComponentName Value="Form2"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Unit1"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="1"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
         <CursorPos X="1" Y="1"/>
         <UsageCount Value="20"/>
-        <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit18>
@@ -203,7 +201,7 @@
     <General>
       <ActiveWindowIndexAtStart Value="0"/>
     </General>
-    <JumpHistory Count="6" HistoryIndex="5">
+    <JumpHistory Count="7" HistoryIndex="6">
       <Position1>
         <Filename Value="..\MainPartner.pas"/>
         <Caret Line="72" Column="11" TopLine="59"/>
@@ -228,6 +226,10 @@
         <Filename Value="partnerdemo.lpr"/>
         <Caret Line="20" Column="39" TopLine="1"/>
       </Position6>
+      <Position7>
+        <Filename Value="..\MainPartner.pas"/>
+        <Caret Line="54" Column="22" TopLine="40"/>
+      </Position7>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>

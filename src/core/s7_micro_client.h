@@ -1,5 +1,5 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.0.0 |
+|  PROJECT SNAP7                                                         1.1.0 |
 |==============================================================================|
 |  Copyright (C) 2013, Davide Nardella                                         |
 |  All rights reserved.                                                        |
@@ -210,10 +210,11 @@ const int pc_iso_DstRef        = 2;
 const int pc_iso_SrcTSAP       = 3;
 const int pc_iso_DstTSAP       = 4;
 const int pc_iso_IsoPduSize    = 5;
-  // High level
-const int pc_iso_RemoteAddress = 9;
-const int pc_s7_Rack           = 10;
-const int pc_s7_Slot           = 11;
+
+// Client Connection Type
+const word CONNTYPE_PG         = 0x01;  // Connect to the PLC as a PG
+const word CONNTYPE_OP         = 0x02;  // Connect to the PLC as an OP
+const word CONNTYPE_BASIC      = 0x03;  // Basic connection 
 
 #pragma pack()
 
@@ -283,22 +284,24 @@ private:
     int CheckBlock(int BlockType, int BlockNum,  void *pBlock,  int Size);
     int SubBlockToBlock(int SBB);
 protected:
+    word ConnectionType;
     longword JobStart;
     TSnap7Job Job;
     int DataSizeByte(int WordLength);
     int opSize; // last operation size
     int PerformOperation();
 public:
-    int Rack, Slot;
     TS7Buffer opData;
-    TSnap7MicroClient();
+	TSnap7MicroClient();
     ~TSnap7MicroClient();
     int Reset(bool DoReconnect);
+    void SetConnectionParams(const char *RemAddress, word LocalTSAP, word RemoteTsap);
+    void SetConnectionType(word ConnType);
+	int ConnectTo(const char *RemAddress, int Rack, int Slot);
     int Connect();
-    int ConnectTo(const char *RemAddress, int IRack, int ISlot);
-    int Disconnect();
-    int GetParam(int ParamNumber, void *pValue);
-    int SetParam(int ParamNumber, void *pValue);
+	int Disconnect();
+	int GetParam(int ParamNumber, void *pValue);
+	int SetParam(int ParamNumber, void *pValue);
     // Fundamental Data I/O functions
     int ReadArea(int Area, int DBNumber, int Start, int Amount, int WordLen, void * pUsrData);
     int WriteArea(int Area, int DBNumber, int Start, int Amount, int WordLen, void * pUsrData);

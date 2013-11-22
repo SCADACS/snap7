@@ -1,5 +1,5 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.0.0 |
+|  PROJECT SNAP7                                                         1.1.0 |
 |==============================================================================|
 |  Copyright (C) 2013, Davide Nardella                                         |
 |  All rights reserved.                                                        |
@@ -147,7 +147,6 @@ typedef TMsgSocket *PWorkerSocket;
 class TCustomMsgServer
 {
 private:
-        bool Destroying;
         int FLastError;
         char FLocalAddress[16];
         // Socket listener
@@ -156,8 +155,6 @@ private:
         PMsgListenerThread ServerThread;
         // Critical section to lock Workers list activities
         PSnapCriticalSection CSList;
-        // Critical section to lock Event activities
-        PSnapCriticalSection CSEvent;
         // Event queue
         PMsgEventQueue FEventQueue;
         // Callback related
@@ -169,6 +166,9 @@ private:
         void UnlockList();
         int FirstFree();
 protected:
+        bool Destroying;
+        // Critical section to lock Event activities
+        PSnapCriticalSection CSEvent;
 	    // Workers list
         void *Workers[MaxWorkers];
         // Terminates all worker threads
@@ -182,7 +182,7 @@ protected:
         virtual PWorkerSocket CreateWorkerSocket(socket_t Sock);
         // Handles the event
         virtual void DoEvent(int Sender, longword Code, word RetCode, word Param1,
-                word Param2, word Param3, word Param4);
+          word Param2, word Param3, word Param4);
         // Delete the worker from the list (It's invoked by Worker Thread)
         void Delete(int Index);
         // Incoming connection (It's invoked by ServerThread, the listener)

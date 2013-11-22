@@ -26,6 +26,7 @@
 |                                                                              |
 |  Client Example                                                              |
 |                                                                              |
+|  2013-09-05 : Fixed expression bug (thanks to Jean-Noel Voirol)              |
 |=============================================================================*)
 Program client;
 {$APPTYPE CONSOLE}
@@ -487,7 +488,7 @@ begin
   if (ParamCount<>1) AND (ParamCount<>3) then
     exit;
   Address:=AnsiString(ParamStr(1));
-  if ParamCount=4 then
+  if ParamCount=3 then
   begin
     Val(ParamStr(2),Rack,code);
     if code<>0 then

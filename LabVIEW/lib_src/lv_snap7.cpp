@@ -1,5 +1,5 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                       1.0.0.0 |
+|  PROJECT SNAP7                                                         1.1.0 |
 |==============================================================================|
 |  Copyright (C) 2013, Davide Nardella                                         |
 |  All rights reserved.                                                        |
@@ -105,6 +105,16 @@ void S7API lv_Cli_Destroy(S7Object &Client)
 int S7API lv_Cli_ConnectTo(S7Object Client, const char *Address, int Rack, int Slot)
 {
     return Cli_ConnectTo(Client, Address, Rack, Slot);
+}
+//---------------------------------------------------------------------------
+int S7API lv_Cli_SetConnectionParams(S7Object Client, const char *Address, word LocalTSAP, word RemoteTSAP)
+{
+    return Cli_SetConnectionParams(Client, Address, LocalTSAP, RemoteTSAP);
+}
+//---------------------------------------------------------------------------
+int S7API lv_Cli_SetConnectionType(S7Object Client, word ConnectionType)
+{
+    return Cli_SetConnectionType(Client, ConnectionType);
 }
 //---------------------------------------------------------------------------
 int S7API lv_Cli_Connect(S7Object Client)
