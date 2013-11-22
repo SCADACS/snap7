@@ -1,0 +1,1 @@
+copy/y lib\win64\*.dll lib\windows\*.dll

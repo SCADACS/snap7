@@ -1,0 +1,1 @@
+You need to copy snap7.dll from /release/windows/win32 (or win64).

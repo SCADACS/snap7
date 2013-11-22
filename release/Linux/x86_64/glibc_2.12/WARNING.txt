@@ -1,0 +1,1 @@
+For CentOS-6.4 and Red Hat 4.4.7.3 this library must be copied in /usr/lib64 instead of /usr/lib

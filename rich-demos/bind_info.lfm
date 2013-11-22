@@ -1,0 +1,56 @@
+object BindErrortInfo: TBindErrortInfo
+  Left = 467
+  Height = 381
+  Top = 267
+  Width = 671
+  BorderIcons = []
+  BorderStyle = bsDialog
+  Caption = 'Info about server start error'
+  ClientHeight = 381
+  ClientWidth = 671
+  Position = poScreenCenter
+  LCLVersion = '1.0.6.0'
+  object Memo1: TMemo
+    Cursor = crHelp
+    Left = 0
+    Height = 312
+    Top = 0
+    Width = 671
+    Align = alTop
+    Font.Height = -15
+    Font.Name = 'Sans'
+    Lines.Strings = (
+      'If you got a start error, most likely :'
+      ''
+      '-Windows'
+      'In this computer is installed Step 7 which has a service listening on port 102 (the IsoTCP port).'
+      'You can temporarily disable this service, to run this demo.'
+      ''
+      'Open a command prompt and type'
+      'net stop fsf  (in win32)'
+      'or'
+      'net stop 424 (in win64)'
+      ''
+      'To re enable it run net start....'
+      ''
+      '-Unix'
+      'You need root rights to bind a socket to the port 102'
+      ''
+      'try '
+      'sudo ./clientdemo'
+    )
+    OnChange = Memo1Change
+    ParentFont = False
+    ReadOnly = True
+    TabOrder = 0
+  end
+  object Button1: TButton
+    Left = 296
+    Height = 25
+    Top = 336
+    Width = 75
+    Caption = 'OK'
+    ModalResult = 11
+    TabOrder = 1
+  end
+end
