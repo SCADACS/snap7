@@ -1170,6 +1170,15 @@ void TS7Worker::SZLData(void *P, int len)
     isoSendBuffer(&SZL.Answer,22+len);
     SZL.SZLDone=true;
 }
+void TS7Worker::SZLCData(int SZLID, void *P, int len)
+{
+	TCSZL szl = FServer->SZLs[SZLID];
+    if (szl.Len >= 0) {
+    	SZLData(szl.Val, szl.Len);
+    } else {
+    	SZLData(P, len);
+    }
+}
 // this block is dynamic (contains date/time and cpu status)
 void TS7Worker::SZL_ID424()
 {
@@ -1233,7 +1242,7 @@ bool TS7Worker::PerformGroupSZL()
     case 0x0000 : SZLData(&SZL_ID_0000_IDX_XXXX,sizeof(SZL_ID_0000_IDX_XXXX));break;
     case 0x0F00 : SZLData(&SZL_ID_0F00_IDX_XXXX,sizeof(SZL_ID_0F00_IDX_XXXX));break;
     case 0x0002 : SZLData(&SZL_ID_0002_IDX_XXXX,sizeof(SZL_ID_0002_IDX_XXXX));break;
-    case 0x0011 : SZLData(&SZL_ID_0011_IDX_XXXX,sizeof(SZL_ID_0011_IDX_XXXX));break;
+    case 0x0011 : SZLCData(SZL_ID_0011,&SZL_ID_0011_IDX_XXXX,sizeof(SZL_ID_0011_IDX_XXXX));break;
     case 0x0012 : SZLData(&SZL_ID_0012_IDX_XXXX,sizeof(SZL_ID_0012_IDX_XXXX));break;
     case 0x0013 : SZLData(&SZL_ID_0013_IDX_XXXX,sizeof(SZL_ID_0013_IDX_XXXX));break;
     case 0x0014 : SZLData(&SZL_ID_0014_IDX_XXXX,sizeof(SZL_ID_0014_IDX_XXXX));break;
@@ -1241,7 +1250,7 @@ bool TS7Worker::PerformGroupSZL()
     case 0x0F14 : SZLData(&SZL_ID_0F14_IDX_XXXX,sizeof(SZL_ID_0F14_IDX_XXXX));break;
     case 0x0019 : SZLData(&SZL_ID_0019_IDX_XXXX,sizeof(SZL_ID_0019_IDX_XXXX));break;
     case 0x0F19 : SZLData(&SZL_ID_0F19_IDX_XXXX,sizeof(SZL_ID_0F19_IDX_XXXX));break;
-    case 0x001C : SZLData(&SZL_ID_001C_IDX_XXXX,sizeof(SZL_ID_001C_IDX_XXXX));break;
+    case 0x001C : SZLCData(SZL_ID_001C,&SZL_ID_001C_IDX_XXXX,sizeof(SZL_ID_001C_IDX_XXXX));break;
     case 0x0F1C : SZLData(&SZL_ID_0F1C_IDX_XXXX,sizeof(SZL_ID_0F1C_IDX_XXXX));break;
     case 0x0036 : SZLData(&SZL_ID_0036_IDX_XXXX,sizeof(SZL_ID_0036_IDX_XXXX));break;
     case 0x0F36 : SZLData(&SZL_ID_0F36_IDX_XXXX,sizeof(SZL_ID_0F36_IDX_XXXX));break;
@@ -1625,6 +1634,9 @@ TSnap7Server::TSnap7Server()
     LocalPort=isoTcpPort;
     CpuStatus=S7CpuStatusRun;
     WorkInterval=100;
+    for (int i = 0; i < CustomSZL; i++) {
+		SZLs[i].Len = -1;
+	}
 }
 //------------------------------------------------------------------------------
 TSnap7Server::~TSnap7Server()
@@ -1842,6 +1854,12 @@ int TSnap7Server::SetParam(int ParamNumber, void *pValue)
 	default: return errSrvInvalidParamNumber;
     }
     return 0;
+}
+//------------------------------------------------------------------------------
+void TSnap7Server::SetSZL(int SZLID, pbyte Val, int Len)
+{
+	SZLs[SZLID].Val = Val;
+	SZLs[SZLID].Len = Len;
 }
 //------------------------------------------------------------------------------
 int TSnap7Server::RegisterArea(int AreaCode, word Index, void *pUsrData, word Size)

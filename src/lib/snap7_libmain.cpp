@@ -806,6 +806,15 @@ int S7API Srv_SetParam(S7Object Server, int ParamNumber, void *pValue)
         return errLibInvalidObject;
 }
 //---------------------------------------------------------------------------
+int S7API Srv_SetSZL(S7Object Server, int SZLID, pbyte Val, int len)
+{
+    if (Server) {
+        PSnap7Server(Server)->SetSZL(SZLID, Val, len);
+    	return 0;
+    } else
+        return errLibInvalidObject;
+}
+//---------------------------------------------------------------------------
 int S7API Srv_StartTo(S7Object Server, const char *Address)
 {
     if (Server)

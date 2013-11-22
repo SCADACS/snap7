@@ -215,6 +215,10 @@ const byte TS_ResOctet = 0x09;
 const int JobComplete  = 0;
 const int JobPending   = 1;
 
+// SZL identifiers (lib internals, not S7)
+const int SZL_ID_0011 = 0;
+const int SZL_ID_001C = 1;
+
 // Control codes
 const word CodeControlUnknown   = 0;
 const word CodeControlColdStart = 1;      // Cold start

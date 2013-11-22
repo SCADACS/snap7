@@ -145,6 +145,7 @@ EXPORTSPEC S7Object S7API Srv_Create();
 EXPORTSPEC void S7API Srv_Destroy(S7Object &Server);
 EXPORTSPEC int S7API Srv_GetParam(S7Object Server, int ParamNumber, void *pValue);
 EXPORTSPEC int S7API Srv_SetParam(S7Object Server, int ParamNumber, void *pValue);
+EXPORTSPEC int S7API Srv_SetSZL(S7Object Server, int SZLID, pbyte Val, int len);
 EXPORTSPEC int S7API Srv_Start(S7Object Server);
 EXPORTSPEC int S7API Srv_StartTo(S7Object Server, const char *Address);
 EXPORTSPEC int S7API Srv_Stop(S7Object Server);

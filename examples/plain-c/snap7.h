@@ -49,7 +49,8 @@
 # define OS_SOLARIS
 #endif
 
-#if BSD>=0
+// XXX >= triggers on my machine and wont define uintptr_t
+#if BSD>0
 # define OS_BSD
 #endif
 
@@ -190,6 +191,10 @@ const int p_u32_KeepAliveTime   = 15;
 // Client/Partner Job status 
 const int JobComplete           = 0;
 const int JobPending            = 1;
+
+// SZL identifiers (lib internals, not S7)
+const int SZL_ID_0011 = 0;
+const int SZL_ID_001C = 1;
 
 //******************************************************************************
 //                                   CLIENT
@@ -612,12 +617,13 @@ typedef struct{
 	word EvtParam4;    // Param 4 (if available)
 }TSrvEvent, *PSrvEvent;
 
-// Server Evants callback
+// Server Events callback
 typedef void (S7API *pfn_SrvCallBack)(void * usrPtr, PSrvEvent PEvent, int Size);
 S7Object S7API Srv_Create();
 void S7API Srv_Destroy(S7Object *Server);
 int S7API Srv_GetParam(S7Object Server, int ParamNumber, void *pValue);
 int S7API Srv_SetParam(S7Object Server, int ParamNumber, void *pValue);
+int S7API Srv_SetSZL(S7Object Server, int SZLID, pbyte Val, int len);
 int S7API Srv_StartTo(S7Object Server, const char *Address);
 int S7API Srv_Start(S7Object Server);
 int S7API Srv_Stop(S7Object Server);

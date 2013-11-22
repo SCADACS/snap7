@@ -36,6 +36,9 @@
 
 #define MaxDB 2048    // Like a S7 318
 
+// Number of custom SZLs
+#define CustomSZL 2
+
 //---------------------------------------------------------------------------
 // Server Interface errors
 const longword errSrvDBNullPointer      = 0x00200000; // Pssed null as PData
@@ -109,6 +112,12 @@ typedef struct{
   word                evError;
   word                DataLength;
 }TCB;
+
+/// custom SZL entry
+typedef struct {
+	pbyte Val;
+	int Len;
+}TCSZL;
 
 class TSnap7Server; // forward declaration
 
@@ -186,6 +195,7 @@ protected:
     void SZLNotAvailable();
     void SZLSystemState();
     void SZLData(void *P, int len);
+    void SZLCData(int SZLID, void *P, int len);
     void SZL_ID424();
 public:
     TSnap7Server *FServer;
@@ -212,6 +222,7 @@ protected:
     int DBLimit;
     PS7Area DB[MaxDB-1]; // DB
     PS7Area HA[5];     // MK,PE,PA,TM,CT
+    TCSZL SZLs[CustomSZL];
     PS7Area FindDB(word DBNumber);
     PWorkerSocket CreateWorkerSocket(socket_t Sock);
     int RegisterDB(word Number, void *pUsrData, word Size);
@@ -229,6 +240,7 @@ public:
     int StartTo(const char *Address);
     int GetParam(int ParamNumber, void *pValue);
     int SetParam(int ParamNumber, void *pValue);
+    void SetSZL(int SZLID, pbyte val, int len);
     int RegisterArea(int AreaCode, word Index, void *pUsrData, word Size);
     int UnregisterArea(int AreaCode, word Index);
     int LockArea(int AreaCode, word DBNumber);
