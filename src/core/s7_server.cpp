@@ -840,12 +840,67 @@ bool TS7Worker::PerformFunctionDownload()
     return true;
 }
 //==============================================================================
-// FUNCTIONS PROGRAMMER AND CYCLIC DATA (NOT IMPLEMENTED...yet)
+// FUNCTIONS PROGRAMMER AND CYCLIC DATA (PARTIALLY IMPLEMENTED...yet)
 //==============================================================================
 bool TS7Worker::PerformGroupProgrammer()
 {
-    DoEvent(evcPDUincoming,evrNotImplemented,grProgrammer,0,0,0);
-    return true;
+	// this is a static answer to TIA's GP request (only seen this response yet).
+	// there is a second kind of GP, a LED blink request w. subfunc 0x16,
+	// might implement this when I get a PLC supporting it.
+	PGPReqParams ReqParams;
+	PGPResParams ResParams;
+	PGPResData ResData;
+	TS7Answer17 Answer;
+	int TotalSize;
+	word evs = evsGPStatic;
+
+	ReqParams=PGPReqParams(pbyte(PDUH_in)+ReqHeaderSize);
+	ResParams=PGPResParams(pbyte(&Answer)+ResHeaderSize17);
+	ResData  =PGPResData(pbyte(ResParams)+sizeof(TGPResParams));
+
+	// Prepares the answer
+	Answer.Header.P=0x32;
+	Answer.Header.PDUType=PduType_userdata;
+	Answer.Header.AB_EX=0x0000;
+	Answer.Header.Sequence=PDUH_in->Sequence;
+	Answer.Header.ParLen =SwapWord(sizeof(TGPResParams));
+	Answer.Header.DataLen=SwapWord(0x0010);
+	// Params
+	ResParams->Head[0]=ReqParams->Head[0];
+	ResParams->Head[1]=ReqParams->Head[1];
+	ResParams->Head[2]=ReqParams->Head[2];
+	ResParams->Plen  =0x08;
+	ResParams->Uk    =0x12;
+	ResParams->Tg    =0x81; // Type response, group programmer
+	ResParams->SubFun=ReqParams->SubFun;
+	ResParams->Seq   =ReqParams->Seq + 1;
+	ResParams->resvd =0x0000;
+	ResParams->Err   =0x0000;
+	// Data
+	ResData->FF      =0xFF;
+	ResData->TRSize  =TS_ResOctet;
+	ResData->DataLength=SwapWord(0x000C);
+	ResData->Data[0]  = 0x00;
+	ResData->Data[1]  = 0x04;
+	ResData->Data[2]  = 0x00;
+	ResData->Data[3]  = 0x04;
+	ResData->Data[4]  = 0x01;
+	ResData->Data[5]  = 0x00;
+	ResData->Data[6]  = 0x00;
+	ResData->Data[7]  = 0x01;
+	ResData->Data[8]  = 0x10;
+	ResData->Data[9]  = 0x01;
+	ResData->Data[10] = 0x00;
+	ResData->Data[11] = 0x00;
+
+	TotalSize = 10 + sizeof(PGPResParams) + 20;
+	isoSendBuffer(&Answer,TotalSize);
+
+	if (ReqParams->SubFun == SFun_Blink)
+		evs = evsGPBlink;
+
+	DoEvent(evcGroupProgrammer,evrNoError,evs,0,0,0);
+	return true;
 }
 //------------------------------------------------------------------------------
 bool TS7Worker::PerformGroupCyclicData()

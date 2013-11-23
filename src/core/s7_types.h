@@ -100,7 +100,7 @@ const longword evcDownload            = 0x00800000;
 const longword evcDirectory           = 0x01000000;
 const longword evcSecurity            = 0x02000000;
 const longword evcControl             = 0x04000000;
-const longword evcReserved_08000000   = 0x08000000;
+const longword evcGroupProgrammer     = 0x08000000;
 const longword evcReserved_10000000   = 0x10000000;
 const longword evcReserved_20000000   = 0x20000000;
 const longword evcReserved_40000000   = 0x40000000;
@@ -117,6 +117,8 @@ const word evsGetClock                = 0x0001;
 const word evsSetClock                = 0x0002;
 const word evsSetPassword             = 0x0001;
 const word evsClrPassword             = 0x0002;
+const word evsGPStatic                = 0x0001;
+const word evsGPBlink                 = 0x0002;
 // Event Result
 const word evrNoError                 = 0;
 const word evrFragmentRejected        = 0x0001;
@@ -259,6 +261,7 @@ const byte SFun_EnterPwd        = 0x01;   // Enter password    for this session
 const byte SFun_CancelPwd   	= 0x02;   // Cancel password    for this session
 const byte SFun_Insert   	= 0x50;   // Insert block
 const byte SFun_Delete   	= 0x42;   // Delete block
+const byte SFun_Blink       = 0x16;   // blink LED
 
 typedef tm *PTimeStruct;
 
@@ -1052,6 +1055,28 @@ typedef struct {
 }TBSendResData;
 
 typedef TBSendResData* PBSendResData;
+
+//==============================================================================
+//                             GROUP PROGRAMMER
+//==============================================================================
+
+typedef struct {
+	byte    FF;			// 0xFF
+	byte    TRSize;		// Transport Size 0x09 (octet)
+	word    DataLength;	// following data length (bytes)
+	byte    Data [IsoPayload_Size - 17];
+} TGPData;
+
+typedef TGPData TGPResData;
+typedef TGPResData* PGPResData;
+typedef TGPData TGPReqData;
+typedef TGPReqData* PGPResData;
+
+typedef TS7Params7 TGPResParams;
+typedef TGPResParams* PGPResParams;
+typedef TS7Params7 TGPReqParams;
+typedef TGPReqParams* PGPReqParams;
+
 
 #pragma pack()
 #endif // s7_types_h

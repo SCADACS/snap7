@@ -363,7 +363,6 @@ static BaseString PDUText(TSrvEvent &Event)
                                    switch (Event.EvtParam1)
                                    {
                                      case grCyclicData : return "Function group cyclic data not yet implemented";
-                                     case grProgrammer : return "Function group programmer not yet implemented";
                                    }; // <- no break needed here
                                  }
       default : return "Unknown Return code ("+IntToString(Event.EvtRetCode)+")";
@@ -488,6 +487,16 @@ static BaseString SecurityText(TSrvEvent &Event)
     };
 }
 //---------------------------------------------------------------------------
+static BaseString GroupProgrammerText(TSrvEvent &Event)
+{
+    switch (Event.EvtParam1)
+    {
+        case evsGPStatic : return "Group Programmer : Standard request --> OK";
+        case evsGPBlink    : return "Group Programmer : Blink LED --> NOT IMPLEMENTED (sending default response)";
+        default : return "Group Programmer : Unknown Subfunction";
+    };
+}
+//---------------------------------------------------------------------------
 BaseString EvtSrvText(TSrvEvent &Event)
 {
     BaseString S;
@@ -496,17 +505,18 @@ BaseString EvtSrvText(TSrvEvent &Event)
     {
         switch (Event.EvtCode)
         {
-            case evcPDUincoming  : S="PDU incoming : "+PDUText(Event);break;
-            case evcDataRead     : S="Read request, "+TxtArea(Event)+TxtStartSize(Event)+TxtDataResult(Event);break;
-            case evcDataWrite    : S="Write request, "+TxtArea(Event)+TxtStartSize(Event)+TxtDataResult(Event);break;
-            case evcNegotiatePDU : S="The client requires a PDU size of "+IntToString(Event.EvtParam1)+" bytes";break;
-            case evcControl      : S=ControlText(Event.EvtParam1);break;
-            case evcReadSZL      : S=ReadSZLText(Event);break;
-            case evcClock        : S=ClockText(Event.EvtParam1);break;
-            case evcUpload       : S=UploadText(Event);break;
-            case evcDownload     : S=DownloadText(Event);break;
-            case evcDirectory    : S=BlockInfoText(Event);break;
-            case evcSecurity     : S=SecurityText(Event);break;
+            case evcPDUincoming    : S="PDU incoming : "+PDUText(Event);break;
+            case evcDataRead       : S="Read request, "+TxtArea(Event)+TxtStartSize(Event)+TxtDataResult(Event);break;
+            case evcDataWrite      : S="Write request, "+TxtArea(Event)+TxtStartSize(Event)+TxtDataResult(Event);break;
+            case evcNegotiatePDU   : S="The client requires a PDU size of "+IntToString(Event.EvtParam1)+" bytes";break;
+            case evcControl        : S=ControlText(Event.EvtParam1);break;
+            case evcReadSZL        : S=ReadSZLText(Event);break;
+            case evcClock          : S=ClockText(Event.EvtParam1);break;
+            case evcUpload         : S=UploadText(Event);break;
+            case evcDownload       : S=DownloadText(Event);break;
+            case evcDirectory      : S=BlockInfoText(Event);break;
+            case evcSecurity       : S=SecurityText(Event);break;
+            case evcGroupProgrammer: S=GroupProgrammerText(Event);break;
             default:               S="Unknown event ("+IntToString(Event.EvtCode)+")";break;
         }
         return SenderText(Event)+S;

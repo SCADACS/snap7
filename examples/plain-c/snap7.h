@@ -549,7 +549,7 @@ const longword evcDownload            = 0x00800000;
 const longword evcDirectory           = 0x01000000;
 const longword evcSecurity            = 0x02000000;
 const longword evcControl             = 0x04000000;
-const longword evcReserved_08000000   = 0x08000000; // actually unused
+const longword evcGroupProgrammer     = 0x08000000;
 const longword evcReserved_10000000   = 0x10000000; // actually unused
 const longword evcReserved_20000000   = 0x20000000; // actually unused
 const longword evcReserved_40000000   = 0x40000000; // actually unused
@@ -569,6 +569,8 @@ const word evsGetClock                = 0x0001;
 const word evsSetClock                = 0x0002;
 const word evsSetPassword             = 0x0001;
 const word evsClrPassword             = 0x0002;
+const word evsGPStatic                = 0x0001;
+const word evsGPBlink                 = 0x0002;
 // Event Params : functions group
 const word grProgrammer               = 0x0041;
 const word grCyclicData               = 0x0042;
