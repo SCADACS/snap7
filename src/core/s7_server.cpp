@@ -1085,24 +1085,6 @@ void TS7Worker::BLK_GetBlockNum_GetBlkInfo(int &BlkNum, PReqDataBlockInfo ReqDat
 //------------------------------------------------------------------------------
 void TS7Worker::BLK_DoBlockInfo_GetBlkInfo(PS7Area DB, PResDataBlockInfo Data, TCB &CB)
 {
-    // Prepares the answer
-    CB.Answer.Header.P=0x32;
-    CB.Answer.Header.PDUType=PduType_userdata;
-    CB.Answer.Header.AB_EX=0x0000;
-    CB.Answer.Header.Sequence=PDUH_in->Sequence;
-    CB.Answer.Header.ParLen =SwapWord(sizeof(TResFunGetBlockInfo));
-
-    CB.ResParams->Head[0]=CB.ReqParams->Head[0];
-    CB.ResParams->Head[1]=CB.ReqParams->Head[1];
-    CB.ResParams->Head[2]=CB.ReqParams->Head[2];
-    CB.ResParams->Plen  =0x08;
-    CB.ResParams->Uk    =0x12;
-    CB.ResParams->Tg    =0x83; // Type response, group functions info
-    CB.ResParams->SubFun=SFun_BlkInfo;
-    CB.ResParams->Seq   =CB.ReqParams->Seq;
-    CB.ResParams->Rsvd  =0x0000;
-    CB.ResParams->ErrNo =0x0000;
-
     CB.DataLength =sizeof(TResDataBlockInfo);
     CB.Answer.Header.DataLen=SwapWord(CB.DataLength);
     CB.ResParams->ErrNo =0x0000;
@@ -1146,6 +1128,23 @@ void TS7Worker::BLK_GetBlkInfo(TCB &CB)
     ReqData=PReqDataBlockInfo(pbyte(PDUH_in)+ReqHeaderSize+sizeof(TReqFunGetBlockInfo));
     memset(Data,0,sizeof(TResDataBlockInfo)); // many fields are 0
 
+    // Prepares the answer
+	CB.Answer.Header.P=0x32;
+	CB.Answer.Header.PDUType=PduType_userdata;
+	CB.Answer.Header.AB_EX=0x0000;
+	CB.Answer.Header.Sequence=PDUH_in->Sequence;
+	CB.Answer.Header.ParLen =SwapWord(sizeof(TResFunGetBlockInfo));
+
+	CB.ResParams->Head[0]=CB.ReqParams->Head[0];
+	CB.ResParams->Head[1]=CB.ReqParams->Head[1];
+	CB.ResParams->Head[2]=CB.ReqParams->Head[2];
+	CB.ResParams->Plen  =0x08;
+	CB.ResParams->Uk    =0x12;
+	CB.ResParams->Tg    =0x83; // Type response, group functions info
+	CB.ResParams->SubFun=SFun_BlkInfo;
+	CB.ResParams->Seq   =CB.ReqParams->Seq;
+	CB.ResParams->Rsvd  =0x0000;
+
     BLK_GetBlockNum_GetBlkInfo(BlkNum, ReqData);
     BlkTypeInfo=ReqData->BlkType;
     if (BlkTypeInfo==Block_DB)
@@ -1164,7 +1163,7 @@ void TS7Worker::BLK_GetBlkInfo(TCB &CB)
     else
         BLK_NoResource_GetBlkInfo(Data, CB);
 
-    TotalSize = ResHeaderSize17+sizeof(TResFunGetBlockInfo)+sizeof(TResDataBlockInfo);
+    TotalSize = ResHeaderSize17+sizeof(TResFunGetBlockInfo)+4+SwapWord(Data->Length);
     isoSendBuffer(&CB.Answer, TotalSize);
     DoEvent(evcDirectory,CB.evError,evsGetBlockInfo,BlkTypeInfo,BlkNum,0);
 }
