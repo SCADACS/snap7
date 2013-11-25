@@ -891,7 +891,7 @@ int S7API Srv_SetCpuStatus(S7Object Server, int CpuStatus)
 {
 	if (Server)
 	{
-		PSnap7Server(Server)->CpuStatus=CpuStatus;
+		PSnap7Server(Server)->SetCpuStatus(CpuStatus);
 		return 0;
 	}
 	else

@@ -89,3 +89,8 @@ longword SwapDWord(longword Value)
     Result.bb.b2=tmp;
     return Result.Value;
 }
+//------------------------------------------------------------------------------
+byte BCD(word Value)
+{
+    return ((Value / 10) << 4) + (Value % 10);
+}

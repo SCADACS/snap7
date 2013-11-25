@@ -28,6 +28,28 @@
 
 const byte BitMask[8] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};
 
+//---------------------------------------------------------------------------
+void FillTime(PS7Time PTime)
+{
+    time_t Now;
+    struct timespec ts;
+    int ms;
+
+    time(&Now);
+    struct tm *DT = localtime(&Now);
+
+    clock_gettime(CLOCK_REALTIME, &ts);
+    ms = ts.tv_nsec / 1000000;
+
+    PTime->bcd_year=BCD(DT->tm_year-100);
+    PTime->bcd_mon =BCD(DT->tm_mon+1);
+    PTime->bcd_day =BCD(DT->tm_mday);
+    PTime->bcd_hour=BCD(DT->tm_hour);
+    PTime->bcd_min =BCD(DT->tm_min);
+    PTime->bcd_sec =BCD(DT->tm_sec);
+    PTime->bcd_himsec=BCD(word(ms / 10)); // first 2 ms digits, last is in dow
+    PTime->bcd_dow =BCD((ms % 10)*10 + DT->tm_wday);
+}
 //------------------------------------------------------------------------------
 // ISO/TCP WORKER  CLASS
 //------------------------------------------------------------------------------
@@ -126,27 +148,6 @@ bool TS7Worker::CheckPDU_in(int PayloadSize)
         return false;
     else
         return true;
-}
-//------------------------------------------------------------------------------
-byte TS7Worker::BCD(word Value)
-{
-    return ((Value / 10) << 4) + (Value % 10);
-}
-//------------------------------------------------------------------------------
-void TS7Worker::FillTime(PS7Time PTime)
-{
-    time_t Now;
-    time(&Now);
-    struct tm *DT = localtime (&Now);
-
-    PTime->bcd_year=BCD(DT->tm_year-100);
-    PTime->bcd_mon =BCD(DT->tm_mon+1);
-    PTime->bcd_day =BCD(DT->tm_mday);
-    PTime->bcd_hour=BCD(DT->tm_hour);
-    PTime->bcd_min =BCD(DT->tm_min);
-    PTime->bcd_sec =BCD(DT->tm_sec);
-    PTime->bcd_himsec=0;
-    PTime->bcd_dow =BCD(DT->tm_wday);
 }
 //------------------------------------------------------------------------------
 void TS7Worker::DoEvent(longword Code, word RetCode, word Param1, word Param2,
@@ -294,13 +295,13 @@ PS7Area TS7Worker::GetArea(byte S7Code, word index)
 {
     switch(S7Code)
     {
-	case S7AreaPE : return FServer->HA[srvAreaPE];
-	case S7AreaPA : return FServer->HA[srvAreaPA];
-	case S7AreaMK : return FServer->HA[srvAreaMK];
-	case S7AreaCT : return FServer->HA[srvAreaCT];
-	case S7AreaTM : return FServer->HA[srvAreaTM];
-	case S7AreaDB : return FServer->FindDB(index);
-	default       : return NULL;
+    case S7AreaPE : return FServer->HA[srvAreaPE];
+    case S7AreaPA : return FServer->HA[srvAreaPA];
+    case S7AreaMK : return FServer->HA[srvAreaMK];
+    case S7AreaCT : return FServer->HA[srvAreaCT];
+    case S7AreaTM : return FServer->HA[srvAreaTM];
+    case S7AreaDB : return FServer->FindDB(index);
+    default       : return NULL;
     };
 }
 //------------------------------------------------------------------------------
@@ -310,7 +311,7 @@ word TS7Worker::ReadArea(PResFunReadItem ResItemData, PReqFunReadItem ReqItemPar
     PS7Area P;
     word DBNum;
     longword Start, Size, ASize;
-	longword OriginalSize;
+    longword OriginalSize;
     longword *PAdd;
     byte BitIndex, ByteVal;
     int Multiplier;
@@ -326,14 +327,14 @@ word TS7Worker::ReadArea(PResFunReadItem ResItemData, PReqFunReadItem ReqItemPar
     EV.EvArea=ReqItemPar->Area;
     // Get Pointer to selected Area
 
-	if (ReqItemPar->Area==S7AreaDB)
-	{
+    if (ReqItemPar->Area==S7AreaDB)
+    {
             DBNum=SwapWord(ReqItemPar->DBNumber);
             EV.EvIndex=DBNum;
-	};
-	P=GetArea(ReqItemPar->Area, DBNum);
+    };
+    P=GetArea(ReqItemPar->Area, DBNum);
 
-	if (P==NULL)
+    if (P==NULL)
         return RA_NotFound(ResItemData, EV);
 
     pcs=P->cs;
@@ -360,11 +361,11 @@ word TS7Worker::ReadArea(PResFunReadItem ResItemData, PReqFunReadItem ReqItemPar
 
     // Calcs size
     Size=Multiplier*SwapWord(ReqItemPar->Length);
-	OriginalSize=Size;
+    OriginalSize=Size;
     // S7 doesn't xfer odd byte amount
-	if ( Size % 2 != 0)
-	   Size++;
-	EV.EvSize=Size;
+    if ( Size % 2 != 0)
+       Size++;
+    EV.EvSize=Size;
 
     // The sum of the items must not exceed the PDU size negotiated
     if (PDURemainder-Size<=0)
@@ -394,12 +395,12 @@ word TS7Worker::ReadArea(PResFunReadItem ResItemData, PReqFunReadItem ReqItemPar
 
     Source=P->PData+Start;
     // Read Event (before copy data)
-    DoReadEvent(evcDataRead,0,EV.EvArea,EV.EvIndex,EV.EvStart,EV.EvSize);	
-	// Lock the area
+    DoReadEvent(evcDataRead,0,EV.EvArea,EV.EvIndex,EV.EvStart,EV.EvSize);
+    // Lock the area
     pcs->Enter();
     // Get Data
     memcpy(&ResItemData->Data, Source, Size);
-	// Unlock the area
+    // Unlock the area
     pcs->Leave();
 
     ResItemData->ReturnCode=0xFF;
@@ -434,7 +435,7 @@ word TS7Worker::ReadArea(PResFunReadItem ResItemData, PReqFunReadItem ReqItemPar
       case S7WLCounter:
         {
           ResItemData->TransportSize=TS_ResOctet;
-		  ResItemData->DataLength=SwapWord(Size);
+          ResItemData->DataLength=SwapWord(Size);
         };break;
     }
     EV.EvRetCode=evrNoError;
@@ -469,8 +470,8 @@ bool TS7Worker::PerformFunctionRead()
     Offset=sizeof(TResFunReadParams);      // = 2
 
     for (c = 0; c < ItemsCount; c++)
-	{
-		ResData[c]=PResFunReadItem(pbyte(ResParams)+Offset);
+    {
+        ResData[c]=PResFunReadItem(pbyte(ResParams)+Offset);
         ItemSize=ReadArea(ResData[c],&ReqParams->Items[c],PDURemainder, EV);
         Offset+=(ItemSize+4);
         // For multiple items we have to create multiple events
@@ -504,7 +505,7 @@ bool TS7Worker::PerformFunctionRead()
 //==============================================================================
 byte TS7Worker::WA_NotFound(TEv &EV)
 {
-	EV.EvRetCode=evrErrAreaNotFound;
+    EV.EvRetCode=evrErrAreaNotFound;
     return Code7ResItemNotAvailable;
 }
 //------------------------------------------------------------------------------
@@ -529,28 +530,28 @@ byte TS7Worker::WA_DataSizeMismatch(TEv &EV)
 byte TS7Worker::WriteArea(PReqFunWriteDataItem ReqItemData, PReqFunWriteItem ReqItemPar,
      TEv &EV)
 {
-	int Multiplier;
+    int Multiplier;
     PS7Area P = NULL;
     word DBNum;
     longword *PAdd;
-	PSnapCriticalSection pcs;
-	longword Start, Size, ASize, DataLen;
-	pbyte Target;
-	byte BitIndex;
+    PSnapCriticalSection pcs;
+    longword Start, Size, ASize, DataLen;
+    pbyte Target;
+    byte BitIndex;
 
     EV.EvStart   =0;
-	EV.EvSize    =0;
+    EV.EvSize    =0;
     EV.EvRetCode =evrNoError;
     EV.EvIndex   =0;
 
     EV.EvArea=ReqItemPar->Area;
     // Get Pointer to selected Area
-	if (ReqItemPar->Area==S7AreaDB)
-	{
-		DBNum=SwapWord(ReqItemPar->DBNumber);
-		EV.EvIndex=DBNum;
-	};
-	P=GetArea(ReqItemPar->Area, DBNum);
+    if (ReqItemPar->Area==S7AreaDB)
+    {
+        DBNum=SwapWord(ReqItemPar->DBNumber);
+        EV.EvIndex=DBNum;
+    };
+    P=GetArea(ReqItemPar->Area, DBNum);
 
     if (P==NULL)
         return WA_NotFound(EV);
@@ -574,10 +575,10 @@ byte TS7Worker::WriteArea(PReqFunWriteDataItem ReqItemData, PReqFunWriteItem Req
     if ((ReqItemPar->Area==S7AreaTM) ^ (ReqItemPar->TransportSize==S7WLTimer))
         return WA_OutOfRange(EV);
 
-	if ((ReqItemPar->Area==S7AreaCT) ^ (ReqItemPar->TransportSize==S7WLCounter))
+    if ((ReqItemPar->Area==S7AreaCT) ^ (ReqItemPar->TransportSize==S7WLCounter))
         return WA_OutOfRange(EV);
 
-	// Calcs size
+    // Calcs size
     Size=Multiplier*SwapWord(ReqItemPar->Length);
     EV.EvSize=Size;
 
@@ -606,10 +607,10 @@ byte TS7Worker::WriteArea(PReqFunWriteDataItem ReqItemData, PReqFunWriteItem Req
     // Checks data size coherence
     DataLen=SwapWord(ReqItemData->DataLength);
 
-	if (ReqItemData->TransportSize==TS_ResByte)
+    if (ReqItemData->TransportSize==TS_ResByte)
         DataLen=DataLen / 8;
 
-	if (DataLen!=Size)
+    if (DataLen!=Size)
         return WA_DataSizeMismatch(EV);
 
     if (ReqItemPar->TransportSize==S7WLBit)
@@ -635,40 +636,40 @@ bool TS7Worker::PerformFunctionWrite()
     TReqFunWriteData ReqData;
     PResFunWrite ResData;
     TS7Answer23 Answer;
-	int L;
+    int L;
 
-	uintptr_t StartData;
-	int c, ItemsCount;
-	int ResDSize;
-	TEv EV;
+    uintptr_t StartData;
+    int c, ItemsCount;
+    int ResDSize;
+    TEv EV;
 
-	// Stage 1 : Setup pointers and initial check
-	ReqParams=PReqFunWriteParams(pbyte(PDUH_in)+sizeof(TS7ReqHeader));
-	ResData  =PResFunWrite(pbyte(&Answer)+ResHeaderSize23);
+    // Stage 1 : Setup pointers and initial check
+    ReqParams=PReqFunWriteParams(pbyte(PDUH_in)+sizeof(TS7ReqHeader));
+    ResData  =PResFunWrite(pbyte(&Answer)+ResHeaderSize23);
 
-	StartData=sizeof(TS7ReqHeader)+SwapWord(PDUH_in->ParLen);
+    StartData=sizeof(TS7ReqHeader)+SwapWord(PDUH_in->ParLen);
 
-	ItemsCount=ReqParams->ItemsCount;
-	ResDSize  =ResHeaderSize23+2+ItemsCount;
-	for (c = 0; c < ItemsCount; c++)
-	{
-		ReqData[c]=PReqFunWriteDataItem(pbyte(PDUH_in)+StartData);
-		if (ReqData[c]->TransportSize==TS_ResBit)
-			L=SwapWord(ReqData[c]->DataLength);
-		else
-			L=(SwapWord(ReqData[c]->DataLength)/8);
-		StartData+=L+4;
-		// the datalength is always even
-		if ( L % 2 != 0) StartData++;
-	}
+    ItemsCount=ReqParams->ItemsCount;
+    ResDSize  =ResHeaderSize23+2+ItemsCount;
+    for (c = 0; c < ItemsCount; c++)
+    {
+        ReqData[c]=PReqFunWriteDataItem(pbyte(PDUH_in)+StartData);
+        if (ReqData[c]->TransportSize==TS_ResBit)
+            L=SwapWord(ReqData[c]->DataLength);
+        else
+            L=(SwapWord(ReqData[c]->DataLength)/8);
+        StartData+=L+4;
+        // the datalength is always even
+        if ( L % 2 != 0) StartData++;
+    }
 
-	ResData->FunWrite =pduFuncWrite;
-	ResData->ItemCount=ReqParams->ItemsCount;
+    ResData->FunWrite =pduFuncWrite;
+    ResData->ItemCount=ReqParams->ItemsCount;
 
-	// Stage 2 : Write data
-	for (c = 0; c < ItemsCount; c++)
-	{
-	  ResData->Data[c]=WriteArea(ReqData[c],&ReqParams->Items[c], EV);
+    // Stage 2 : Write data
+    for (c = 0; c < ItemsCount; c++)
+    {
+      ResData->Data[c]=WriteArea(ReqData[c],&ReqParams->Items[c], EV);
       // For multiple items we have to create multiple events
       if (ItemsCount>1)
            DoEvent(evcDataWrite,EV.EvRetCode,EV.EvArea,EV.EvIndex,EV.EvStart,EV.EvSize);
@@ -707,8 +708,8 @@ bool TS7Worker::PerformFunctionNegotiate()
     // Prepares the answer
     Answer.Header.P=0x32;
     Answer.Header.PDUType=0x03;
-	Answer.Header.AB_EX=0x0000;
-	Answer.Header.Sequence=PDUH_in->Sequence;
+    Answer.Header.AB_EX=0x0000;
+    Answer.Header.Sequence=PDUH_in->Sequence;
     Answer.Header.ParLen=SwapWord(sizeof(TResFunNegotiateParams));
     Answer.Header.DataLen=0x0000;
     Answer.Header.Error=0x0000;
@@ -782,10 +783,10 @@ bool TS7Worker::PerformFunctionControl(byte PduFun)
     DoEvent(evcControl,0,CtrlCode,0,0,0);
 
     if ((CtrlCode==CodeControlWarmStart) || (CtrlCode==CodeControlColdStart))
-        FServer->CpuStatus=S7CpuStatusRun;
+        FServer->SetCpuStatus(S7CpuStatusRun);
 
     if (CtrlCode==CodeControlStop)
-        FServer->CpuStatus=S7CpuStatusStop;
+        FServer->SetCpuStatus(S7CpuStatusStop);
 
     return true;
 }
@@ -844,63 +845,63 @@ bool TS7Worker::PerformFunctionDownload()
 //==============================================================================
 bool TS7Worker::PerformGroupProgrammer()
 {
-	// this is a static answer to TIA's GP request (only seen this response yet).
-	// there is a second kind of GP, a LED blink request w. subfunc 0x16,
-	// might implement this when I get a PLC supporting it.
-	PGPReqParams ReqParams;
-	PGPResParams ResParams;
-	PGPResData ResData;
-	TS7Answer17 Answer;
-	int TotalSize;
-	word evs = evsGPStatic;
+    // this is a static answer to TIA's GP request (only seen this response yet).
+    // there is a second kind of GP, a LED blink request w. subfunc 0x16,
+    // might implement this when I get a PLC supporting it.
+    PGPReqParams ReqParams;
+    PGPResParams ResParams;
+    PGPResData ResData;
+    TS7Answer17 Answer;
+    int TotalSize;
+    word evs = evsGPStatic;
 
-	ReqParams=PGPReqParams(pbyte(PDUH_in)+ReqHeaderSize);
-	ResParams=PGPResParams(pbyte(&Answer)+ResHeaderSize17);
-	ResData  =PGPResData(pbyte(ResParams)+sizeof(TGPResParams));
+    ReqParams=PGPReqParams(pbyte(PDUH_in)+ReqHeaderSize);
+    ResParams=PGPResParams(pbyte(&Answer)+ResHeaderSize17);
+    ResData  =PGPResData(pbyte(ResParams)+sizeof(TGPResParams));
 
-	// Prepares the answer
-	Answer.Header.P=0x32;
-	Answer.Header.PDUType=PduType_userdata;
-	Answer.Header.AB_EX=0x0000;
-	Answer.Header.Sequence=PDUH_in->Sequence;
-	Answer.Header.ParLen =SwapWord(sizeof(TGPResParams));
-	Answer.Header.DataLen=SwapWord(0x0010);
-	// Params
-	ResParams->Head[0]=ReqParams->Head[0];
-	ResParams->Head[1]=ReqParams->Head[1];
-	ResParams->Head[2]=ReqParams->Head[2];
-	ResParams->Plen  =0x08;
-	ResParams->Uk    =0x12;
-	ResParams->Tg    =0x81; // Type response, group programmer
-	ResParams->SubFun=ReqParams->SubFun;
-	ResParams->Seq   =ReqParams->Seq + 1;
-	ResParams->resvd =0x0000;
-	ResParams->Err   =0x0000;
-	// Data
-	ResData->FF      =0xFF;
-	ResData->TRSize  =TS_ResOctet;
-	ResData->DataLength=SwapWord(0x000C);
-	ResData->Data[0]  = 0x00;
-	ResData->Data[1]  = 0x04;
-	ResData->Data[2]  = 0x00;
-	ResData->Data[3]  = 0x04;
-	ResData->Data[4]  = 0x01;
-	ResData->Data[5]  = 0x00;
-	ResData->Data[6]  = 0x00;
-	ResData->Data[7]  = 0x01;
-	ResData->Data[8]  = 0x10;
-	ResData->Data[9]  = 0x01;
-	ResData->Data[10] = 0x00;
-	ResData->Data[11] = 0x00;
+    // Prepares the answer
+    Answer.Header.P=0x32;
+    Answer.Header.PDUType=PduType_userdata;
+    Answer.Header.AB_EX=0x0000;
+    Answer.Header.Sequence=PDUH_in->Sequence;
+    Answer.Header.ParLen =SwapWord(sizeof(TGPResParams));
+    Answer.Header.DataLen=SwapWord(0x0010);
+    // Params
+    ResParams->Head[0]=ReqParams->Head[0];
+    ResParams->Head[1]=ReqParams->Head[1];
+    ResParams->Head[2]=ReqParams->Head[2];
+    ResParams->Plen  =0x08;
+    ResParams->Uk    =0x12;
+    ResParams->Tg    =0x81; // Type response, group programmer
+    ResParams->SubFun=ReqParams->SubFun;
+    ResParams->Seq   =ReqParams->Seq + 1;
+    ResParams->resvd =0x0000;
+    ResParams->Err   =0x0000;
+    // Data
+    ResData->FF      =0xFF;
+    ResData->TRSize  =TS_ResOctet;
+    ResData->DataLength=SwapWord(0x000C);
+    ResData->Data[0]  = 0x00;
+    ResData->Data[1]  = 0x04;
+    ResData->Data[2]  = 0x00;
+    ResData->Data[3]  = 0x04;
+    ResData->Data[4]  = 0x01;
+    ResData->Data[5]  = 0x00;
+    ResData->Data[6]  = 0x00;
+    ResData->Data[7]  = 0x01;
+    ResData->Data[8]  = 0x10;
+    ResData->Data[9]  = 0x01;
+    ResData->Data[10] = 0x00;
+    ResData->Data[11] = 0x00;
 
-	TotalSize = 10 + sizeof(PGPResParams) + 20;
-	isoSendBuffer(&Answer,TotalSize);
+    TotalSize = 10 + sizeof(PGPResParams) + 20;
+    isoSendBuffer(&Answer,TotalSize);
 
-	if (ReqParams->SubFun == SFun_Blink)
-		evs = evsGPBlink;
+    if (ReqParams->SubFun == SFun_Blink)
+        evs = evsGPBlink;
 
-	DoEvent(evcGroupProgrammer,evrNoError,evs,0,0,0);
-	return true;
+    DoEvent(evcGroupProgrammer,evrNoError,evs,0,0,0);
+    return true;
 }
 //------------------------------------------------------------------------------
 bool TS7Worker::PerformGroupCyclicData()
@@ -1010,47 +1011,47 @@ void TS7Worker::BLK_ListBoT(byte BlockType, bool Start, TCB &CB)
     {
       cnt =0;  // Local couter
       if (Start)
-	      DBCnt=-1; // Global counter
+          DBCnt=-1; // Global counter
 
       if (FServer->DBCount>0)
       {
-	      while ((cnt<MaxItems) && (DBCnt<HiBound))
-	      {
-		      DBCnt++;
-		      if (FServer->DB[DBCnt]!=NULL)
-		      {
-			      Data->Items[cnt].BlockNum=SwapWord(FServer->DB[DBCnt]->Number);
-			      Data->Items[cnt].Unknown  =0x22;
-			      Data->Items[cnt].BlockLang=0x05;
-			      cnt++;
-		      };
-	      };
+          while ((cnt<MaxItems) && (DBCnt<HiBound))
+          {
+              DBCnt++;
+              if (FServer->DB[DBCnt]!=NULL)
+              {
+                  Data->Items[cnt].BlockNum=SwapWord(FServer->DB[DBCnt]->Number);
+                  Data->Items[cnt].Unknown  =0x22;
+                  Data->Items[cnt].BlockLang=0x05;
+                  cnt++;
+              };
+          };
 
-	      if ((cnt<MaxItems) || (DBCnt==HiBound))
-	      {
-		      DBCnt=0; // Finished
-		      CB.ResParams->Rsvd=0x0023;
-	      }
-	      else
-		      CB.ResParams->Rsvd=0x0123;
+          if ((cnt<MaxItems) || (DBCnt==HiBound))
+          {
+              DBCnt=0; // Finished
+              CB.ResParams->Rsvd=0x0023;
+          }
+          else
+              CB.ResParams->Rsvd=0x0123;
 
-	      if (cnt>0)
-	      {
-		      CB.ResParams->ErrNo =0x0000;
-		      Data->TSize =TS_ResOctet;
-		      Data->RetVal=0xFF;
-		      CB.DataLength=4+(cnt*word(sizeof(TDataFunGetBotItem)));
-		      CB.Answer.Header.DataLen=SwapWord(CB.DataLength);
-		      Data->DataLen=SwapWord(CB.DataLength-4);
-	      }
-	      else
-		      BLK_NoResource_ListBoT(Data, CB);
+          if (cnt>0)
+          {
+              CB.ResParams->ErrNo =0x0000;
+              Data->TSize =TS_ResOctet;
+              Data->RetVal=0xFF;
+              CB.DataLength=4+(cnt*word(sizeof(TDataFunGetBotItem)));
+              CB.Answer.Header.DataLen=SwapWord(CB.DataLength);
+              Data->DataLen=SwapWord(CB.DataLength-4);
+          }
+          else
+              BLK_NoResource_ListBoT(Data, CB);
       }
       else
-	      BLK_NoResource_ListBoT(Data, CB);
+          BLK_NoResource_ListBoT(Data, CB);
     }
     else // we store only DBs
-	    BLK_NoResource_ListBoT(Data, CB);
+        BLK_NoResource_ListBoT(Data, CB);
 
     TotalSize = ResHeaderSize17+sizeof(TResFunGetBlockInfo)+CB.DataLength;
     isoSendBuffer(&CB.Answer,TotalSize);
@@ -1129,21 +1130,21 @@ void TS7Worker::BLK_GetBlkInfo(TCB &CB)
     memset(Data,0,sizeof(TResDataBlockInfo)); // many fields are 0
 
     // Prepares the answer
-	CB.Answer.Header.P=0x32;
-	CB.Answer.Header.PDUType=PduType_userdata;
-	CB.Answer.Header.AB_EX=0x0000;
-	CB.Answer.Header.Sequence=PDUH_in->Sequence;
-	CB.Answer.Header.ParLen =SwapWord(sizeof(TResFunGetBlockInfo));
+    CB.Answer.Header.P=0x32;
+    CB.Answer.Header.PDUType=PduType_userdata;
+    CB.Answer.Header.AB_EX=0x0000;
+    CB.Answer.Header.Sequence=PDUH_in->Sequence;
+    CB.Answer.Header.ParLen =SwapWord(sizeof(TResFunGetBlockInfo));
 
-	CB.ResParams->Head[0]=CB.ReqParams->Head[0];
-	CB.ResParams->Head[1]=CB.ReqParams->Head[1];
-	CB.ResParams->Head[2]=CB.ReqParams->Head[2];
-	CB.ResParams->Plen  =0x08;
-	CB.ResParams->Uk    =0x12;
-	CB.ResParams->Tg    =0x83; // Type response, group functions info
-	CB.ResParams->SubFun=SFun_BlkInfo;
-	CB.ResParams->Seq   =CB.ReqParams->Seq;
-	CB.ResParams->Rsvd  =0x0000;
+    CB.ResParams->Head[0]=CB.ReqParams->Head[0];
+    CB.ResParams->Head[1]=CB.ReqParams->Head[1];
+    CB.ResParams->Head[2]=CB.ReqParams->Head[2];
+    CB.ResParams->Plen  =0x08;
+    CB.ResParams->Uk    =0x12;
+    CB.ResParams->Tg    =0x83; // Type response, group functions info
+    CB.ResParams->SubFun=SFun_BlkInfo;
+    CB.ResParams->Seq   =CB.ReqParams->Seq;
+    CB.ResParams->Rsvd  =0x0000;
 
     BLK_GetBlockNum_GetBlkInfo(BlkNum, ReqData);
     BlkTypeInfo=ReqData->BlkType;
@@ -1151,10 +1152,10 @@ void TS7Worker::BLK_GetBlkInfo(TCB &CB)
     {
       if (BlkNum>=0)
       {
-	    BlkDB=FServer->FindDB(BlkNum);
-	    if (BlkDB!=NULL)
+        BlkDB=FServer->FindDB(BlkNum);
+        if (BlkDB!=NULL)
                 BLK_DoBlockInfo_GetBlkInfo(BlkDB, Data, CB);
-	    else
+        else
                 BLK_NoResource_GetBlkInfo(Data, CB);
       }
       else
@@ -1226,12 +1227,56 @@ void TS7Worker::SZLData(void *P, int len)
 }
 void TS7Worker::SZLCData(int SZLID, void *P, int len)
 {
-	TCSZL szl = FServer->SZLs[SZLID];
+    TCSZL szl = FServer->SZLs[SZLID];
     if (szl.Len >= 0) {
-    	SZLData(szl.Val, szl.Len);
+        SZLData(szl.Val, szl.Len);
     } else {
-    	SZLData(P, len);
+        SZLData(P, len);
     }
+}
+// dynamic diagnostic buffer
+void TS7Worker::SZL_ID0A0()
+{
+    uint items = FServer->GetDiagItemCount();
+    size_t bufferSize = items * DiagItemLength;
+    byte buffer[MaxDiagBufferItems * DiagItemLength];
+    PS7ResSZLDataFirst ResData = PS7ResSZLDataFirst(SZL.ResData);
+    FServer->CopyDiagBuffer(buffer);
+    SZL.Answer.Header.DataLen=SwapWord(bufferSize+10);
+    SZL.ResParams->Err  =0x0000;
+    ResData->Ret = 0xFF;
+    ResData->TS = TS_ResOctet;
+    ResData->DLen = SwapWord(uint(bufferSize + 8));
+    ResData->ID = 0xA000;
+    ResData->Index = 0x0000;
+    ResData->ListLen = SwapWord(DiagItemLength);
+    ResData->ListCount = SwapWord(items);
+    memcpy(&SZL.ResData[12], buffer, bufferSize);
+
+    SZL.SZLDone = true;
+    isoSendBuffer(&SZL.Answer,22+bufferSize+12);
+}
+// this block is dynamic (cpu status and date/time of last mode change)
+void TS7Worker::SZL_ID124()
+{
+    PS7Time PTime;
+    pbyte PStatus;
+
+    SZL.Answer.Header.DataLen=SwapWord(sizeof(SZL_ID_0124_IDX_XXXX));
+    SZL.ResParams->Err  =0x0000;
+    PTime=PS7Time(pbyte(SZL.ResData)+24);
+    PStatus =pbyte(SZL.ResData)+15;
+    memcpy(SZL.ResData,&SZL_ID_0124_IDX_XXXX,sizeof(SZL_ID_0124_IDX_XXXX));
+
+    if (FServer->CpuStatus == S7CpuStatusRun)
+        memcpy(&SZL.ResData[12],&SZL_DIAG_CPU_RUN,sizeof(SZL_DIAG_CPU_RUN));
+    else
+        memcpy(&SZL.ResData[12],&SZL_DIAG_CPU_STOP,sizeof(SZL_DIAG_CPU_STOP));
+
+    memcpy(PTime,&FServer->LastCPUStateChange,sizeof(TS7Time));
+
+    SZL.SZLDone=true;
+    isoSendBuffer(&SZL.Answer,22+sizeof(SZL_ID_0124_IDX_XXXX));
 }
 // this block is dynamic (contains date/time and cpu status)
 void TS7Worker::SZL_ID424()
@@ -1322,7 +1367,7 @@ bool TS7Worker::PerformGroupSZL()
     case 0x0F94 : SZLData(&SZL_ID_0F94_IDX_XXXX,sizeof(SZL_ID_0F94_IDX_XXXX));break;
     case 0x0095 : SZLData(&SZL_ID_0095_IDX_XXXX,sizeof(SZL_ID_0095_IDX_XXXX));break;
     case 0x0F95 : SZLData(&SZL_ID_0F95_IDX_XXXX,sizeof(SZL_ID_0F95_IDX_XXXX));break;
-    case 0x00A0 : SZLData(&SZL_ID_00A0_IDX_XXXX,sizeof(SZL_ID_00A0_IDX_XXXX));break;
+    case 0x00A0 : SZL_ID0A0();break;
     case 0x0FA0 : SZLData(&SZL_ID_0FA0_IDX_XXXX,sizeof(SZL_ID_0FA0_IDX_XXXX));break;
     case 0x0017 : SZLData(&SZL_ID_0017_IDX_XXXX,sizeof(SZL_ID_0017_IDX_XXXX));break;
     case 0x0F17 : SZLData(&SZL_ID_0F17_IDX_XXXX,sizeof(SZL_ID_0F17_IDX_XXXX));break;
@@ -1338,7 +1383,7 @@ bool TS7Worker::PerformGroupSZL()
     case 0x0023 : SZLData(&SZL_ID_0023_IDX_XXXX,sizeof(SZL_ID_0023_IDX_XXXX));break;
     case 0x0F23 : SZLData(&SZL_ID_0F23_IDX_XXXX,sizeof(SZL_ID_0F23_IDX_XXXX));break;
     case 0x0024 : SZLData(&SZL_ID_0024_IDX_XXXX,sizeof(SZL_ID_0024_IDX_XXXX));break;
-    case 0x0124 : SZLData(&SZL_ID_0124_IDX_XXXX,sizeof(SZL_ID_0124_IDX_XXXX));break;
+    case 0x0124 : SZL_ID124();break;
     case 0x0424 : SZL_ID424();break;
     case 0x0038 : SZLData(&SZL_ID_0038_IDX_XXXX,sizeof(SZL_ID_0038_IDX_XXXX));break;
     case 0x0F38 : SZLData(&SZL_ID_0F38_IDX_XXXX,sizeof(SZL_ID_0F38_IDX_XXXX));break;
@@ -1681,16 +1726,18 @@ bool TS7Worker::PerformSetClock()
 //------------------------------------------------------------------------------
 TSnap7Server::TSnap7Server()
 {
+    AddedDiagItemCount=0;
+    AddDiagItem(SZL_DIAG_START);
     memset(&DB,0,sizeof(DB));
     memset(&HA,0,sizeof(HA));
     DBCount=0;
     DBLimit=0;
     LocalPort=isoTcpPort;
-    CpuStatus=S7CpuStatusRun;
     WorkInterval=100;
     for (int i = 0; i < CustomSZL; i++) {
-		SZLs[i].Len = -1;
-	}
+        SZLs[i].Len = -1;
+    }
+    SetCpuStatus(S7CpuStatusRun);
 }
 //------------------------------------------------------------------------------
 TSnap7Server::~TSnap7Server()
@@ -1707,6 +1754,38 @@ PWorkerSocket TSnap7Server::CreateWorkerSocket(socket_t Sock)
     return Result;
 }
 //------------------------------------------------------------------------------
+// Item must be DiagItemLength bytes long!
+void TSnap7Server::AddDiagItem(pbyte Item)
+{
+	// add item in reverse order (start at bottom)
+    int i = pmod(MaxDiagBufferItems - AddedDiagItemCount - 1, MaxDiagBufferItems);
+
+    memcpy(&DiagBuffer[i][0], Item, DiagItemLength);
+    FillTime(PS7Time(&DiagBuffer[i][12]));
+
+    AddedDiagItemCount++;
+}
+//------------------------------------------------------------------------------
+uint TSnap7Server::GetDiagItemCount() {
+    return AddedDiagItemCount > MaxDiagBufferItems ? MaxDiagBufferItems : AddedDiagItemCount;
+}
+//------------------------------------------------------------------------------
+// target memory has at least (GetDiagItemCount() * MaxDiagBufferItems) bytes
+void TSnap7Server::CopyDiagBuffer(pbyte to)
+{
+    int start = pmod(MaxDiagBufferItems - AddedDiagItemCount, MaxDiagBufferItems);
+    int end = pmod(start + GetDiagItemCount() - 1, MaxDiagBufferItems);
+
+    if (start <= end)
+        memcpy(to, &DiagBuffer[start][0], (end - start + 1) * DiagItemLength);
+    else
+    {
+        const int copied = (MaxDiagBufferItems - start) * DiagItemLength;
+        memcpy(to, &DiagBuffer[start][0], copied);
+        memcpy(&to[copied], &DiagBuffer[0][0], (end + 1) * DiagItemLength);
+    }
+}
+//------------------------------------------------------------------------------
 PS7Area TSnap7Server::FindDB(word DBNumber)
 {
     int c;
@@ -1716,11 +1795,11 @@ PS7Area TSnap7Server::FindDB(word DBNumber)
     {
         if (DB[c]!=NULL)
         {
-	        if (DB[c]->Number==DBNumber)
-	        {
+            if (DB[c]->Number==DBNumber)
+            {
                 return DB[c];
-	        }
-	    }
+            }
+        }
     }
     return NULL;
 }
@@ -1732,13 +1811,13 @@ int TSnap7Server::IndexOfDB(word DBNumber)
 
     for (c=0; c<max; c++)
     {
-		if (DB[c]!=NULL)
-		{
-			if (DB[c]->Number==DBNumber)
-			{
-				return c;
-			}
-		}
+        if (DB[c]!=NULL)
+        {
+            if (DB[c]->Number==DBNumber)
+            {
+                return c;
+            }
+        }
     }
     return -1;
 }
@@ -1749,7 +1828,7 @@ int TSnap7Server::FindFirstFreeDB()
     for (c=0; c < MaxDB; c++)
     {
         if (DB[c]==NULL)
-	        return c;
+            return c;
     }
     return -1;
 }
@@ -1788,16 +1867,16 @@ void TSnap7Server::DisposeAll()
     // Unregister DBs
     for (c = 0; c < MaxDB; c++)
     {
-		if (DB[c]!=NULL)
-		{
-			// Unregister should be done with the server in stop mode
-			// however we can minimize the risk...
-			TheDB=DB[c];
-			DB[c]=NULL;
-			if (TheDB->cs!=0)
-					delete TheDB->cs;
-			delete TheDB;
-		}
+        if (DB[c]!=NULL)
+        {
+            // Unregister should be done with the server in stop mode
+            // however we can minimize the risk...
+            TheDB=DB[c];
+            DB[c]=NULL;
+            if (TheDB->cs!=0)
+                    delete TheDB->cs;
+            delete TheDB;
+        }
     }
     DBCount=0;
     // Unregister other
@@ -1817,12 +1896,12 @@ int TSnap7Server::RegisterSys(int AreaCode, void *pUsrData, word Size)
 
     if (HA[AreaCode]==0)
     {
-	TheArea=new TS7Area;
-	TheArea->cs=new TSnapCriticalSection();
-	TheArea->PData=pbyte(pUsrData);
-	TheArea->Size=Size;
-	HA[AreaCode]=TheArea;
-	return 0;
+    TheArea=new TS7Area;
+    TheArea->cs=new TSnapCriticalSection();
+    TheArea->PData=pbyte(pUsrData);
+    TheArea->Size=Size;
+    HA[AreaCode]=TheArea;
+    return 0;
     }
     else
         return errSrvAreaAlreadyExists;
@@ -1852,13 +1931,13 @@ int TSnap7Server::UnregisterSys(int AreaCode)
     PS7Area TheArea;
     if (HA[AreaCode]!=NULL)
     {
-		// Unregister should be done with the server in stop mode
-		// however we can minimize the risk...
-		TheArea=HA[AreaCode];
-		HA[AreaCode]=NULL;
-		if (TheArea->cs!=NULL)
-			 delete TheArea->cs;
-		delete TheArea;
+        // Unregister should be done with the server in stop mode
+        // however we can minimize the risk...
+        TheArea=HA[AreaCode];
+        HA[AreaCode]=NULL;
+        if (TheArea->cs!=NULL)
+             delete TheArea->cs;
+        delete TheArea;
     }
     return 0;
 }
@@ -1872,16 +1951,16 @@ int TSnap7Server::GetParam(int ParamNumber, void *pValue)
 {
     switch (ParamNumber)
     {
-	case p_u16_LocalPort:
+    case p_u16_LocalPort:
             *Puint16_t(pValue)=LocalPort;
-	    break;
-	case p_i32_WorkInterval:
-	    *Pint32_t(pValue)=WorkInterval;
-	    break;
-	case p_i32_MaxClients:
-	    *Pint32_t(pValue)=MaxClients;
-	    break;
-	default: return errSrvInvalidParamNumber;
+        break;
+    case p_i32_WorkInterval:
+        *Pint32_t(pValue)=WorkInterval;
+        break;
+    case p_i32_MaxClients:
+        *Pint32_t(pValue)=MaxClients;
+        break;
+    default: return errSrvInvalidParamNumber;
     }
     return 0;
 }
@@ -1890,30 +1969,44 @@ int TSnap7Server::SetParam(int ParamNumber, void *pValue)
 {
     switch (ParamNumber)
     {
-	case p_u16_LocalPort:
-	    if (Status==SrvStopped)
+    case p_u16_LocalPort:
+        if (Status==SrvStopped)
                 LocalPort=*Puint16_t(pValue);
-	    else
-		return errSrvCannotChangeParam;
-	    break;
-	case p_i32_WorkInterval:
+        else
+        return errSrvCannotChangeParam;
+        break;
+    case p_i32_WorkInterval:
             WorkInterval=*Pint32_t(pValue);
-	     break;
-	case p_i32_MaxClients:
-	     if (ClientsCount==0 && Status==SrvStopped)
-	         MaxClients=*Pint32_t(pValue);
+         break;
+    case p_i32_MaxClients:
+         if (ClientsCount==0 && Status==SrvStopped)
+             MaxClients=*Pint32_t(pValue);
              else
-	         return errSrvCannotChangeParam;
+             return errSrvCannotChangeParam;
              break;
-	default: return errSrvInvalidParamNumber;
+    default: return errSrvInvalidParamNumber;
     }
     return 0;
 }
 //------------------------------------------------------------------------------
 void TSnap7Server::SetSZL(int SZLID, pbyte Val, int Len)
 {
-	SZLs[SZLID].Val = Val;
-	SZLs[SZLID].Len = Len;
+    SZLs[SZLID].Val = Val;
+    SZLs[SZLID].Len = Len;
+}
+//------------------------------------------------------------------------------
+void TSnap7Server::SetCpuStatus(byte State)
+{
+    if (CpuStatus != State)
+    {
+        CpuStatus = State;
+        FillTime(&LastCPUStateChange);
+        switch (CpuStatus)
+        {
+            case S7CpuStatusRun: AddDiagItem(SZL_DIAG_CPU_RUN); break;
+            case S7CpuStatusStop:AddDiagItem(SZL_DIAG_CPU_STOP); break;
+        }
+    }
 }
 //------------------------------------------------------------------------------
 int TSnap7Server::RegisterArea(int AreaCode, word Index, void *pUsrData, word Size)
@@ -1931,7 +2024,7 @@ int TSnap7Server::UnregisterArea(int AreaCode, word Index)
     else
         if ((AreaCode>=srvAreaPE) && (AreaCode<=srvAreaTM))
             return UnregisterSys(AreaCode);
-	else
+    else
         return errSrvInvalidParams;
 }
 //------------------------------------------------------------------------------
@@ -1943,26 +2036,26 @@ int TSnap7Server::LockArea(int AreaCode, word DBNumber)
   {
       if (HA[AreaCode]!=0)
       {
-		  HA[AreaCode]->cs->Enter();
-		  return 0;
+          HA[AreaCode]->cs->Enter();
+          return 0;
       }
       else
-		  return errSrvInvalidParams;
+          return errSrvInvalidParams;
   }
   else
       if (AreaCode==srvAreaDB)
       {
-		  index=IndexOfDB(DBNumber);
-		  if (index!=-1)
-	  {
-	      DB[index]->cs->Enter();
-	      return 0;
-	  }
-	  else
-	      return errSrvInvalidParams;
+          index=IndexOfDB(DBNumber);
+          if (index!=-1)
+      {
+          DB[index]->cs->Enter();
+          return 0;
       }
       else
-		  return errSrvInvalidParams;
+          return errSrvInvalidParams;
+      }
+      else
+          return errSrvInvalidParams;
 }
 //------------------------------------------------------------------------------
 int TSnap7Server::UnlockArea(int AreaCode, word DBNumber)
@@ -1973,26 +2066,26 @@ int TSnap7Server::UnlockArea(int AreaCode, word DBNumber)
   {
       if (HA[AreaCode]!=0)
       {
-		  HA[AreaCode]->cs->Leave();
-		  return 0;
+          HA[AreaCode]->cs->Leave();
+          return 0;
       }
       else
-		  return errSrvInvalidParams;
+          return errSrvInvalidParams;
   }
   else
       if (AreaCode==srvAreaDB)
       {
-		  index=IndexOfDB(DBNumber);
-		  if (index!=-1)
-	  {
-	      DB[index]->cs->Leave();
-	      return 0;
-	  }
-	  else
-	      return errSrvInvalidParams;
+          index=IndexOfDB(DBNumber);
+          if (index!=-1)
+      {
+          DB[index]->cs->Leave();
+          return 0;
       }
       else
-		  return errSrvInvalidParams;
+          return errSrvInvalidParams;
+      }
+      else
+          return errSrvInvalidParams;
 }
 //------------------------------------------------------------------------------
 int TSnap7Server::SetReadEventsCallBack(pfn_SrvCallBack PCallBack, void *UsrPtr) 

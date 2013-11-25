@@ -39,6 +39,12 @@
 // Number of custom SZLs
 #define CustomSZL 2
 
+#define MaxDiagBufferItems 99
+#define DiagItemLength 20
+
+// a modulo which is always positive
+#define pmod(X,Y)     (X%Y+Y)%Y
+
 //---------------------------------------------------------------------------
 // Server Interface errors
 const longword errSrvDBNullPointer      = 0x00200000; // Pssed null as PData
@@ -56,6 +62,8 @@ const int srvAreaMK = 2;
 const int srvAreaCT = 3;
 const int srvAreaTM = 4;
 const int srvAreaDB = 5;
+
+void FillTime(PS7Time PTime);
 
 typedef struct{
 	word   Number; // Number (only for DB)
@@ -129,10 +137,8 @@ private:
     byte LastBlk;
     TSZL SZL;
     TS7Buffer Buffer;
-    byte BCD(word Value);
     // Checks the consistence of the incoming PDU
     bool CheckPDU_in(int PayloadSize);
-    void FillTime(PS7Time PTime);
 protected:
     bool ExecuteRecv();
     void DoEvent(longword Code, word RetCode, word Param1, word Param2,
@@ -196,6 +202,8 @@ protected:
     void SZLSystemState();
     void SZLData(void *P, int len);
     void SZLCData(int SZLID, void *P, int len);
+    void SZL_ID0A0();
+    void SZL_ID124();
     void SZL_ID424();
 public:
     TSnap7Server *FServer;
@@ -214,6 +222,10 @@ private:
     // Read Callback related
     pfn_SrvCallBack OnReadEvent;
     void *FReadUsrPtr;
+    // ring buffer for diagnostic messages
+    byte DiagBuffer[MaxDiagBufferItems][DiagItemLength];
+    uint AddedDiagItemCount;
+    uint GetDiagItemCount();
     void DisposeAll();
     int FindFirstFreeDB();
     int IndexOfDB(word DBNumber);
@@ -223,12 +235,14 @@ protected:
     PS7Area DB[MaxDB-1]; // DB
     PS7Area HA[5];     // MK,PE,PA,TM,CT
     TCSZL SZLs[CustomSZL];
+    TS7Time LastCPUStateChange;
     PS7Area FindDB(word DBNumber);
     PWorkerSocket CreateWorkerSocket(socket_t Sock);
     int RegisterDB(word Number, void *pUsrData, word Size);
     int RegisterSys(int AreaCode, void *pUsrData, word Size);
     int UnregisterDB(word DBNumber);
     int UnregisterSys(int AreaCode);
+    void AddDiagItem(pbyte Item);
     // The Read event
     void DoReadEvent(int Sender, longword Code, word RetCode, word Param1,
       word Param2, word Param3, word Param4);
@@ -241,10 +255,12 @@ public:
     int GetParam(int ParamNumber, void *pValue);
     int SetParam(int ParamNumber, void *pValue);
     void SetSZL(int SZLID, pbyte val, int len);
+    void SetCpuStatus(byte State);
     int RegisterArea(int AreaCode, word Index, void *pUsrData, word Size);
     int UnregisterArea(int AreaCode, word Index);
     int LockArea(int AreaCode, word DBNumber);
     int UnlockArea(int AreaCode, word DBNumber);
+    void CopyDiagBuffer(pbyte to);
     // Sets Event callback
     int SetReadEventsCallBack(pfn_SrvCallBack PCallBack, void *UsrPtr);
     friend class TS7Worker;

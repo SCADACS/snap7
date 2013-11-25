@@ -34,5 +34,6 @@ void SysSleep(longword Delay_ms);
 longword DeltaTime(longword &Elapsed);
 word SwapWord(word Value);
 longword SwapDWord(longword Value);
+byte BCD(word Value);
 
 #endif // snap_sysutils_h
