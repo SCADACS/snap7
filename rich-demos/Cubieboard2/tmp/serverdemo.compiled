@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <Compiler Value="/usr/bin/fpc" Date="1365979667"/>
+  <Params Value=" -MObjFPC -Scghi -O1 -Xs -XX -vewnhi -l -Fi/home/cubie/snap7-full-1.2.0/rich-demos/Cubieboard2/tmp -Fl/home/cubie/snap7-full-1.2.0/rich-demos -Fu/home/cubie/snap7-full-1.2.0/rich-demos -Fu/usr/lib/lazarus/0.9.30.4/lcl/units/arm-linux -Fu/usr/lib/lazarus/0.9.30.4/lcl/units/arm-linux/gtk2 -Fu/usr/lib/lazarus/0.9.30.4/packager/units/arm-linux -Fu/home/cubie/snap7-full-1.2.0/rich-demos/Cubieboard2/ -Fu. -FU/home/cubie/snap7-full-1.2.0/rich-demos/Cubieboard2/tmp/ -FE/home/cubie/snap7-full-1.2.0/rich-demos/Cubieboard2/bin/ -oserverdemo -dLCL -dLCLgtk2 serverdemo.lpr"/>
+</CONFIG>

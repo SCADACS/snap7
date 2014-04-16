@@ -1,5 +1,5 @@
 ﻿/*=============================================================================|
-|  PROJECT SNAP7                                                         1.0.0 |
+|  PROJECT SNAP7                                                         1.2.0 |
 |==============================================================================|
 |  Copyright (C) 2013, Davide Nardella                                         |
 |  All rights reserved.                                                        |
@@ -40,6 +40,7 @@ class ClientDemo
     static int SampleDBSize = 0;
     static int AsyncResult;
     static bool AsyncDone;
+    private static S7Client.S7CliCompletion Completion; // <== Static var containig the callback
 
     // Async completion is called when an async operation was complete
     // For this simply text demo we only set a flag....
@@ -433,7 +434,10 @@ class ClientDemo
         // You need this only if you use async functions and if you plan to 
         // use a callback as done trigger.
         // In this demo we will use all 3 completion strategies.
-        Client.SetAsCallBack(CompletionProc, IntPtr.Zero);
+        
+        // Set the callbacks (using the static var to avoid the garbage collect)
+        Completion = new S7Client.S7CliCompletion(CompletionProc);
+        Client.SetAsCallBack(Completion, IntPtr.Zero);
         // Try Connection
         if (PlcConnect(args[0], Rack, Slot))
         {

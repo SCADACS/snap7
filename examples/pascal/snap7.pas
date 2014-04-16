@@ -1,7 +1,7 @@
 (*=============================================================================|
-|  PROJECT SNAP7                                                       1.0.0.0 |
+|  PROJECT SNAP7                                                         1.2.0 |
 |==============================================================================|
-|  Copyright (C) 2013, Davide Nardella                                         |
+|  Copyright (C) 2013, 2014 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -691,6 +691,8 @@ function Srv_SetMask(Server : S7Object; MaskKind : integer; Mask : longword) : i
 {$IFDEF MSWINDOWS}stdcall;{$ELSE}cdecl;{$ENDIF}
 function Srv_SetEventsCallback(Server : S7Object; CallBack, usrPtr : pointer) : integer;
 {$IFDEF MSWINDOWS}stdcall;{$ELSE}cdecl;{$ENDIF}
+function Srv_SetReadEventsCallback(Server : S7Object; CallBack, usrPtr : pointer) : integer;
+{$IFDEF MSWINDOWS}stdcall;{$ELSE}cdecl;{$ENDIF}
 function Srv_ErrorText(Error : integer; Text : PAnsiChar; TextLen : integer) : integer;
 {$IFDEF MSWINDOWS}stdcall;{$ELSE}cdecl;{$ENDIF}
 function Srv_EventText(var Event : TSrvEvent; Text : PAnsiChar; TextLen : integer) : integer;
@@ -929,6 +931,7 @@ Type
     function PickEvent(var Event : TSrvEvent) : boolean;
     function ClearEvents : integer;
     function SetEventsCallback(CallBack, usrPtr : pointer) : integer;
+    function SetReadEventsCallback(CallBack, usrPtr : pointer) : integer;
     // Properties
     property EventsMask : longword read GetEventsMask write SetEventsMask;
     property LogMask : longword read GetLogMask write SetLogMask;
@@ -1049,8 +1052,8 @@ end;
 function Cli_Create;                  external snaplib name 'Cli_Create';
 procedure Cli_Destroy;                external snaplib name 'Cli_Destroy';
 function Cli_ConnectTo;               external snaplib name 'Cli_ConnectTo';
-function Cli_SetConnectionParams      external snaplib name 'Cli_SetConnectionParams';
-function Cli_SetConnectionType        external snaplib name 'Cli_SetConnectionType';
+function Cli_SetConnectionParams;     external snaplib name 'Cli_SetConnectionParams';
+function Cli_SetConnectionType;       external snaplib name 'Cli_SetConnectionType';
 function Cli_Disconnect;              external snaplib name 'Cli_Disconnect';
 function Cli_Connect;                 external snaplib name 'Cli_Connect';
 function Cli_GetParam;                external snaplib name 'Cli_GetParam';
@@ -1152,6 +1155,7 @@ function Srv_ClearEvents;             external snaplib name 'Srv_ClearEvents';
 function Srv_GetMask;                 external snaplib name 'Srv_GetMask';
 function Srv_SetMask;                 external snaplib name 'Srv_SetMask';
 function Srv_SetEventsCallback;       external snaplib name 'Srv_SetEventsCallback';
+function Srv_SetReadEventsCallback;   external snaplib name 'Srv_SetReadEventsCallback';
 function Srv_ErrorText;               external snaplib name 'Srv_ErrorText';
 function Srv_EventText;               external snaplib name 'Srv_EventText';
 //******************************************************************************
@@ -1728,6 +1732,11 @@ end;
 function TS7Server.SetEventsCallback(CallBack, usrPtr: pointer): integer;
 begin
   Result:=Srv_SetEventsCallback(HS,CallBack,usrPtr);
+end;
+//------------------------------------------------------------------------------
+function TS7Server.SetReadEventsCallback(CallBack, usrPtr: pointer): integer;
+begin
+  Result:=Srv_SetReadEventsCallback(HS,CallBack,usrPtr);
 end;
 //------------------------------------------------------------------------------
 procedure TS7Server.SetEventsMask(const Value: longword);

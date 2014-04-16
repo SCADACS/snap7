@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.1.0 |
+|  PROJECT SNAP7                                                         1.2.0 |
 |==============================================================================|
-|  Copyright (C) 2013, Davide Nardella                                         |
+|  Copyright (C) 2013, 2014 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -60,7 +60,8 @@ void S7API ReadEventCallBack(void *usrPtr, PSrvEvent PEvent, int Size)
     printf("%s\n",SrvEventText(PEvent).c_str());
 	if (PEvent->EvtParam1==S7AreaDB)
 	{
-		// EvtParam1 contains the DB number.
+                // As example the DB requested is filled before transferred
+                // EvtParam1 contains the DB number.
 		switch (PEvent->EvtParam2)
 		{
 		case 1 : memset(&DB1, ++cnt, sizeof(DB1));break;
@@ -85,10 +86,10 @@ int main(int argc, char* argv[])
     Server->RegisterArea(srvAreaDB, 3, &DB3, sizeof(DB3));
 
     // We mask the read event to avoid the double trigger for the same event                  
-	Server->SetEventsMask(~evcDataRead);
+    Server->SetEventsMask(~evcDataRead);
     Server->SetEventsCallback(EventCallBack, NULL);
-	// Set the Read Callback
-	Server->SetReadEventsCallback(ReadEventCallBack, NULL);
+    // Set the Read Callback
+    Server->SetReadEventsCallback(ReadEventCallBack, NULL);
     // Start the server onto the default adapter.
     // To select an adapter we have to use Server->StartTo("192.168.x.y").
     // Start() is the same of StartTo("0.0.0.0");

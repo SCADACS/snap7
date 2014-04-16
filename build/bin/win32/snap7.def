@@ -1,4 +1,4 @@
-; dlltool --base-file C:\Users\Davide\AppData\Local\Temp\cca04800.base --output-exp snap7.exp --dllname snap7.dll --output-def ../../bin/win32/snap7.def --no-export-all-symbols --add-stdcall-alias --exclude-symbol=DllMainCRTStartup@12 --def C:\Users\Davide\AppData\Local\Temp\cca04800.def
+; dlltool --base-file C:\Users\DAVIDE~1.MAS\AppData\Local\Temp\cca04432.base --output-exp snap7.exp --dllname snap7.dll --output-def ../../bin/win32/snap7.def --no-export-all-symbols --add-stdcall-alias --exclude-symbol=DllMainCRTStartup@12 --def C:\Users\DAVIDE~1.MAS\AppData\Local\Temp\cca04432.def
 EXPORTS
 	Cli_ABRead = Cli_ABRead@16 @ 1
 	Cli_ABRead@16 @ 2

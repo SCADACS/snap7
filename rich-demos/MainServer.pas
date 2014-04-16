@@ -208,7 +208,7 @@ begin
   //   Set the callback and set Events/Log mask are optional,
   //   we call them only if we need.
   //   Also Register area is optional, but a server without shared areas is
-  //   not very useful :-) however it works an it's recognized by simatic manager.
+  //   not very useful :-) however it works and it's recognized by simatic manager.
 
   LogMask:=Server.LogMask; // Get the current mask, always $FFFFFFFF on startup
 end;
@@ -330,4 +330,4 @@ begin
   EdIP.Enabled:=true;
 end;
 
-end.
+end.

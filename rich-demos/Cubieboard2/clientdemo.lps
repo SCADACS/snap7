@@ -13,7 +13,7 @@
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
-        <CursorPos X="26" Y="23"/>
+        <CursorPos X="1" Y="17"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -80,7 +80,7 @@
         <UnitName Value="snap7"/>
         <EditorIndex Value="2"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="218"/>
+        <TopLine Value="545"/>
         <CursorPos X="7" Y="64"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
@@ -99,7 +99,7 @@
     <General>
       <ActiveWindowIndexAtStart Value="0"/>
     </General>
-    <JumpHistory Count="8" HistoryIndex="7">
+    <JumpHistory Count="9" HistoryIndex="8">
       <Position1>
         <Filename Value="..\mainclient.pas"/>
         <Caret Line="393" Column="14" TopLine="393"/>
@@ -132,6 +132,10 @@
         <Filename Value="..\mainclient.pas"/>
         <Caret Line="2075" Column="15" TopLine="2052"/>
       </Position8>
+      <Position9>
+        <Filename Value="..\snap7.pas"/>
+        <Caret Line="64" Column="7" TopLine="545"/>
+      </Position9>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>

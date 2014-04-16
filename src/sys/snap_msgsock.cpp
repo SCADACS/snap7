@@ -478,7 +478,7 @@ int TMsgSocket::PeekPacket(void *Data, int Size)
     WaitForData(Size, RecvTimeout);
     if (LastTcpError==0)
     {
-        BytesRead=recv(FSocket, (char*)Data, Size, MSG_PEEK || MSG_NOSIGNAL );
+        BytesRead=recv(FSocket, (char*)Data, Size, MSG_PEEK | MSG_NOSIGNAL );
         if (BytesRead==0)
             LastTcpError = WSAECONNRESET;  // Connection reset by Peer
         else

@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.1.0 |
+|  PROJECT SNAP7                                                         1.2.0 |
 |==============================================================================|
-|  Copyright (C) 2013, Davide Nardella                                         |
+|  Copyright (C) 2013, 2014 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -25,6 +25,18 @@
 |=============================================================================*/
 
 #include "snap_sysutils.h"
+
+#ifdef OS_OSX
+int clock_gettime(int clk_id, struct timespec* t) {
+    struct timeval now;
+    int rv = gettimeofday(&now, NULL);
+    if (rv) return rv;
+    t->tv_sec  = now.tv_sec;
+    t->tv_nsec = now.tv_usec * 1000;
+    return 0;
+}
+#endif
+
 //---------------------------------------------------------------------------
 longword SysGetTick()
 {
@@ -67,14 +79,14 @@ word SwapWord(word Value)
 longword SwapDWord(longword Value)
 {
     #pragma pack(1)
-    typedef struct {
+	typedef struct {
         union {
             struct {
                 byte b1, b2, b3, b4;
-            }bb; // to be ISO C++ compliant we cannot have unnamed struct
+            } bb; // to be ISO C++ compliant we cannot have unnamed struct
             longword Value;
         };
-    } lw;
+    }lw;
     #pragma pack()
 
     lw Result;

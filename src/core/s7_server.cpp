@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.1.0 |
+|  PROJECT SNAP7                                                         1.2.0 |
 |==============================================================================|
-|  Copyright (C) 2013, Davide Nardella                                         |
+|  Copyright (C) 2013, 2014 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -1726,6 +1726,7 @@ bool TS7Worker::PerformSetClock()
 //------------------------------------------------------------------------------
 TSnap7Server::TSnap7Server()
 {
+	OnReadEvent=NULL;
     AddedDiagItemCount=0;
     AddDiagItem(SZL_DIAG_START);
     memset(&DB,0,sizeof(DB));

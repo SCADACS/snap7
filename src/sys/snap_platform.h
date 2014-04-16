@@ -26,7 +26,7 @@
 #ifndef snap_platform_h
 #define snap_platform_h
 //---------------------------------------------------------------------------
-#if defined (_WIN32)||defined(_WIN64)||defined(__WIN32__)||defined(__WINDOWS__)
+#if defined (_WIN32)|| defined(_WIN64)|| defined(__WIN32__) || defined(__WINDOWS__)
 # define OS_WINDOWS
 #endif
 
@@ -35,8 +35,17 @@
 # define _USE_32BIT_TIME_T 
 #endif
 
+// Linux, BSD and Solaris define "unix", OSX doesn't, even though it derives from BSD
 #if defined(unix) || defined(__unix__) || defined(__unix)
 # define PLATFORM_UNIX
+#endif
+
+#if BSD>=0
+# define OS_BSD
+#endif
+
+#if __APPLE__
+# define OS_OSX
 #endif
 
 #if defined(__SVR4) || defined(__svr4__)
@@ -51,11 +60,11 @@
 # endif
 #endif
 
-#if BSD>=0
-# define OS_BSD
+#ifdef OS_OSX
+# include <unistd.h>
 #endif
 
-#if (!defined (OS_WINDOWS)) && (!defined(PLATFORM_UNIX))
+#if (!defined (OS_WINDOWS)) && (!defined(PLATFORM_UNIX)) && (!defined(OS_BSD)) && (!defined(OS_OSX))
 # error platform still unsupported (please add it yourself and report ;-)
 #endif
 
@@ -93,14 +102,13 @@
 # include <mmsystem.h>
 #endif
 
-
 #ifdef OS_SOLARIS
 # include <sys/filio.h>
 # include <cstdlib>
 # include <string.h>
 #endif
 
-#ifdef PLATFORM_UNIX
+#if defined(PLATFORM_UNIX) || defined(OS_OSX)
 # include <errno.h>
 # include <sys/time.h>
 # include <sys/socket.h>

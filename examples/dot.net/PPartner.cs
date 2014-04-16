@@ -1,5 +1,5 @@
 ﻿/*=============================================================================|
-|  PROJECT SNAP7                                                         1.0.0 |
+|  PROJECT SNAP7                                                         1.2.0 |
 |==============================================================================|
 |  Copyright (C) 2013, Davide Nardella                                         |
 |  All rights reserved.                                                        |
@@ -35,8 +35,8 @@ using Snap7;
 class PassivePartnerDemo
 {
     static S7Partner Partner;
-    //static byte[] Buffer = new byte[0x10000];
-
+    
+    private static S7Partner.S7ParRecvCallback CallBack; // <== Static var containig the callback
     //------------------------------------------------------------------------------
     // Delegate called on data ready
     //------------------------------------------------------------------------------
@@ -150,8 +150,11 @@ class PassivePartnerDemo
         }
         // Create the PASSIVE partner
         Partner = new S7Partner(0);
-        // Set the BRecv callback
-        Partner.SetRecvCallback(RecvCallback, IntPtr.Zero);
+        
+        // Set the BRecv callback (using the static var to avoid the garbage collect)
+        CallBack = new S7Partner.S7ParRecvCallback(RecvCallback);
+        Partner.SetRecvCallback(CallBack, IntPtr.Zero);
+        
         // Start
         int Error=Partner.StartTo("0.0.0.0", args[0], 0x1002, 0x1002);
         if (Error == 0)
