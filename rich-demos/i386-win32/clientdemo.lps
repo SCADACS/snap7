@@ -9,7 +9,6 @@
         <Filename Value="clientdemo.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="clientdemo"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="0"/>
         <WindowIndex Value="0"/>
         <TopLine Value="1"/>
@@ -52,10 +51,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="mainclient"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <WindowIndex Value="0"/>
-        <TopLine Value="2021"/>
-        <CursorPos X="3" Y="2037"/>
+        <TopLine Value="732"/>
+        <CursorPos X="16" Y="747"/>
         <UsageCount Value="11"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -142,123 +142,127 @@
     <General>
       <ActiveWindowIndexAtStart Value="0"/>
     </General>
-    <JumpHistory Count="29" HistoryIndex="28">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="..\mainclient.pas"/>
-        <Caret Line="955" Column="1" TopLine="934"/>
+        <Caret Line="959" Column="1" TopLine="938"/>
       </Position1>
       <Position2>
         <Filename Value="..\mainclient.pas"/>
-        <Caret Line="959" Column="1" TopLine="938"/>
+        <Caret Line="963" Column="1" TopLine="942"/>
       </Position2>
       <Position3>
         <Filename Value="..\mainclient.pas"/>
-        <Caret Line="963" Column="1" TopLine="942"/>
+        <Caret Line="964" Column="1" TopLine="943"/>
       </Position3>
       <Position4>
-        <Filename Value="..\mainclient.pas"/>
-        <Caret Line="964" Column="1" TopLine="943"/>
+        <Filename Value="..\frmPartner.pas"/>
+        <Caret Line="1" Column="1" TopLine="1"/>
       </Position4>
       <Position5>
         <Filename Value="..\frmPartner.pas"/>
-        <Caret Line="1" Column="1" TopLine="1"/>
+        <Caret Line="676" Column="3" TopLine="674"/>
       </Position5>
       <Position6>
-        <Filename Value="..\frmPartner.pas"/>
-        <Caret Line="676" Column="3" TopLine="674"/>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="992" Column="1" TopLine="968"/>
       </Position6>
       <Position7>
         <Filename Value="..\mainclient.pas"/>
-        <Caret Line="992" Column="1" TopLine="968"/>
+        <Caret Line="987" Column="39" TopLine="973"/>
       </Position7>
       <Position8>
         <Filename Value="..\mainclient.pas"/>
-        <Caret Line="987" Column="39" TopLine="973"/>
+        <Caret Line="479" Column="3" TopLine="476"/>
       </Position8>
       <Position9>
         <Filename Value="..\mainclient.pas"/>
-        <Caret Line="479" Column="3" TopLine="476"/>
+        <Caret Line="997" Column="3" TopLine="985"/>
       </Position9>
       <Position10>
         <Filename Value="..\mainclient.pas"/>
-        <Caret Line="997" Column="3" TopLine="985"/>
+        <Caret Line="411" Column="14" TopLine="397"/>
       </Position10>
       <Position11>
         <Filename Value="..\mainclient.pas"/>
-        <Caret Line="411" Column="14" TopLine="397"/>
+        <Caret Line="2033" Column="22" TopLine="2011"/>
       </Position11>
       <Position12>
         <Filename Value="..\mainclient.pas"/>
-        <Caret Line="2033" Column="22" TopLine="2011"/>
+        <Caret Line="479" Column="3" TopLine="477"/>
       </Position12>
       <Position13>
         <Filename Value="..\mainclient.pas"/>
-        <Caret Line="479" Column="3" TopLine="477"/>
+        <Caret Line="992" Column="26" TopLine="974"/>
       </Position13>
       <Position14>
-        <Filename Value="..\mainclient.pas"/>
-        <Caret Line="992" Column="26" TopLine="974"/>
-      </Position14>
-      <Position15>
         <Filename Value="..\..\src\core\s7_micro_client.cpp"/>
         <Caret Line="364" Column="9" TopLine="364"/>
-      </Position15>
-      <Position16>
+      </Position14>
+      <Position15>
         <Filename Value="..\mainclient.pas"/>
         <Caret Line="995" Column="17" TopLine="974"/>
-      </Position16>
-      <Position17>
+      </Position15>
+      <Position16>
         <Filename Value="..\snap7.pas"/>
         <Caret Line="1212" Column="7" TopLine="1185"/>
+      </Position16>
+      <Position17>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="995" Column="24" TopLine="974"/>
       </Position17>
       <Position18>
         <Filename Value="..\mainclient.pas"/>
-        <Caret Line="995" Column="24" TopLine="974"/>
+        <Caret Line="996" Column="24" TopLine="975"/>
       </Position18>
       <Position19>
         <Filename Value="..\mainclient.pas"/>
-        <Caret Line="996" Column="24" TopLine="975"/>
+        <Caret Line="1510" Column="1" TopLine="1507"/>
       </Position19>
       <Position20>
         <Filename Value="..\mainclient.pas"/>
-        <Caret Line="1510" Column="1" TopLine="1507"/>
+        <Caret Line="879" Column="11" TopLine="872"/>
       </Position20>
       <Position21>
         <Filename Value="..\mainclient.pas"/>
-        <Caret Line="879" Column="11" TopLine="872"/>
+        <Caret Line="878" Column="11" TopLine="871"/>
       </Position21>
       <Position22>
-        <Filename Value="..\mainclient.pas"/>
-        <Caret Line="878" Column="11" TopLine="871"/>
-      </Position22>
-      <Position23>
         <Filename Value="clientdemo.lpr"/>
         <Caret Line="22" Column="46" TopLine="1"/>
+      </Position22>
+      <Position23>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="16" Column="34" TopLine="1"/>
       </Position23>
       <Position24>
         <Filename Value="..\mainclient.pas"/>
-        <Caret Line="16" Column="34" TopLine="1"/>
+        <Caret Line="883" Column="1" TopLine="872"/>
       </Position24>
       <Position25>
         <Filename Value="..\mainclient.pas"/>
-        <Caret Line="883" Column="1" TopLine="872"/>
+        <Caret Line="290" Column="54" TopLine="281"/>
       </Position25>
       <Position26>
         <Filename Value="..\mainclient.pas"/>
-        <Caret Line="290" Column="54" TopLine="281"/>
+        <Caret Line="291" Column="54" TopLine="282"/>
       </Position26>
       <Position27>
         <Filename Value="..\mainclient.pas"/>
-        <Caret Line="291" Column="54" TopLine="282"/>
+        <Caret Line="482" Column="3" TopLine="479"/>
       </Position27>
       <Position28>
         <Filename Value="..\mainclient.pas"/>
-        <Caret Line="482" Column="3" TopLine="479"/>
+        <Caret Line="414" Column="14" TopLine="400"/>
       </Position28>
       <Position29>
         <Filename Value="..\mainclient.pas"/>
-        <Caret Line="414" Column="14" TopLine="400"/>
+        <Caret Line="2037" Column="3" TopLine="2021"/>
       </Position29>
+      <Position30>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="2095" Column="3" TopLine="2093"/>
+      </Position30>
     </JumpHistory>
   </ProjectSession>
   <Debugging>

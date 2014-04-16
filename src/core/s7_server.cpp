@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.1.0 |
+|  PROJECT SNAP7                                                         1.2.0 |
 |==============================================================================|
-|  Copyright (C) 2013, Davide Nardella                                         |
+|  Copyright (C) 2013, 2014 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -1618,7 +1618,8 @@ bool TS7Worker::PerformSetClock()
 //------------------------------------------------------------------------------
 TSnap7Server::TSnap7Server()
 {
-    memset(&DB,0,sizeof(DB));
+	OnReadEvent=NULL;
+	memset(&DB,0,sizeof(DB));
     memset(&HA,0,sizeof(HA));
     DBCount=0;
     DBLimit=0;

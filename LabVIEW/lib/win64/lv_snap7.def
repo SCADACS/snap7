@@ -1,4 +1,4 @@
-; dlltool --base-file C:\Users\Davide\AppData\Local\Temp\cca01488.base --output-exp lv_snap7.exp --dllname lv_snap7.dll --output-def ../../lib/win64/lv_snap7.def --no-export-all-symbols --add-stdcall-alias --exclude-symbol=DllMainCRTStartup --def C:\Users\Davide\AppData\Local\Temp\cca01488.def
+; dlltool --base-file C:\Users\DAVIDE~1.MAS\AppData\Local\Temp\cca03688.base --output-exp lv_snap7.exp --dllname lv_snap7.dll --output-def ../../lib/win64/lv_snap7.def --no-export-all-symbols --add-stdcall-alias --exclude-symbol=DllMainCRTStartup --def C:\Users\DAVIDE~1.MAS\AppData\Local\Temp\cca03688.def
 EXPORTS
 	lv_Cli_ClearSessionPassword @ 1
 	lv_Cli_Compress @ 2

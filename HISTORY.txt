@@ -1,5 +1,44 @@
+======================================================================[2014-01-02]
+Version 1.2.0 - New platform release (fully compatible with 1.0.0)
+----------------------------------------------------------------------------------
+- Apple Mac OSX support (Tested under OSX 10.9.1 Mavericks)
+- UDOO Quad support
+- Some bug fixed
+- Documentation improved and updated.
+==================================================================================
+
+[Added]
+
+- Apple OSX full support :
+  makefiles, source examples, binary library and binary demos supplied.
+  new osx folders added in the entire project. 
+
+- UDOO Quad (Linux board Freescale i.MX 6 Quad based) full support.
+  Added /release/Linux/ARMHF/Udoo folder with libsnap7.so compiled under 
+  Ubuntu 12.10.
+
+[fixed]
+
+- S7API directive missing for two functions in snap7_libmain.h
+  (Thanks to Mathias Küsel for reporting)
+
+- fixed Snap7.S7Server.Srv_RegisterArea in snap7.net.cs
+  (Thanks to André for reporting).
+
+- Added a static var to contain the callback addresses into c# examples.
+  The .net garbage collector *sometime* garbages the delegates (called by unmanaged
+  code) if their address is not stored into a static var.
+  MS says that it's not a clr bug (maybe a feature ????)
+  However this solves the problem.
+  PLEASE SEE THE .NET EXAMPLES IF YOU PLAN TO USE SNAP7 (or other unmanaged)
+  CALLBACKS.
+  (Thanks to Martin Bratt for reporting).
+
+- Srv_SetReadEventsCallback prototype missing in Snap7.pas
+
+
 ======================================================================[2013-11-10]
-Version 1.1.0 - New Minor release (full compatible with 1.0.0)
+Version 1.1.0 - New hardware release (fully compatible with 1.0.0)
 ----------------------------------------------------------------------------------
 - LOGO 0BA7 Ethernet support (as client/server and Network I/O blocks)
 - S7200 (via CP243) experimental support
@@ -7,7 +46,7 @@ Version 1.1.0 - New Minor release (full compatible with 1.0.0)
   translators)
 - New rich-demos
 - Some bug fixed
-- Documentation inproved and updated.
+- Documentation improved and updated.
 ==================================================================================
 
 [Added]

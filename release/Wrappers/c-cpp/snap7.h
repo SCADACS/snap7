@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.1.0 |
+|  PROJECT SNAP7                                                         1.2.0 |
 |==============================================================================|
-|  Copyright (C) 2013, Davide Nardella                                         |
+|  Copyright (C) 2013, 2014 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -10,7 +10,7 @@
 |  (at your option) any later version.                                         |
 |                                                                              |
 |  It means that you can distribute your commercial software linked with       |
-|  SMART7 without the requirement to distribute the source code of your        |
+|  SNAP7 without the requirement to distribute the source code of your         |
 |  application and without the requirement that your application be itself     |
 |  distributed under LGPL.                                                     |
 |                                                                              |
@@ -53,7 +53,11 @@
 # define OS_BSD
 #endif
 
-#if defined(PLATFORM_UNIX)
+#if defined(__APPLE__)
+# define OS_OSX
+#endif
+
+#if defined(PLATFORM_UNIX) || defined(OS_OSX)
 # include <unistd.h>
 # if defined(_POSIX_VERSION)
 #   define POSIX
@@ -96,12 +100,34 @@ extern "C" {
 // C exact length types
 //---------------------------------------------------------------------------
 #ifndef __cplusplus
-typedef unsigned char   uint8_t;  //  8 bit unsigned integer
-typedef unsigned short  uint16_t; // 16 bit unsigned integer
-typedef unsigned int    uint32_t; // 32 bit unsigned integer
-#if !defined(_UINTPTR_T_DEFINED) && !defined(OS_SOLARIS)  && !defined(OS_BSD)
+
+#ifdef OS_BSD
+#  include <stdint.h>
+#  include <time.h>
+#endif
+
+#ifdef OS_OSX
+#  include <stdint.h>  
+#  include <time.h>
+#endif
+
+#ifdef OS_SOLARIS
+#  include <stdint.h>  
+#  include <time.h>
+#endif
+
+#if defined(_UINTPTR_T_DEFINED)
+#  include <stdint.h>
+#  include <time.h>
+#endif
+
+#if !defined(_UINTPTR_T_DEFINED) && !defined(OS_SOLARIS) && !defined(OS_BSD) && !defined(OS_OSX)
+  typedef unsigned char   uint8_t;  //  8 bit unsigned integer
+  typedef unsigned short  uint16_t; // 16 bit unsigned integer
+  typedef unsigned int    uint32_t; // 32 bit unsigned integer
   typedef unsigned long   uintptr_t;// 64 bit unsigned integer
 #endif
+
 #endif
 
 #ifdef OS_WINDOWS
@@ -831,13 +857,13 @@ public:
     int Stop();
     int GetParam(int ParamNumber, void *pValue);
     int SetParam(int ParamNumber, void *pValue);
-	// Events
-	int SetEventsCallback(pfn_SrvCallBack PCallBack, void *UsrPtr);
-	int SetReadEventsCallback(pfn_SrvCallBack PCallBack, void *UsrPtr);
-	bool PickEvent(TSrvEvent *pEvent);
-	void ClearEvents();
+    // Events
+    int SetEventsCallback(pfn_SrvCallBack PCallBack, void *UsrPtr);
+    int SetReadEventsCallback(pfn_SrvCallBack PCallBack, void *UsrPtr);
+    bool PickEvent(TSrvEvent *pEvent);
+    void ClearEvents();
     longword GetEventsMask();
-	longword GetLogMask();
+    longword GetLogMask();
     void SetEventsMask(longword Mask);
     void SetLogMask(longword Mask);
     // Resources

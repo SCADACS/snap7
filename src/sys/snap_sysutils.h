@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.1.0 |
+|  PROJECT SNAP7                                                         1.2.0 |
 |==============================================================================|
-|  Copyright (C) 2013, Davide Nardella                                         |
+|  Copyright (C) 2013, 2014 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -28,6 +28,9 @@
 //---------------------------------------------------------------------------
 #include "snap_platform.h"
 //---------------------------------------------------------------------------
+#ifdef OS_OSX
+# define CLOCK_MONOTONIC 0
+#endif
 
 longword SysGetTick();
 void SysSleep(longword Delay_ms);

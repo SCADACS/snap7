@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.1.0 |
+|  PROJECT SNAP7                                                         1.2.0 |
 |==============================================================================|
-|  Copyright (C) 2013, Davide Nardella                                         |
+|  Copyright (C) 2013, 2014 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -40,7 +40,7 @@ class TSnapCriticalSection
 {
 private:
     pthread_mutex_t mx;
-    int result;
+//    int result;
 public:
 
     TSnapCriticalSection() 
@@ -100,8 +100,8 @@ public:
     TSnapEvent(bool ManualReset) 
     {
         AutoReset = !ManualReset;
-        pthread_cond_init(&CVariable, 0) == 0;
-        pthread_mutex_init(&Mutex, 0);
+        if (pthread_cond_init(&CVariable, 0) == 0)
+        	pthread_mutex_init(&Mutex, 0);
         State = false;
     }
 

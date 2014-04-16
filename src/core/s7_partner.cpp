@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.1.0 |
+|  PROJECT SNAP7                                                         1.2.0 |
 |==============================================================================|
-|  Copyright (C) 2013, Davide Nardella                                         |
+|  Copyright (C) 2013, 2014 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -644,7 +644,6 @@ bool TSnap7Partner::PerformFunctionNegotiate()
     {
         LastError=errParInvalidPDU;
         return false;
-      // todo: verificare cosa risponde un partner reale
     };
     // Prepares the answer
     Answer.Header.P=0x32;
@@ -793,7 +792,7 @@ bool TSnap7Partner::BlockSend()
 
         DataSendReq->FF      =0xFF;
         DataSendReq->TRSize  =TS_ResOctet;
-        DataSendReq->DHead[0]=0x12;  // todo : trasformare in LongWord e fare un'unica passata
+        DataSendReq->DHead[0]=0x12;
         DataSendReq->DHead[1]=0x06;
         DataSendReq->DHead[2]=0x13;
         DataSendReq->DHead[3]=0x00;

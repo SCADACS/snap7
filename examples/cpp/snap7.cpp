@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.1.0 |
+|  PROJECT SNAP7                                                         1.2.0 |
 |==============================================================================|
-|  Copyright (C) 2013, Davide Nardella                                         |
+|  Copyright (C) 2013, 2014 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -10,7 +10,7 @@
 |  (at your option) any later version.                                         |
 |                                                                              |
 |  It means that you can distribute your commercial software linked with       |
-|  SMART7 without the requirement to distribute the source code of your        |
+|  SNAP7 without the requirement to distribute the source code of your         |
 |  application and without the requirement that your application be itself     |
 |  distributed under LGPL.                                                     |
 |                                                                              |

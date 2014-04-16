@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.1.0 |
+|  PROJECT SNAP7                                                         1.2.0 |
 |==============================================================================|
-|  Copyright (C) 2013, Davide Nardella                                         |
+|  Copyright (C) 2013, 2014 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -82,7 +82,7 @@ void S7API Cli_Destroy(S7Object &Client)
     }
 }
 //---------------------------------------------------------------------------
-int Cli_SetConnectionParams(S7Object Client, const char *Address, word LocalTSAP, word RemoteTSAP)
+int S7API Cli_SetConnectionParams(S7Object Client, const char *Address, word LocalTSAP, word RemoteTSAP)
 {
     if (Client)
     {
@@ -93,7 +93,7 @@ int Cli_SetConnectionParams(S7Object Client, const char *Address, word LocalTSAP
         return errLibInvalidObject;
 }
 //---------------------------------------------------------------------------
-int Cli_SetConnectionType(S7Object Client, word ConnectionType)
+int S7API Cli_SetConnectionType(S7Object Client, word ConnectionType)
 {
     if (Client)
     {

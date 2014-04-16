@@ -29,7 +29,7 @@
 #include "snap_platform.h"
 #include "snap_sysutils.h"
 //----------------------------------------------------------------------------
-#if defined(OS_WINDOWS) || defined (OS_SOLARIS)
+#if defined(OS_WINDOWS) || defined (OS_SOLARIS) || defined(OS_OSX)
 # define MSG_NOSIGNAL    0
 #endif
 //----------------------------------------------------------------------------
@@ -61,7 +61,7 @@ typedef int socket_t;
 
 //----------------------------------------------------------------------------
 // For other platform we need to re-define next constants
-#ifdef PLATFORM_UNIX
+#if defined(PLATFORM_UNIX) || defined(OS_OSX)
 
 #define INVALID_SOCKET (socket_t)(~0)
 #define SOCKET_ERROR             (-1)
