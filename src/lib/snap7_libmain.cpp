@@ -842,6 +842,13 @@ int S7API Srv_Stop(S7Object Server)
         return errLibInvalidObject;
 }
 //---------------------------------------------------------------------------
+int S7API Srv_AddBlock(S7Object Server, void *pBinary, int Size) {
+    if (Server)
+        return PSnap7Server(Server)->AddBlock(pBinary, Size);
+    else
+        return errLibInvalidObject;
+}
+//---------------------------------------------------------------------------
 int S7API Srv_RegisterArea(S7Object Server, int AreaCode, word Index, void *pUsrData, int Size)
 {
     if (Server)

@@ -150,6 +150,7 @@ EXPORTSPEC int S7API Srv_Start(S7Object Server);
 EXPORTSPEC int S7API Srv_StartTo(S7Object Server, const char *Address);
 EXPORTSPEC int S7API Srv_Stop(S7Object Server);
 // Data
+EXPORTSPEC int S7API Srv_AddBlock(S7Object Server, void *pBinary, int Size);
 EXPORTSPEC int S7API Srv_RegisterArea(S7Object Server, int AreaCode, word Index, void *pUsrData, int Size);
 EXPORTSPEC int S7API Srv_UnregisterArea(S7Object Server, int AreaCode, word Index);
 EXPORTSPEC int S7API Srv_LockArea(S7Object Server, int AreaCode, word Index);

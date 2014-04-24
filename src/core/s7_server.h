@@ -54,6 +54,7 @@ const longword errSrvInvalidParams      = 0x00500000; // Invalid param(s) suppli
 const longword errSrvTooManyDB          = 0x00600000; // Cannot register DB
 const longword errSrvInvalidParamNumber = 0x00700000; // Invalid param (srv_get/set_param)
 const longword errSrvCannotChangeParam  = 0x00800000; // Cannot change because running
+const longword errInvalidBlock          = 0x00900000; // Block is not valid
 
 // Server Area ID  (use with Register/unregister - Lock/unlock Area)
 const int srvAreaPE = 0;
@@ -62,6 +63,11 @@ const int srvAreaMK = 2;
 const int srvAreaCT = 3;
 const int srvAreaTM = 4;
 const int srvAreaDB = 5;
+const int srvAreaOB = 6;
+const int srvAreaFB = 7;
+const int srvAreaFC = 8;
+const int srvAreaSDB = 9;
+
 
 void FillTime(PS7Time PTime);
 
@@ -71,6 +77,23 @@ typedef struct{
 	pbyte  PData;  // Pointer to area
 	PSnapCriticalSection cs;
 }TS7Area, *PS7Area;
+
+class PS7AreaContainer {
+public:
+    PS7Area *area;
+    size_t count;
+    size_t limit;
+    size_t size;
+    PS7AreaContainer(size_t size);
+    ~PS7AreaContainer();
+    PS7Area Find(word Number);
+    int FindFirstFree();
+    int IndexOf(word Number);
+    PS7Area* get(); // TODO remove!
+    int Register(word Number, void *pUsrData, word Size);
+    int Unregister(word Number);
+    void Dispose();
+};
 
 //------------------------------------------------------------------------------
 // ISOTCP WORKER CLASS
@@ -227,20 +250,15 @@ private:
     uint AddedDiagItemCount;
     uint GetDiagItemCount();
     void DisposeAll();
-    int FindFirstFreeDB();
-    int IndexOfDB(word DBNumber);
 protected:
-    int DBCount;
-    int DBLimit;
-    PS7Area DB[MaxDB-1]; // DB
+    PS7AreaContainer *DBArea;
+    PS7AreaContainer *OB, *FB, *FC, *SDB;
+    // TODO replace HA with container
     PS7Area HA[5];     // MK,PE,PA,TM,CT
     TCSZL SZLs[CustomSZL];
     TS7Time LastCPUStateChange;
-    PS7Area FindDB(word DBNumber);
     PWorkerSocket CreateWorkerSocket(socket_t Sock);
-    int RegisterDB(word Number, void *pUsrData, word Size);
     int RegisterSys(int AreaCode, void *pUsrData, word Size);
-    int UnregisterDB(word DBNumber);
     int UnregisterSys(int AreaCode);
     void AddDiagItem(pbyte Item);
     // The Read event
@@ -256,6 +274,9 @@ public:
     int SetParam(int ParamNumber, void *pValue);
     void SetSZL(int SZLID, pbyte val, int len);
     void SetCpuStatus(byte State);
+    int AddBlock(void *pBinary, int Size);
+    PS7AreaContainer* getArea(int srvArea);
+    PS7AreaContainer* getArea(byte blkType);
     int RegisterArea(int AreaCode, word Index, void *pUsrData, word Size);
     int UnregisterArea(int AreaCode, word Index);
     int LockArea(int AreaCode, word DBNumber);

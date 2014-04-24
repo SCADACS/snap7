@@ -436,16 +436,6 @@ static BaseString ReadSZLText(TSrvEvent &Event)
         return Result+" --> NOT AVAILABLE";
 }
 //---------------------------------------------------------------------------
-static BaseString UploadText(TSrvEvent &Event)
-{
-   return "Block upload requested --> NOT PERFORMED (due to invalid security level)";
-}
-//---------------------------------------------------------------------------
-static BaseString DownloadText(TSrvEvent &Event)
-{
-   return "Block download requested --> NOT PERFORMED (due to invalid security level)";
-}
-//---------------------------------------------------------------------------
 static BaseString StrBlockType(word Code)
 {
     switch (Code)
@@ -460,6 +450,39 @@ static BaseString StrBlockType(word Code)
         default : return "[Unknown 0x"+NumToString(Code,16,4)+"]";
     };
 }
+//---------------------------------------------------------------------------
+static BaseString UploadText(TSrvEvent &Event)
+{
+    BaseString Result="Upload " + StrBlockType(Event.EvtParam1) + IntToString(Event.EvtParam2) + ": ";
+    switch (Event.EvtRetCode) {
+        case evrNoError:
+            Result += "Successful";
+            break;
+        case evrDataSizeMismatch:
+            Result += "Data size does not match";
+            break;
+        default:
+            Result += "Unknown";
+    }
+   return Result;
+}
+//---------------------------------------------------------------------------
+static BaseString DownloadText(TSrvEvent &Event)
+{
+    BaseString Result="Download " + StrBlockType(Event.EvtParam1) + IntToString(Event.EvtParam2) + ": ";
+    switch (Event.EvtRetCode) {
+        case evrNoError:
+            Result += "Successful";
+            break;
+        case evrDataSizeMismatch:
+            Result += "Data size does not match";
+            break;
+        default:
+            Result += "Unknown";
+    }
+   return Result;
+}
+
 //---------------------------------------------------------------------------
 static BaseString BlockInfoText(TSrvEvent &Event)
 {

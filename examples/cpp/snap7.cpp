@@ -571,6 +571,10 @@ void TS7Server::SetLogMask(longword Mask)
     Srv_SetMask(Server, mkLog, Mask);
 }
 //---------------------------------------------------------------------------
+int TS7Server::AddBlock(void *pBinary, int Size) {
+    return Srv_AddBlock(Server, pBinary, Size);
+}
+//---------------------------------------------------------------------------
 int TS7Server::RegisterArea(int AreaCode, word Index, void *pUsrData, word Size)
 {
     return Srv_RegisterArea(Server, AreaCode, Index, pUsrData, Size);

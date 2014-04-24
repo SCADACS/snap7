@@ -106,3 +106,22 @@ byte BCD(word Value)
 {
     return ((Value / 10) << 4) + (Value % 10);
 }
+//------------------------------------------------------------------------------
+longword AsciiToNum(pbyte ascii, size_t len) {
+    longword dec = 1;
+    longword num = 0;
+    for (int i = 1; i <= len; i++, dec *= 10) {
+        num += (ascii[len - i] - 0x30) * dec;
+    }
+    return num;
+}
+//------------------------------------------------------------------------------
+void NumToAscii(pbyte buff, longword num, size_t len) {
+    longword dec = 1;
+    for (int i = 1; i < len; i++)
+        dec *= 10;
+    for (int i = 1; i <= len; i++, dec /= 10) {
+        buff[len - i] = (num / dec) + 0x30;
+        num %= dec;
+    }
+}

@@ -81,6 +81,7 @@ const byte BlockLangFUP       = 0x03;
 const byte BlockLangSCL       = 0x04;
 const byte BlockLangDB        = 0x05;
 const byte BlockLangGRAPH     = 0x06;
+const byte BlockLangSDB       = 0x11;
 
   // CPU status
 const byte S7CpuStatusUnknown = 0x00;

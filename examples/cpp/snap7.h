@@ -530,6 +530,10 @@ const int srvAreaMK = 2;
 const int srvAreaCT = 3;
 const int srvAreaTM = 4;
 const int srvAreaDB = 5;
+const int srvAreaOB = 6;
+const int srvAreaFB = 7;
+const int srvAreaFC = 8;
+const int srvAreaSDB = 9;
 
 // Errors
 const longword errSrvCannotStart        = 0x00100000; // Server cannot start
@@ -540,6 +544,7 @@ const longword errSrvInvalidParams      = 0x00500000; // Invalid param(s) suppli
 const longword errSrvTooManyDB          = 0x00600000; // Cannot register DB
 const longword errSrvInvalidParamNumber = 0x00700000; // Invalid param (srv_get/set_param)
 const longword errSrvCannotChangeParam  = 0x00800000; // Cannot change because running
+const longword errInvalidBlock          = 0x00900000; // Block is not valid
 
 // TCP Server Event codes
 const longword evcServerStarted       = 0x00000001;
@@ -647,6 +652,7 @@ int S7API Srv_SetParam(S7Object Server, int ParamNumber, void *pValue);
 int S7API Srv_StartTo(S7Object Server, const char *Address);
 int S7API Srv_Start(S7Object Server);
 int S7API Srv_Stop(S7Object Server);
+int S7API Srv_AddBlock(S7Object Server, void *pBinary, int Size);
 int S7API Srv_RegisterArea(S7Object Server, int AreaCode, word Index, void *pUsrData, int Size);
 int S7API Srv_UnregisterArea(S7Object Server, int AreaCode, word Index);
 int S7API Srv_LockArea(S7Object Server, int AreaCode, word Index);
@@ -867,6 +873,7 @@ public:
     void SetEventsMask(longword Mask);
     void SetLogMask(longword Mask);
     // Resources
+    int AddBlock(void *pBinary, int Size);
     int RegisterArea(int AreaCode, word Index, void *pUsrData, word Size);
     int UnregisterArea(int AreaCode, word Index);
     int LockArea(int AreaCode, word Index);

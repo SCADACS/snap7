@@ -38,5 +38,6 @@ longword DeltaTime(longword &Elapsed);
 word SwapWord(word Value);
 longword SwapDWord(longword Value);
 byte BCD(word Value);
-
+longword AsciiToNum(pbyte, size_t);
+void NumToAscii(pbyte buff, longword num, size_t len);
 #endif // snap_sysutils_h
