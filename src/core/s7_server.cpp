@@ -1094,7 +1094,7 @@ bool TS7Worker::PerformFunctionDownload()
         RetCode = evrDataSizeMismatch;
     }
 
-    DoEvent(evcDownload,RetCode, BlkType, BlkNum,0,0);
+    DoEvent(evcDownload,RetCode, BlkType, BlkNum, BlkLen,0);
     return true;
 }
 //==============================================================================
@@ -2228,6 +2228,14 @@ int TSnap7Server::AddBlock(void *pBinary, int Size) {
     }
 
     return getArea(srvArea)->Register(SwapWord(blockHead->BlkNum), pBinary, Size);
+}
+//------------------------------------------------------------------------------
+pbyte TSnap7Server::GetBlock(byte BlkType, word BlkNum) {
+    PS7AreaContainer *areaContainer = getArea(BlkType);
+    if (!areaContainer)
+        return NULL;
+    PS7Area area = areaContainer->Find(BlkNum);
+    return area ? area->PData : NULL;
 }
 //------------------------------------------------------------------------------
 PS7AreaContainer* TSnap7Server::getArea(int srvArea) {

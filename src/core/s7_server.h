@@ -275,6 +275,7 @@ public:
     void SetSZL(int SZLID, pbyte val, int len);
     void SetCpuStatus(byte State);
     int AddBlock(void *pBinary, int Size);
+    pbyte GetBlock(byte BlkType, word BlkNum);
     PS7AreaContainer* getArea(int srvArea);
     PS7AreaContainer* getArea(byte blkType);
     int RegisterArea(int AreaCode, word Index, void *pUsrData, word Size);

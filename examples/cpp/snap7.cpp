@@ -575,6 +575,12 @@ int TS7Server::AddBlock(void *pBinary, int Size) {
     return Srv_AddBlock(Server, pBinary, Size);
 }
 //---------------------------------------------------------------------------
+pbyte TS7Server::GetBlock(byte BlkType, word BlkNum) {
+    pbyte block;
+    Srv_GetBlock(Server, BlkType, BlkNum, &block);
+    return block;
+}
+//---------------------------------------------------------------------------
 int TS7Server::RegisterArea(int AreaCode, word Index, void *pUsrData, word Size)
 {
     return Srv_RegisterArea(Server, AreaCode, Index, pUsrData, Size);
