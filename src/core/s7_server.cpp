@@ -1087,6 +1087,10 @@ bool TS7Worker::PerformFunctionDownload()
 
     if (last_packet && written == BlkLen) {
         // success
+        if (FServer->getArea(BlkType)->Find(BlkNum) != NULL) {
+            // unregister old block to overwrite it
+            FServer->getArea(BlkType)->Unregister(BlkNum);
+        }
         FServer->getArea(BlkType)->Register(BlkNum, buffer, BlkLen);
         RetCode = evrNoError;
     } else {
@@ -1313,12 +1317,13 @@ void TS7Worker::BLK_ListBoT(byte BlockType, bool Start, TCB &CB)
     switch (BlockType) {
         case Block_OB:
         case Block_FB:
-        case Block_FC:  uk = 0x12; blockLang = BlockLangAWL; break;
+        case Block_FC:  uk = 0x22; blockLang = BlockLangAWL; break;
         case Block_DB:  uk = 0x12; blockLang = BlockLangDB;  break;
         case Block_SDB: uk = 0x22; blockLang = BlockLangSDB; break;
         case Block_SFB:
         case Block_SFC: uk = 0x42; blockLang = BlockLangAWL; break;
     }
+    // TODO use lang in block header
     if ((listLen = FServer->getArea(BlockType)->count) > 0) {
         PS7Area* area = FServer->getArea(BlockType)->get();
         Data->RetVal=0xFF;
@@ -1434,6 +1439,7 @@ void TS7Worker::BLK_GetBlkInfo(TCB &CB)
     CB.ResParams->SubFun=SFun_BlkInfo;
     CB.ResParams->Seq   =CB.ReqParams->Seq;
     CB.ResParams->Rsvd  =0x0000;
+    CB.ResParams->ErrNo =0x0;
 
     BLK_GetBlockNum_GetBlkInfo(BlkNum, ReqData);
     BlkTypeInfo=ReqData->BlkType;
@@ -1442,6 +1448,8 @@ void TS7Worker::BLK_GetBlkInfo(TCB &CB)
     if (block != NULL)
     {
         memcpy(&Data->Cst_pp, block->PData, sizeof(TS7CompactBlockInfo));
+        memcpy(&Data->Author, block->PData + block->Size - 36, 36);
+        Data->BlkType      =0x00;         // XXX a 314C zeroes the type...
         Data->RetVal       =0xFF;
         Data->TSize        =TS_ResOctet;
         Data->Length       =SwapWord(78); // this struct - RetValData->Tsize and length
@@ -1449,7 +1457,6 @@ void TS7Worker::BLK_GetBlkInfo(TCB &CB)
         Data->BlkType      =ReqData->BlkType;
         Data->Cst_w1       =0x4A00;
         Data->Cst_w2       =0x0022;
-        Data->Version      =0x01;
     }
     else
         BLK_NoResource_GetBlkInfo(Data, CB);
