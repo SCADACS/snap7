@@ -523,6 +523,12 @@ int S7API Cli_WaitAsCompletion(S7Object Client, int Timeout);
 const int mkEvent = 0;
 const int mkLog   = 1;
 
+// SZL identifiers (lib internals, not S7)
+const int SZL_ID_0011 = 0;
+const int SZL_ID_001C = 1;
+const int SZL_ID_0091 = 2;
+const int SZL_ID_0D91 = 3;
+
 // Server Area ID  (use with Register/unregister - Lock/unlock Area)
 const int srvAreaPE = 0;
 const int srvAreaPA = 1;
@@ -575,7 +581,7 @@ const longword evcDownload            = 0x00800000;
 const longword evcDirectory           = 0x01000000;
 const longword evcSecurity            = 0x02000000;
 const longword evcControl             = 0x04000000;
-const longword evcReserved_08000000   = 0x08000000; // actually unused
+const longword evcGroupProgrammer     = 0x08000000;
 const longword evcReserved_10000000   = 0x10000000; // actually unused
 const longword evcReserved_20000000   = 0x20000000; // actually unused
 const longword evcReserved_40000000   = 0x40000000; // actually unused
@@ -595,6 +601,11 @@ const word evsGetClock                = 0x0001;
 const word evsSetClock                = 0x0002;
 const word evsSetPassword             = 0x0001;
 const word evsClrPassword             = 0x0002;
+const word evsGPStatic                = 0x0001;
+const word evsGPBlink                 = 0x0002;
+const word evsGPRequestDiag           = 0x0003;
+const word evsGPReadDiag              = 0x0004;
+const word evsGPRemoveDiag            = 0x0005;
 // Event Params : functions group
 const word grProgrammer               = 0x0041;
 const word grCyclicData               = 0x0042;
@@ -643,15 +654,46 @@ typedef struct{
 	word EvtParam4;    // Param 4 (if available)
 }TSrvEvent, *PSrvEvent;
 
+typedef struct {
+    byte block_type;
+    word block_no;
+    word start_address;
+    word saz;
+    word lines;
+    byte initial_registers;
+    // key is line, value is selected registers
+    std::map<word, byte> line_registers;
+} RequestDiag;
+
+typedef struct {
+    word offset;
+    longword akku1;
+    longword akku2;
+    longword areg1;
+    longword areg2;
+    word db_no;
+    word di_no;
+    word status_word;
+} DiagDataLine;
+
+typedef struct {
+    DiagDataLine initial;
+    std::map<word, DiagDataLine> lines;
+    bool ready;
+} ResponseDiag;
+
 // Server Evants callback
 typedef void (S7API *pfn_SrvCallBack)(void * usrPtr, PSrvEvent PEvent, int Size);
 S7Object S7API Srv_Create();
 void S7API Srv_Destroy(S7Object *Server);
 int S7API Srv_GetParam(S7Object Server, int ParamNumber, void *pValue);
 int S7API Srv_SetParam(S7Object Server, int ParamNumber, void *pValue);
+int S7API Srv_SetSZL(S7Object Server, int SZLID, pbyte Val, int len);
 int S7API Srv_StartTo(S7Object Server, const char *Address);
 int S7API Srv_Start(S7Object Server);
 int S7API Srv_Stop(S7Object Server);
+int S7API Srv_GetDiagRequest(S7Object Server, longword client_id, byte job_id, RequestDiag*& rd);
+int S7API Srv_AddDiagResponse(S7Object Server, longword client_id, byte job_id, ResponseDiag* rd);
 int S7API Srv_AddBlock(S7Object Server, void *pBinary, int Size);
 int S7API Srv_GetBlock(S7Object Server, byte BlkType, word BlkNum, pbyte* block);
 int S7API Srv_RegisterArea(S7Object Server, int AreaCode, word Index, void *pUsrData, int Size);
@@ -864,6 +906,7 @@ public:
     int Stop();
     int GetParam(int ParamNumber, void *pValue);
     int SetParam(int ParamNumber, void *pValue);
+    int SetSZL(int SZLID, pbyte val, int len);
     // Events
     int SetEventsCallback(pfn_SrvCallBack PCallBack, void *UsrPtr);
     int SetReadEventsCallback(pfn_SrvCallBack PCallBack, void *UsrPtr);
@@ -873,6 +916,8 @@ public:
     longword GetLogMask();
     void SetEventsMask(longword Mask);
     void SetLogMask(longword Mask);
+    RequestDiag* GetDiagRequest(longword client_id, byte job_id);
+    int AddDiagResponse(longword client_id, byte job_id, ResponseDiag* rd);
     // Resources
     int AddBlock(void *pBinary, int Size);
     pbyte GetBlock(byte BlkType, word BlkNum);

@@ -25,6 +25,7 @@
 |=============================================================================*/
 #include "s7_server.h"
 #include "s7_firmware.h"
+#include <stdio.h>
 
 const byte BitMask[8] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};
 
@@ -1110,14 +1111,17 @@ bool TS7Worker::PerformGroupProgrammer()
     // there is a second kind of GP, a LED blink request w. subfunc 0x16,
     // might implement this when I get a PLC supporting it.
     PGPReqParams ReqParams;
+    PGPResData ReqData;
     PGPResParams ResParams;
     PGPResData ResData;
     TS7Answer17 Answer;
     int TotalSize;
-    word evs = evsGPStatic;
-    int dlen = 20;
+    word evs, param2 = 0, param3 = 0, param4 = 0;
+    int dlen;
+    byte job_id = 0;
 
     ReqParams=PGPReqParams(pbyte(PDUH_in)+ReqHeaderSize);
+    ReqData  =PGPResData(pbyte(PDUH_in)+ReqHeaderSize+sizeof(TGPReqParams));
     ResParams=PGPResParams(pbyte(&Answer)+ResHeaderSize17);
     ResData  =PGPResData(pbyte(ResParams)+sizeof(TGPResParams));
 
@@ -1139,25 +1143,145 @@ bool TS7Worker::PerformGroupProgrammer()
     ResParams->Seq   =ReqParams->Seq + 1;
     ResParams->resvd =0x0000;
     ResParams->Err   =0x0000;
-    // Data
-    ResData->FF      =0xFF;
-    ResData->TRSize  =TS_ResOctet;
-    ResData->DataLength=SwapWord(0x000C);
-    ResData->Data[0]  = 0x00;
-    ResData->Data[1]  = 0x04;
-    ResData->Data[2]  = 0x00;
-    ResData->Data[3]  = 0x04;
-    ResData->Data[4]  = 0x01;
-    ResData->Data[5]  = 0x00;
-    ResData->Data[6]  = 0x00;
-    ResData->Data[7]  = 0x01;
-    ResData->Data[8]  = 0x10;
-    ResData->Data[9]  = 0x01;
-    ResData->Data[10] = 0x00;
-    ResData->Data[11] = 0x00;
 
-    if (ReqParams->SubFun == SFun_Blink)
-        evs = evsGPBlink;
+    // Request Diag Data Type 2
+    if (ReqParams->SubFun == SFun_ReqDiagT2
+            || ReqParams->SubFun == SFun_ReadDiag
+            || ReqParams->SubFun == SFun_RemoveDiag) {
+        // ACK request
+        ResData->FF = 0x0A;
+        ResData->TRSize = 0;
+        ResData->DataLength = 0;
+        Answer.Header.DataLen=0x0400;
+
+        dlen = 8;
+
+        param2 = *((word*)&ClientHandle);
+        param3 = *(((word*)&ClientHandle) + 1);
+
+        if (ReqParams->SubFun == SFun_ReqDiagT2) {
+            evs = evsGPRequestDiag;
+
+            byte block_type = ReqData->Data[25];
+            word blockno = SwapWord(*((word*)(ReqData->Data + 26)));
+            word start_address = SwapWord(*((word*)(ReqData->Data + 28)));
+            word saz = SwapWord(*((word*)(ReqData->Data + 30)));
+            byte lines = ReqData->Data[33];
+            byte registers = ReqData->Data[35];
+
+
+            RequestDiag rd;
+            rd.block_type = block_type;
+            rd.block_no = blockno;
+            rd.start_address = start_address;
+            rd.saz = saz;
+            rd.lines = lines;
+            rd.initial_registers = registers;
+
+            for (int i = 0; i < lines; i++) {
+                rd.line_registers[*((word*)&ReqData->Data[37 + i * 4])] = ReqData->Data[39 + i * 4];
+            }
+
+            job_id = FServer->AddDiagRequest(ClientHandle, rd);
+            ResParams->Seq = job_id;
+            param4 = job_id;
+        }
+        if (ReqParams->SubFun == SFun_ReadDiag) {
+            job_id = ReqData->Data[25];
+            param4 = job_id;
+            evs = evsGPReadDiag;
+            DiagID diag_id = std::make_pair(ClientHandle, job_id);
+            if (!FServer->diag_responses.count(diag_id)
+                    || !FServer->diag_requests.count(diag_id))
+                goto send_gp;
+
+            ResponseDiag* diag_response = FServer->diag_responses[diag_id];
+            RequestDiag* diag_request = FServer->diag_requests[diag_id];
+
+            // ACK read request
+            TotalSize = 10 + sizeof(PGPResParams) + dlen;
+            isoSendBuffer(&Answer,TotalSize);
+
+            // and send follow packet
+            ResParams->SubFun= SFun_ReqDiagT2;
+
+            ResParams->Tg = 0x01; // follow
+
+            ResData->FF = 0xFF;
+
+            // expecting caller to block here until response was recorded
+            DoEvent(evcGroupProgrammer,evrNoError,evs,param2,param3,param4);
+
+            // cancel if response was not populated
+            // XXX TIA crashes when response contains only zeroes
+            if (!diag_response->ready) {
+                return true;
+            } else {
+                diag_response->ready = false;
+            }
+
+            ResponseDiagData* resp_d = (ResponseDiagData*) &ResData->Data;
+
+            resp_d->uk1_0 = 0;
+            resp_d->uk2_4 = 4;
+            resp_d->uk3_1 = 1;
+            resp_d->uk4_0 = 0;
+            resp_d->uk5_0 = 0;
+            resp_d->uk6_1 = 1;
+            resp_d->uk7_0 = 0;
+            resp_d->uk8_0 = 0;
+
+
+            pbyte first_byte = &resp_d->diag_lines;
+            size_t offset = 0;
+
+            offset = copyDiagDataLine(first_byte, diag_request->initial_registers, false, &diag_response->initial);
+
+            for (std::map<word, DiagDataLine>::iterator it =
+                    diag_response->lines.begin();
+                    it != diag_response->lines.end(); it++) {
+                offset += copyDiagDataLine(first_byte + offset,
+                        diag_request->line_registers[it->first], true,
+                        &it->second);
+            }
+
+            ResData->TRSize = TS_ResOctet;
+
+            dlen = sizeof(ResponseDiagData) - 1 + offset + 8;
+            resp_d->answer_length = SwapWord(dlen - 16);
+            ResData->DataLength = SwapWord(dlen - 8);
+            Answer.Header.DataLen=SwapWord(dlen - 4);
+            Answer.Header.Sequence=0;
+            ResParams->Seq   = job_id;
+        }
+        if (ReqParams->SubFun == SFun_RemoveDiag) {
+            job_id = ReqData->Data[27];
+            param4 = job_id;
+            evs = evsGPRemoveDiag;
+            FServer->RemoveDiagRequest(ClientHandle, job_id);
+        }
+    }
+    if (ReqParams->SubFun == SFun_Forces || ReqParams->SubFun == SFun_Blink) {
+        // Data
+        ResData->FF      =0xFF;
+        ResData->TRSize  =TS_ResOctet;
+        ResData->DataLength=SwapWord(0x000C);
+        ResData->Data[0]  = 0x00;
+        ResData->Data[1]  = 0x04;
+        ResData->Data[2]  = 0x00;
+        ResData->Data[3]  = 0x04;
+        ResData->Data[4]  = 0x01;
+        ResData->Data[5]  = 0x00;
+        ResData->Data[6]  = 0x00;
+        ResData->Data[7]  = 0x01;
+        ResData->Data[8]  = 0x10;
+        ResData->Data[9]  = 0x01;
+        ResData->Data[10] = 0x00;
+        ResData->Data[11] = 0x00;
+
+        dlen = 20;
+        evs = ReqParams->SubFun == SFun_Blink ? evsGPBlink : evsGPStatic;
+    }
 
     // TODO what was that????
     if (ReqParams->SubFun == 0x02) {
@@ -1199,11 +1323,67 @@ bool TS7Worker::PerformGroupProgrammer()
         dlen = 24;
     }
 
+    send_gp:
     TotalSize = 10 + sizeof(PGPResParams) + dlen;
     isoSendBuffer(&Answer,TotalSize);
 
-    DoEvent(evcGroupProgrammer,evrNoError,evs,0,0,0);
+    if (evs != evsGPReadDiag)
+        DoEvent(evcGroupProgrammer,evrNoError,evs,param2,param3,param4);
+
+    if (evs == evsGPRemoveDiag)
+        FServer->RemoveDiagRequest(ClientHandle, job_id);
+
     return true;
+}
+//------------------------------------------------------------------------------
+size_t TS7Worker::copyDiagDataLine(pbyte to, byte registers, bool add_offset, DiagDataLine* ddl) {
+    size_t offset = 0;
+
+    if (add_offset) {
+        *((word*)(to + offset)) = ddl->offset;
+        offset += 2;
+    }
+
+    if (registers & DIAG_REGISTER_STATUS) {
+        *((word*)(to + offset)) = ddl->status_word;
+        offset += 2;
+    }
+    if (registers & DIAG_REGISTER_AKKU1) {
+        *((longword*)(to + offset)) = ddl->akku1;
+        offset += 4;
+    }
+    if (registers & DIAG_REGISTER_AKKU2) {
+        *((longword*)(to + offset)) = ddl->akku2;
+        offset += 4;
+    }
+    if (registers & DIAG_REGISTER_AREG1) {
+        *((longword*)(to + offset)) = ddl->areg1;
+        offset += 4;
+    }
+    if (registers & DIAG_REGISTER_AREG2) {
+        *((longword*)(to + offset)) = ddl->areg2;
+        offset += 4;
+    }
+    if (registers & DIAG_REGISTER_DB) {
+        // TODO this field has an unknown value
+        *((word*)(to + offset)) = 0;
+        offset += 2;
+        *((word*)(to + offset)) = SwapWord(ddl->db_no);
+        offset += 2;
+        *((word*)(to + offset)) = 0;
+        offset += 2;
+    }
+    if (registers & DIAG_REGISTER_DI) {
+        // TODO this field has an unknown value
+        *((word*)(to + offset)) = 0;
+        offset += 2;
+        *((word*)(to + offset)) = SwapWord(ddl->di_no);
+        offset += 2;
+        *((word*)(to + offset)) = 0;
+        offset += 2;
+    }
+
+    return offset;
 }
 //------------------------------------------------------------------------------
 bool TS7Worker::PerformGroupCyclicData()
@@ -2025,6 +2205,7 @@ TSnap7Server::TSnap7Server()
 {
 	OnReadEvent=NULL;
     AddedDiagItemCount=0;
+    CSDiag = new TSnapCriticalSection();
     AddDiagItem(SZL_DIAG_START);
     memset(&HA,0,sizeof(HA));
     DBArea = new PS7AreaContainer(MaxDB-1);
@@ -2086,6 +2267,56 @@ void TSnap7Server::CopyDiagBuffer(pbyte to)
     }
 }
 //------------------------------------------------------------------------------
+byte TSnap7Server::freeDiagJobID(longword client_id) {
+    byte job_id = DIAG_JOB_OFFSET;
+    CSDiag->Enter();
+    while(diag_requests.count(std::make_pair(client_id, job_id))) {
+        job_id++;
+    }
+    CSDiag->Leave();
+    return job_id;
+}
+//------------------------------------------------------------------------------
+byte TSnap7Server::AddDiagRequest(longword id, RequestDiag &rd) {
+    byte job_id = freeDiagJobID(id);
+    CSDiag->Enter();
+    RequestDiag* rdc = new RequestDiag(rd);
+
+    diag_requests[std::make_pair(id, job_id)] = rdc;
+
+    CSDiag->Leave();
+
+    return job_id;
+}
+//------------------------------------------------------------------------------
+void TSnap7Server::RemoveDiagRequest(longword client_id, byte job_id) {
+    RequestDiag *rd;
+    DiagID diag_id = std::make_pair(client_id, job_id);
+    CSDiag->Enter();
+    if (diag_requests.count(diag_id)) {
+        rd = diag_requests[diag_id];
+        delete rd;
+        diag_requests.erase(diag_id);
+    }
+    CSDiag->Leave();
+}
+//------------------------------------------------------------------------------
+RequestDiag* TSnap7Server::GetDiagRequest(longword client_id, byte job_id) {
+    RequestDiag* rd;
+    DiagID diag_id = std::make_pair(client_id, job_id);
+    CSDiag->Enter();
+    rd = diag_requests.count(diag_id) ? diag_requests[diag_id] : NULL;
+    CSDiag->Leave();
+    return rd;
+}
+//------------------------------------------------------------------------------
+int TSnap7Server::AddDiagResponse(longword client_id, byte job_id, ResponseDiag* rd) {
+    CSDiag->Enter();
+    diag_responses[std::make_pair(client_id, job_id)] = rd;
+    CSDiag->Leave();
+    return 0;
+}
+//------------------------------------------------------------------------------
 void TSnap7Server::DisposeAll()
 {
     delete DBArea;
@@ -2096,6 +2327,10 @@ void TSnap7Server::DisposeAll()
     // Unregister other
     for (int c = srvAreaPE; c < srvAreaDB; c++)
         UnregisterSys(c);
+    delete CSDiag;
+    for (DiagRequestMap::iterator it = diag_requests.begin(); it != diag_requests.end(); it ++) {
+        delete it->second;
+    }
 }
 //------------------------------------------------------------------------------
 int TSnap7Server::RegisterSys(int AreaCode, void *pUsrData, word Size)

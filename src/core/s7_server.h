@@ -29,6 +29,7 @@
 #include "snap_tcpsrvr.h"
 #include "s7_types.h"
 #include "s7_isotcp.h"
+#include <map>
 //---------------------------------------------------------------------------
 
 // Maximum number of DB, change it to increase/decrease the limit.
@@ -37,10 +38,12 @@
 #define MaxDB 2048    // Like a S7 318
 
 // Number of custom SZLs
-#define CustomSZL 2
+#define CustomSZL 4
 
 #define MaxDiagBufferItems 99
 #define DiagItemLength 20
+
+#define DIAG_JOB_OFFSET 2
 
 // a modulo which is always positive
 #define pmod(X,Y)     (X%Y+Y)%Y
@@ -162,6 +165,7 @@ private:
     TS7Buffer Buffer;
     // Checks the consistence of the incoming PDU
     bool CheckPDU_in(int PayloadSize);
+    size_t copyDiagDataLine(pbyte to, byte registers, bool add_offset, DiagDataLine* ddl);
 protected:
     bool ExecuteRecv();
     void DoEvent(longword Code, word RetCode, word Param1, word Param2,
@@ -239,6 +243,9 @@ typedef TS7Worker *PS7Worker;
 //------------------------------------------------------------------------------
 // S7 SERVER CLASS
 //------------------------------------------------------------------------------
+typedef std::pair<longword, byte> DiagID;
+typedef std::map<DiagID, RequestDiag*> DiagRequestMap;
+typedef std::map<DiagID, ResponseDiag*> DiagResponseMap;
 class TSnap7Server : public TCustomMsgServer
 {
 private:
@@ -248,8 +255,12 @@ private:
     // ring buffer for diagnostic messages
     byte DiagBuffer[MaxDiagBufferItems][DiagItemLength];
     uint AddedDiagItemCount;
+    PSnapCriticalSection CSDiag;
+    DiagRequestMap diag_requests;
+    DiagResponseMap diag_responses;
     uint GetDiagItemCount();
     void DisposeAll();
+    byte freeDiagJobID(longword client_id);
 protected:
     PS7AreaContainer *DBArea;
     PS7AreaContainer *OB, *FB, *FC, *SDB;
@@ -261,6 +272,8 @@ protected:
     int RegisterSys(int AreaCode, void *pUsrData, word Size);
     int UnregisterSys(int AreaCode);
     void AddDiagItem(pbyte Item);
+    byte AddDiagRequest(longword id, RequestDiag &rd);
+    void RemoveDiagRequest(longword client_id, byte job_id);
     // The Read event
     void DoReadEvent(int Sender, longword Code, word RetCode, word Param1,
       word Param2, word Param3, word Param4);
@@ -285,6 +298,8 @@ public:
     void CopyDiagBuffer(pbyte to);
     // Sets Event callback
     int SetReadEventsCallBack(pfn_SrvCallBack PCallBack, void *UsrPtr);
+    RequestDiag* GetDiagRequest(longword client_id, byte job_id);
+    int AddDiagResponse(longword client_id, byte job_id, ResponseDiag* rd);
     friend class TS7Worker;
 };
 typedef TSnap7Server *PSnap7Server;

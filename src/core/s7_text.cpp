@@ -514,9 +514,12 @@ static BaseString GroupProgrammerText(TSrvEvent &Event)
 {
     switch (Event.EvtParam1)
     {
-        case evsGPStatic : return "Group Programmer : Standard request --> OK";
-        case evsGPBlink    : return "Group Programmer : Blink LED --> NOT IMPLEMENTED (sending default response)";
-        default : return "Group Programmer : Unknown Subfunction";
+        case evsGPStatic      : return "Group Programmer : Standard request (forces) --> OK";
+        case evsGPBlink       : return "Group Programmer : Blink LED --> NOT IMPLEMENTED (sending default response)";
+        case evsGPRequestDiag : return "Group Programmer : Request diag mode (Job " + IntToString(Event.EvtParam4) + ") --> OK";
+        case evsGPReadDiag    : return "Group Programmer : Read diagnotic data (Job " + IntToString(Event.EvtParam4) + ") --> OK";
+        case evsGPRemoveDiag  : return "Group Programmer : Stop diag mode (Job " + IntToString(Event.EvtParam4) + ") --> OK";
+        default               : return "Group Programmer : Unknown Subfunction";
     };
 }
 //---------------------------------------------------------------------------
