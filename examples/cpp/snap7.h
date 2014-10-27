@@ -70,6 +70,7 @@
 #ifdef __cplusplus
 #include <string>
 #include <time.h>
+#include <map>
 
 // Visual C++ not C99 compliant (VS2008--)
 #ifdef _MSC_VER
@@ -696,6 +697,7 @@ int S7API Srv_GetDiagRequest(S7Object Server, longword client_id, byte job_id, R
 int S7API Srv_AddDiagResponse(S7Object Server, longword client_id, byte job_id, ResponseDiag* rd);
 int S7API Srv_AddBlock(S7Object Server, void *pBinary, int Size);
 int S7API Srv_GetBlock(S7Object Server, byte BlkType, word BlkNum, pbyte* block);
+int S7API Srv_AddDiagItem(S7Object Server, pbyte Item);
 int S7API Srv_RegisterArea(S7Object Server, int AreaCode, word Index, void *pUsrData, int Size);
 int S7API Srv_UnregisterArea(S7Object Server, int AreaCode, word Index);
 int S7API Srv_LockArea(S7Object Server, int AreaCode, word Index);
@@ -921,6 +923,7 @@ public:
     // Resources
     int AddBlock(void *pBinary, int Size);
     pbyte GetBlock(byte BlkType, word BlkNum);
+    void AddDiagItem(pbyte Item);
     int RegisterArea(int AreaCode, word Index, void *pUsrData, word Size);
     int UnregisterArea(int AreaCode, word Index);
     int LockArea(int AreaCode, word Index);

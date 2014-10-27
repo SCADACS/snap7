@@ -154,6 +154,7 @@ EXPORTSPEC int S7API Srv_GetDiagRequest(S7Object Server, longword client_id, byt
 EXPORTSPEC int S7API Srv_AddDiagResponse(S7Object Server, longword client_id, byte job_id, ResponseDiag* rd);
 EXPORTSPEC int S7API Srv_AddBlock(S7Object Server, void *pBinary, int Size);
 EXPORTSPEC int S7API Srv_GetBlock(S7Object Server, byte BlkType, word BlkNum, pbyte &block);
+EXPORTSPEC int S7API Srv_AddDiagItem(S7Object Server, pbyte Item);
 EXPORTSPEC int S7API Srv_RegisterArea(S7Object Server, int AreaCode, word Index, void *pUsrData, int Size);
 EXPORTSPEC int S7API Srv_UnregisterArea(S7Object Server, int AreaCode, word Index);
 EXPORTSPEC int S7API Srv_LockArea(S7Object Server, int AreaCode, word Index);

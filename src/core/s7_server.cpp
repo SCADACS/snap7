@@ -2431,11 +2431,6 @@ void TSnap7Server::SetCpuStatus(byte State)
     {
         CpuStatus = State;
         FillTime(&LastCPUStateChange);
-        switch (CpuStatus)
-        {
-            case S7CpuStatusRun: AddDiagItem(SZL_DIAG_CPU_RUN); break;
-            case S7CpuStatusStop:AddDiagItem(SZL_DIAG_CPU_STOP); break;
-        }
     }
 }
 //------------------------------------------------------------------------------

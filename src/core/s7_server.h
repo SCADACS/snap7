@@ -271,7 +271,6 @@ protected:
     PWorkerSocket CreateWorkerSocket(socket_t Sock);
     int RegisterSys(int AreaCode, void *pUsrData, word Size);
     int UnregisterSys(int AreaCode);
-    void AddDiagItem(pbyte Item);
     byte AddDiagRequest(longword id, RequestDiag &rd);
     void RemoveDiagRequest(longword client_id, byte job_id);
     // The Read event
@@ -288,6 +287,7 @@ public:
     void SetSZL(int SZLID, pbyte val, int len);
     void SetCpuStatus(byte State);
     int AddBlock(void *pBinary, int Size);
+    void AddDiagItem(pbyte Item);
     pbyte GetBlock(byte BlkType, word BlkNum);
     PS7AreaContainer* getArea(int srvArea);
     PS7AreaContainer* getArea(byte blkType);

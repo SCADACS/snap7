@@ -595,6 +595,10 @@ pbyte TS7Server::GetBlock(byte BlkType, word BlkNum) {
     return block;
 }
 //---------------------------------------------------------------------------
+void TS7Server::AddDiagItem(pbyte Item) {
+    Srv_AddDiagItem(Server, Item);
+}
+//---------------------------------------------------------------------------
 int TS7Server::RegisterArea(int AreaCode, word Index, void *pUsrData, word Size)
 {
     return Srv_RegisterArea(Server, AreaCode, Index, pUsrData, Size);
