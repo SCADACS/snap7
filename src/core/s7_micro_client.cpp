@@ -1185,7 +1185,7 @@ int TSnap7MicroClient::opUpload()
         if (Full)
         {
             opSize=int(Offset);
-            if (opSize<92)
+            if (opSize<90)
                 Result=errCliInvalidDataSizeRecvd;
         }
         else
