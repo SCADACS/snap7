@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.1.0 |
+|  PROJECT SNAP7                                                         1.3.0 |
 |==============================================================================|
-|  Copyright (C) 2013, Davide Nardella                                         |
+|  Copyright (C) 2013, 2015 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -24,6 +24,7 @@
 |  If not, see  http://www.gnu.org/licenses/                                   |
 |=============================================================================*/
 #include "s7_micro_client.h"
+#include <stdio.h>
 //---------------------------------------------------------------------------
 
 TSnap7MicroClient::TSnap7MicroClient()
@@ -71,7 +72,7 @@ int TSnap7MicroClient::opReadArea()
      if (WordSize==0)
         return errCliInvalidWordLen;
      // First check : params bounds
-     if ((Job.Number<0) || (Job.Number>65535) || (Job.Start<0) || (Job.Amount<1) || (Job.Start+(Job.Amount*WordSize)>65536))
+     if ((Job.Number<0) || (Job.Number>65535) || (Job.Start<0) || (Job.Amount<1))
         return errCliInvalidParams;
      // Request Params size
      RPSize    =sizeof(TReqFunReadItem)+2; // 1 item + FunRead + ItemsCount
@@ -137,8 +138,8 @@ int TSnap7MicroClient::opReadArea()
                 {
                    // Calcs data size in bytes
                    Size = SwapWord(ResData->DataLength);
-                   // with Transportsize=byte the amount must be divided by 8
-                   if (ResData->TransportSize == TS_ResByte)
+                   // Adjust Size in accord of TransportSize
+                   if ((ResData->TransportSize != TS_ResOctet) && (ResData->TransportSize != TS_ResReal) && (ResData->TransportSize != TS_ResBit))
                        Size = Size >> 3;
                    memcpy(Target, &ResData->Data[0], Size);
                 }
@@ -179,7 +180,7 @@ int TSnap7MicroClient::opWriteArea()
      if (WordSize==0)
         return errCliInvalidWordLen;
      // First check : params bounds
-     if ((Job.Number<0) || (Job.Number>65535) || (Job.Start<0) || (Job.Amount<1) || (Job.Start+(Job.Amount*WordSize)>65536))
+     if ((Job.Number<0) || (Job.Number>65535) || (Job.Start<0) || (Job.Amount<1))
         return errCliInvalidParams;
 
      RHSize =sizeof(TS7ReqHeader)+    // Request header
@@ -247,20 +248,24 @@ int TSnap7MicroClient::opWriteArea()
                case S7WLBit:
                    ReqData->TransportSize=TS_ResBit;
                    break;
-               case S7WLByte:
-               case S7WLWord:
-               case S7WLDWord:
-                   ReqData->TransportSize=TS_ResByte;
+               case S7WLInt:
+               case S7WLDInt:
+                   ReqData->TransportSize=TS_ResInt;
                    break;
                case S7WLReal:
                    ReqData->TransportSize=TS_ResReal;
                    break;
+               case S7WLChar   :
                case S7WLCounter:
                case S7WLTimer:
                    ReqData->TransportSize=TS_ResOctet;
+				   break;
+			   default:
+                   ReqData->TransportSize=TS_ResByte;
+                   break;
            };
 
-           if (ReqData->TransportSize==TS_ResByte)
+           if ((ReqData->TransportSize!=TS_ResOctet) && (ReqData->TransportSize!=TS_ResReal) && (ReqData->TransportSize!=TS_ResBit))
                ReqData->DataLength=SwapWord(Size*8);
            else
                ReqData->DataLength=SwapWord(Size);
@@ -376,6 +381,8 @@ int TSnap7MicroClient::opReadMultiVars()
     };
 
     IsoSize=RPSize+sizeof(TS7ReqHeader);
+	if (IsoSize>PDULength) 
+		return errCliSizeOverPDU;
     Result=isoExchangeBuffer(0,IsoSize);
     // Function level error
     if (Answer->Error!=0)
@@ -395,10 +402,11 @@ int TSnap7MicroClient::opReadMultiVars()
         {
           // Calcs data size in bytes
           Slice=SwapWord(ResData[c]->DataLength);
-          // with Transportsize=byte the amount must be divided by 8
-          if (ResData[c]->TransportSize == TS_ResByte)
+          // Adjust Size in accord of TransportSize
+          if ((ResData[c]->TransportSize != TS_ResOctet) && (ResData[c]->TransportSize != TS_ResReal) && (ResData[c]->TransportSize != TS_ResBit))
             Slice=Slice >> 3;
-          memcpy(Item->pdata, ResData[c]->Data, Slice);
+
+		  memcpy(Item->pdata, ResData[c]->Data, Slice);
           Item->Result=0;
         }
         else
@@ -504,30 +512,34 @@ int TSnap7MicroClient::opWriteMultiVars()
           case S7WLBit     :
                ReqData[c]->TransportSize=TS_ResBit;
                break;
-          case S7WLByte:
-          case S7WLWord:
-          case S7WLDWord   :
-               ReqData[c]->TransportSize=TS_ResByte;
+		  case S7WLInt     :
+          case S7WLDInt    :
+               ReqData[c]->TransportSize=TS_ResInt;
                break;
           case S7WLReal    :
                ReqData[c]->TransportSize=TS_ResReal;
                break;
+          case S7WLChar    :
           case S7WLCounter :
           case S7WLTimer   : ReqData[c]->TransportSize=TS_ResOctet;
+			   break;
+		  default :
+			   ReqData[c]->TransportSize=TS_ResByte; // byte/word/dword etc.
+			   break;
         };
 
         WordSize=DataSizeByte(Item->WordLen);
         Size=Item->Amount * WordSize;
 
-        if (ReqData[c]->TransportSize==TS_ResByte)
+		if ((ReqData[c]->TransportSize!=TS_ResOctet) && (ReqData[c]->TransportSize!=TS_ResReal) && (ReqData[c]->TransportSize!=TS_ResBit))
            ReqData[c]->DataLength=SwapWord(Size*8);
         else
            ReqData[c]->DataLength=SwapWord(Size);
 
         memcpy(ReqData[c]->Data, Item->pdata, Size);
 
-        if ((Size % 2)!=0)
-        	Size++; // Skip fill byte for Odd frame
+		if ((Size % 2) != 0 && (ItemsCount - c != 1))
+			Size++; // Skip fill byte for Odd frame (except for the last one)
 
         Offset+=(4+Size); // next item
         Item++;
@@ -536,6 +548,8 @@ int TSnap7MicroClient::opWriteMultiVars()
     PDUH_out->DataLen=SwapWord(word(Offset));
 
     IsoSize=RPSize+sizeof(TS7ReqHeader)+int(Offset);
+	if (IsoSize>PDULength) 
+		return errCliSizeOverPDU;
     Result=isoExchangeBuffer(0,IsoSize);
     // Function level error
     if (Answer->Error!=0)
@@ -860,7 +874,7 @@ int TSnap7MicroClient::opAgBlockInfo()
     {
         if (ResParams->ErrNo==0)
         {
-            if (SwapWord(ResData->Length)<78)
+            if (SwapWord(ResData->Length)<40) // 78
                 return errCliInvalidPlcAnswer;
             if (ResData->RetVal==0xFF) // <-- 0xFF means Result OK
             {
@@ -1185,12 +1199,14 @@ int TSnap7MicroClient::opUpload()
         if (Full)
         {
             opSize=int(Offset);
-            if (opSize<90)
+            //printf("OS: %d\n", opSize);
+            if (opSize<76) // 76 for SDB5, 80 for empty DB
                 Result=errCliInvalidDataSizeRecvd;
         }
         else
         {
             opSize=BlockLength;
+            //printf("BL: %d\n", opSize);
             if (opSize<1)
                 Result=errCliInvalidDataSizeRecvd;
         };
@@ -1214,7 +1230,7 @@ int TSnap7MicroClient::opDownload()
 {
     PS7CompactBlockInfo Info;
     PS7BlockFooter Footer;
-    int BlockNum, BlockAmount;
+    int BlockNum, StoreBlockNum, BlockAmount;
     int BlockSize, BlockSizeLd;
     int BlockType, Remainder;
     int Result, IsoSize;
@@ -1261,7 +1277,7 @@ int TSnap7MicroClient::opDownload()
             // Init Params
             ReqParams->FunSDwnld = pduReqDownload;
             ReqParams->Uk6[0]=0x00;
-            ReqParams->Uk6[1]=0x00;
+            ReqParams->Uk6[1]=0x01;
             ReqParams->Uk6[2]=0x00;
             ReqParams->Uk6[3]=0x00;
             ReqParams->Uk6[4]=0x00;
@@ -1271,6 +1287,7 @@ int TSnap7MicroClient::opDownload()
             ReqParams->Prefix=0x5F;
             ReqParams->BlkPrfx=0x30;
             ReqParams->BlkType=BlockType;
+			StoreBlockNum=BlockNum;
             ReqParams->AsciiBlk[0]=(BlockNum / 10000)+0x30;
             BlockNum=BlockNum % 10000;
             ReqParams->AsciiBlk[1]=(BlockNum / 1000)+0x30;
@@ -1283,6 +1300,7 @@ int TSnap7MicroClient::opDownload()
             ReqParams->P    =0x50;
             ReqParams->Len_2=0x0D;
             ReqParams->Uk1  =0x31; // '1'
+			BlockNum=StoreBlockNum;
             // Load memory
             ReqParams->AsciiLoad[0]=(BlockSizeLd / 100000)+0x30;
             BlockSizeLd=BlockSizeLd % 100000;
@@ -1341,7 +1359,7 @@ int TSnap7MicroClient::opDownload()
                 Answer   =PS7ResHeader23(&PDU.Payload);
                 ResParams=PResDownloadParams(pbyte(Answer)+ResHeaderSize23);
                 ResData  =PResDownloadDataHeader(pbyte(ResParams)+sizeof(TResDownloadParams));
-                Target   =pbyte(ResData)+sizeof(PResDownloadDataHeader);
+                Target   =pbyte(ResData)+sizeof(TResDownloadDataHeader);
                 Source   =pbyte(&opData)+Offset;
 
                 Result=isoRecvBuffer(0,Size);
@@ -2437,15 +2455,18 @@ int TSnap7MicroClient::CpuError(int Error)
 //---------------------------------------------------------------------------
 int TSnap7MicroClient::DataSizeByte(int WordLength)
 {
-     switch (WordLength){
-          case S7WLBit     : return 1;  // S7 sends 1 byte per bit
-          case S7WLByte    : return 1;
-          case S7WLWord    : return 2;
-          case S7WLDWord   : return 4;
-          case S7WLReal    : return 4;
-          case S7WLCounter : return 2;
-          case S7WLTimer   : return 2;
-          default          : return 0;
+	switch (WordLength){
+		case S7WLBit     : return 1;  // S7 sends 1 byte per bit
+		case S7WLByte    : return 1;
+		case S7WLChar    : return 1;
+		case S7WLWord    : return 2;
+		case S7WLDWord   : return 4;
+		case S7WLInt     : return 2;
+		case S7WLDInt    : return 4;
+		case S7WLReal    : return 4;
+		case S7WLCounter : return 2;
+		case S7WLTimer   : return 2;
+		default          : return 0;
      }
 }
 //---------------------------------------------------------------------------
@@ -2473,12 +2494,13 @@ int TSnap7MicroClient::CheckBlock(int BlockType, int BlockNum,  void * pBlock,  
           if (BlockNum>0xFFFF)
             return errCliInvalidBlockNumber;
       };
-
+      //printf("%d != %d\n", SwapDWord(Info->LenLoadMem), longword(Size));
       if (SwapDWord(Info->LenLoadMem)!=longword(Size))
           return errCliInvalidBlockSize;
 
   // Check the presence of the footer
-  if (SwapWord(Info->MC7Len)+sizeof(TS7CompactBlockInfo)>=u_int(Size))
+  //printf("%d + %ld > %d\n", SwapWord(Info->MC7Len), sizeof(TS7CompactBlockInfo), u_int(Size));
+  if (SwapWord(Info->MC7Len)+sizeof(TS7CompactBlockInfo)>u_int(Size))
     return errCliInvalidBlockSize;
 
   return 0;

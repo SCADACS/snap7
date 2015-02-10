@@ -51,11 +51,15 @@ const int MaxVars     = 20;
 
 const int S7WLBit     = 0x01;
 const int S7WLByte    = 0x02;
+const int S7WLChar    = 0x03;
 const int S7WLWord    = 0x04;
+const int S7WLInt     = 0x05;
 const int S7WLDWord   = 0x06;
+const int S7WLDInt    = 0x07;
 const int S7WLReal    = 0x08;
 const int S7WLCounter = 0x1C;
 const int S7WLTimer   = 0x1D;
+
 
   // Block type
 const byte Block_OB   = 0x38;
@@ -224,6 +228,7 @@ const word Code7DataOverPDU   		= 0x8500;
 // Result transport size
 const byte TS_ResBit   = 0x03;
 const byte TS_ResByte  = 0x04;
+const byte TS_ResInt   = 0x05;
 const byte TS_ResReal  = 0x07;
 const byte TS_ResOctet = 0x09;
 
@@ -279,6 +284,7 @@ const byte SFun_Delete   	= 0x42;   // Delete block
 const byte SFun_Blink       = 0x16;   // blink LED
 const byte SFun_Forces      = 0x10;   // blink LED
 const byte SFun_ReqDiagT1   = 0x01;   // request diag data type 1
+const byte SFun_VarTab      = 0x02;   // variable table
 const byte SFun_ReqDiagT2   = 0x13;   // request diag data type 2
 const byte SFun_ReadDiag    = 0x0E;   // read diag data
 const byte SFun_RemoveDiag  = 0x0F;   // remove diag data
