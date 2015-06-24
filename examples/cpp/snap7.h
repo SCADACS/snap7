@@ -851,6 +851,7 @@ public:
 	int PlcStop();
 	int CopyRamToRom(int Timeout);
 	int Compress(int Timeout);
+	int GetPlcStatus(int *Status);
 	// Security functions
 	int GetProtection(PS7Protection pUsrData);
 	int SetSessionPassword(char *Password);
