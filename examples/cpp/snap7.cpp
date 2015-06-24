@@ -273,6 +273,11 @@ int TS7Client::Compress(int Timeout)
     return Cli_Compress(Client, Timeout);
 }
 //---------------------------------------------------------------------------
+int TS7Client::GetPlcStatus(int *Status)
+{
+	return Cli_GetPlcStatus(Client, Status);
+}
+//---------------------------------------------------------------------------
 int TS7Client::GetProtection(PS7Protection pUsrData)
 {
     return Cli_GetProtection(Client, pUsrData);
