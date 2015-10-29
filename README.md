@@ -2,4 +2,15 @@
 
 This is a fork of http://snap7.sourceforge.net/
 
-Current Goal: Make the server work with TIA Portal to handle up- and downloads.
+
+This fork focuses on extending the Snap7Server module to support some features helping to implement a software PLC.
+These features are currently:
+* support for program blocks (up-/download, listing)
+* some dynamic SZLs
+* vartable watching
+* monitor mode, currently broken :(
+
+For more details I refer to the commit history.
+Please note that this fork is currently at version 1.2.0, while the original is at 1.4.0.
+
+Cleanup, more fixes and documentation will follow.
