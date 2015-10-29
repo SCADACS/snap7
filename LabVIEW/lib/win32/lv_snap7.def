@@ -1,0 +1,150 @@
+; dlltool --base-file C:\Users\DAVIDE~1.MAS\AppData\Local\Temp\cca05256.base --output-exp lv_snap7.exp --dllname lv_snap7.dll --output-def ../../lib/win32/lv_snap7.def --no-export-all-symbols --add-stdcall-alias --exclude-symbol=DllMainCRTStartup@12 --def C:\Users\DAVIDE~1.MAS\AppData\Local\Temp\cca05256.def
+EXPORTS
+	lv_Cli_ClearSessionPassword = lv_Cli_ClearSessionPassword@4 @ 1
+	lv_Cli_ClearSessionPassword@4 @ 2
+	lv_Cli_Compress = lv_Cli_Compress@8 @ 3
+	lv_Cli_Compress@8 @ 4
+	lv_Cli_Connect = lv_Cli_Connect@4 @ 5
+	lv_Cli_Connect@4 @ 6
+	lv_Cli_ConnectTo = lv_Cli_ConnectTo@16 @ 7
+	lv_Cli_ConnectTo@16 @ 8
+	lv_Cli_CopyRamToRom = lv_Cli_CopyRamToRom@8 @ 9
+	lv_Cli_CopyRamToRom@8 @ 10
+	lv_Cli_Create = lv_Cli_Create@0 @ 11
+	lv_Cli_Create@0 @ 12
+	lv_Cli_DBFill = lv_Cli_DBFill@12 @ 13
+	lv_Cli_DBFill@12 @ 14
+	lv_Cli_DBGet = lv_Cli_DBGet@16 @ 15
+	lv_Cli_DBGet@16 @ 16
+	lv_Cli_Delete = lv_Cli_Delete@12 @ 17
+	lv_Cli_Delete@12 @ 18
+	lv_Cli_Destroy = lv_Cli_Destroy@4 @ 19
+	lv_Cli_Destroy@4 @ 20
+	lv_Cli_Disconnect = lv_Cli_Disconnect@4 @ 21
+	lv_Cli_Disconnect@4 @ 22
+	lv_Cli_Download = lv_Cli_Download@16 @ 23
+	lv_Cli_Download@16 @ 24
+	lv_Cli_ErrorText = lv_Cli_ErrorText@12 @ 25
+	lv_Cli_ErrorText@12 @ 26
+	lv_Cli_FullUpload = lv_Cli_FullUpload@20 @ 27
+	lv_Cli_FullUpload@20 @ 28
+	lv_Cli_GetAgBlockInfo = lv_Cli_GetAgBlockInfo@20 @ 29
+	lv_Cli_GetAgBlockInfo@20 @ 30
+	lv_Cli_GetCpInfo = lv_Cli_GetCpInfo@8 @ 31
+	lv_Cli_GetCpInfo@8 @ 32
+	lv_Cli_GetCpuInfo = lv_Cli_GetCpuInfo@8 @ 33
+	lv_Cli_GetCpuInfo@8 @ 34
+	lv_Cli_GetExecTime = lv_Cli_GetExecTime@8 @ 35
+	lv_Cli_GetExecTime@8 @ 36
+	lv_Cli_GetLastError = lv_Cli_GetLastError@8 @ 37
+	lv_Cli_GetLastError@8 @ 38
+	lv_Cli_GetOrderCode = lv_Cli_GetOrderCode@20 @ 39
+	lv_Cli_GetOrderCode@20 @ 40
+	lv_Cli_GetParam = lv_Cli_GetParam@12 @ 41
+	lv_Cli_GetParam@12 @ 42
+	lv_Cli_GetPduLength = lv_Cli_GetPduLength@12 @ 43
+	lv_Cli_GetPduLength@12 @ 44
+	lv_Cli_GetPgBlockInfo = lv_Cli_GetPgBlockInfo@20 @ 45
+	lv_Cli_GetPgBlockInfo@20 @ 46
+	lv_Cli_GetPlcDateTime = lv_Cli_GetPlcDateTime@8 @ 47
+	lv_Cli_GetPlcDateTime@8 @ 48
+	lv_Cli_GetPlcStatus = lv_Cli_GetPlcStatus@8 @ 49
+	lv_Cli_GetPlcStatus@8 @ 50
+	lv_Cli_GetProtection = lv_Cli_GetProtection@8 @ 51
+	lv_Cli_GetProtection@8 @ 52
+	lv_Cli_IsoExchangeBuffer = lv_Cli_IsoExchangeBuffer@12 @ 53
+	lv_Cli_IsoExchangeBuffer@12 @ 54
+	lv_Cli_ListBlocks = lv_Cli_ListBlocks@8 @ 55
+	lv_Cli_ListBlocks@8 @ 56
+	lv_Cli_ListBlocksOfType = lv_Cli_ListBlocksOfType@16 @ 57
+	lv_Cli_ListBlocksOfType@16 @ 58
+	lv_Cli_PlcColdStart = lv_Cli_PlcColdStart@4 @ 59
+	lv_Cli_PlcColdStart@4 @ 60
+	lv_Cli_PlcHotStart = lv_Cli_PlcHotStart@4 @ 61
+	lv_Cli_PlcHotStart@4 @ 62
+	lv_Cli_PlcStop = lv_Cli_PlcStop@4 @ 63
+	lv_Cli_PlcStop@4 @ 64
+	lv_Cli_ReadArea = lv_Cli_ReadArea@28 @ 65
+	lv_Cli_ReadArea@28 @ 66
+	lv_Cli_ReadSZL = lv_Cli_ReadSZL@28 @ 67
+	lv_Cli_ReadSZL@28 @ 68
+	lv_Cli_ReadSZLList = lv_Cli_ReadSZLList@12 @ 69
+	lv_Cli_ReadSZLList@12 @ 70
+	lv_Cli_SetConnectionParams = lv_Cli_SetConnectionParams@16 @ 71
+	lv_Cli_SetConnectionParams@16 @ 72
+	lv_Cli_SetConnectionType = lv_Cli_SetConnectionType@8 @ 73
+	lv_Cli_SetConnectionType@8 @ 74
+	lv_Cli_SetParam = lv_Cli_SetParam@12 @ 75
+	lv_Cli_SetParam@12 @ 76
+	lv_Cli_SetPlcDateTime = lv_Cli_SetPlcDateTime@8 @ 77
+	lv_Cli_SetPlcDateTime@8 @ 78
+	lv_Cli_SetPlcSystemDateTime = lv_Cli_SetPlcSystemDateTime@4 @ 79
+	lv_Cli_SetPlcSystemDateTime@4 @ 80
+	lv_Cli_SetSessionPassword = lv_Cli_SetSessionPassword@8 @ 81
+	lv_Cli_SetSessionPassword@8 @ 82
+	lv_Cli_Upload = lv_Cli_Upload@20 @ 83
+	lv_Cli_Upload@20 @ 84
+	lv_Cli_WriteArea = lv_Cli_WriteArea@28 @ 85
+	lv_Cli_WriteArea@28 @ 86
+	lv_Par_BRecv = lv_Par_BRecv@20 @ 87
+	lv_Par_BRecv@20 @ 88
+	lv_Par_BSend = lv_Par_BSend@16 @ 89
+	lv_Par_BSend@16 @ 90
+	lv_Par_Create = lv_Par_Create@4 @ 91
+	lv_Par_Create@4 @ 92
+	lv_Par_Destroy = lv_Par_Destroy@4 @ 93
+	lv_Par_Destroy@4 @ 94
+	lv_Par_ErrorText = lv_Par_ErrorText@12 @ 95
+	lv_Par_ErrorText@12 @ 96
+	lv_Par_GetLastError = lv_Par_GetLastError@8 @ 97
+	lv_Par_GetLastError@8 @ 98
+	lv_Par_GetParam = lv_Par_GetParam@12 @ 99
+	lv_Par_GetParam@12 @ 100
+	lv_Par_GetStats = lv_Par_GetStats@20 @ 101
+	lv_Par_GetStats@20 @ 102
+	lv_Par_GetStatus = lv_Par_GetStatus@8 @ 103
+	lv_Par_GetStatus@8 @ 104
+	lv_Par_GetTimes = lv_Par_GetTimes@12 @ 105
+	lv_Par_GetTimes@12 @ 106
+	lv_Par_SetParam = lv_Par_SetParam@12 @ 107
+	lv_Par_SetParam@12 @ 108
+	lv_Par_Start = lv_Par_Start@4 @ 109
+	lv_Par_Start@4 @ 110
+	lv_Par_StartTo = lv_Par_StartTo@20 @ 111
+	lv_Par_StartTo@20 @ 112
+	lv_Par_Stop = lv_Par_Stop@4 @ 113
+	lv_Par_Stop@4 @ 114
+	lv_Srv_ClearEvents = lv_Srv_ClearEvents@4 @ 115
+	lv_Srv_ClearEvents@4 @ 116
+	lv_Srv_Create = lv_Srv_Create@0 @ 117
+	lv_Srv_Create@0 @ 118
+	lv_Srv_Destroy = lv_Srv_Destroy@4 @ 119
+	lv_Srv_Destroy@4 @ 120
+	lv_Srv_ErrorText = lv_Srv_ErrorText@12 @ 121
+	lv_Srv_ErrorText@12 @ 122
+	lv_Srv_EventText = lv_Srv_EventText@12 @ 123
+	lv_Srv_EventText@12 @ 124
+	lv_Srv_GetParam = lv_Srv_GetParam@12 @ 125
+	lv_Srv_GetParam@12 @ 126
+	lv_Srv_GetStatus = lv_Srv_GetStatus@16 @ 127
+	lv_Srv_GetStatus@16 @ 128
+	lv_Srv_LockArea = lv_Srv_LockArea@12 @ 129
+	lv_Srv_LockArea@12 @ 130
+	lv_Srv_PickEvent = lv_Srv_PickEvent@12 @ 131
+	lv_Srv_PickEvent@12 @ 132
+	lv_Srv_RegisterArea = lv_Srv_RegisterArea@16 @ 133
+	lv_Srv_RegisterArea@16 @ 134
+	lv_Srv_SetCpuStatus = lv_Srv_SetCpuStatus@8 @ 135
+	lv_Srv_SetCpuStatus@8 @ 136
+	lv_Srv_SetParam = lv_Srv_SetParam@12 @ 137
+	lv_Srv_SetParam@12 @ 138
+	lv_Srv_Start = lv_Srv_Start@4 @ 139
+	lv_Srv_Start@4 @ 140
+	lv_Srv_StartTo = lv_Srv_StartTo@8 @ 141
+	lv_Srv_StartTo@8 @ 142
+	lv_Srv_Stop = lv_Srv_Stop@4 @ 143
+	lv_Srv_Stop@4 @ 144
+	lv_Srv_UnlockArea = lv_Srv_UnlockArea@12 @ 145
+	lv_Srv_UnlockArea@12 @ 146
+	lv_Srv_UnregisterArea = lv_Srv_UnregisterArea@12 @ 147
+	lv_Srv_UnregisterArea@12 @ 148

@@ -1,0 +1,7 @@
+C:\Snap7\Deploy-1.4.0\snap7-full-1.4.0\examples\dot.net\WinForm\CSharp\bin\x64\CSClient.exe
+C:\Snap7\Deploy-1.4.0\snap7-full-1.4.0\examples\dot.net\WinForm\CSharp\bin\x64\CSClient.pdb
+C:\Snap7\Deploy-1.4.0\snap7-full-1.4.0\examples\dot.net\WinForm\CSharp\CSClient\obj\x64\Release\CSClient.MainForm.resources
+C:\Snap7\Deploy-1.4.0\snap7-full-1.4.0\examples\dot.net\WinForm\CSharp\CSClient\obj\x64\Release\CSClient.Properties.Resources.resources
+C:\Snap7\Deploy-1.4.0\snap7-full-1.4.0\examples\dot.net\WinForm\CSharp\CSClient\obj\x64\Release\CSClient.csproj.GenerateResource.Cache
+C:\Snap7\Deploy-1.4.0\snap7-full-1.4.0\examples\dot.net\WinForm\CSharp\CSClient\obj\x64\Release\CSClient.exe
+C:\Snap7\Deploy-1.4.0\snap7-full-1.4.0\examples\dot.net\WinForm\CSharp\CSClient\obj\x64\Release\CSClient.pdb

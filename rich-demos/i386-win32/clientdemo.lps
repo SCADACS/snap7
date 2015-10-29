@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="9"/>
+    <BuildModes Active="Default"/>
+    <Units Count="14">
+      <Unit0>
+        <Filename Value="clientdemo.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <CursorPos X="22" Y="9"/>
+        <UsageCount Value="27"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="..\unit1.pas"/>
+        <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <CursorPos X="9" Y="4"/>
+        <UsageCount Value="20"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="..\mainclient.lfm"/>
+        <UsageCount Value="20"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="..\rootinfo.lfm"/>
+        <UsageCount Value="20"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="clientdemo.lps"/>
+        <TopLine Value="3"/>
+        <CursorPos X="13" Y="26"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="XML"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="..\mainclient.pas"/>
+        <ComponentName Value="FormClient"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="mainclient"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="1849"/>
+        <CursorPos X="33" Y="1870"/>
+        <UsageCount Value="13"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="..\sc_info.pas"/>
+        <ComponentName Value="SmartConnectInfo"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <CursorPos X="65" Y="2"/>
+        <UsageCount Value="10"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="..\snap7.pas"/>
+        <UnitName Value="snap7"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="639"/>
+        <CursorPos X="21" Y="52"/>
+        <UsageCount Value="13"/>
+        <Loaded Value="True"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="..\frmPartner.pas"/>
+        <ComponentName Value="PartnerForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="frmPartner"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="550"/>
+        <CursorPos Y="578"/>
+        <UsageCount Value="13"/>
+        <Loaded Value="True"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="..\..\src\core\s7_micro_client.cpp"/>
+        <TopLine Value="2619"/>
+        <CursorPos X="36" Y="2628"/>
+        <UsageCount Value="12"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="..\..\src\lib\snap7_libmain.cpp"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="85"/>
+        <CursorPos X="56" Y="101"/>
+        <UsageCount Value="13"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="..\..\src\lib\snap7_libmain.h"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="22"/>
+        <CursorPos X="26" Y="49"/>
+        <UsageCount Value="13"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="..\cp_info.pas"/>
+        <ComponentName Value="ParamsConnectInfo"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="cp_info"/>
+        <EditorIndex Value="6"/>
+        <CursorPos X="63" Y="4"/>
+        <UsageCount Value="13"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="C:\lazarus\lcl\stdctrls.pp"/>
+        <TopLine Value="394"/>
+        <CursorPos X="3" Y="408"/>
+        <UsageCount Value="10"/>
+      </Unit13>
+    </Units>
+    <JumpHistory Count="30" HistoryIndex="29">
+      <Position1>
+        <Filename Value="..\snap7.pas"/>
+        <Caret Line="1212" Column="7" TopLine="1185"/>
+      </Position1>
+      <Position2>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="995" Column="24" TopLine="974"/>
+      </Position2>
+      <Position3>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="996" Column="24" TopLine="975"/>
+      </Position3>
+      <Position4>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="1510" TopLine="1507"/>
+      </Position4>
+      <Position5>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="879" Column="11" TopLine="872"/>
+      </Position5>
+      <Position6>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="878" Column="11" TopLine="871"/>
+      </Position6>
+      <Position7>
+        <Filename Value="clientdemo.lpr"/>
+        <Caret Line="22" Column="46"/>
+      </Position7>
+      <Position8>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="16" Column="34"/>
+      </Position8>
+      <Position9>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="883" TopLine="872"/>
+      </Position9>
+      <Position10>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="290" Column="54" TopLine="281"/>
+      </Position10>
+      <Position11>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="291" Column="54" TopLine="282"/>
+      </Position11>
+      <Position12>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="482" Column="3" TopLine="479"/>
+      </Position12>
+      <Position13>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="414" Column="14" TopLine="400"/>
+      </Position13>
+      <Position14>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="2037" Column="3" TopLine="2021"/>
+      </Position14>
+      <Position15>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="2095" Column="3" TopLine="2093"/>
+      </Position15>
+      <Position16>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="747" TopLine="732"/>
+      </Position16>
+      <Position17>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="443" Column="5" TopLine="421"/>
+      </Position17>
+      <Position18>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="2257" Column="17" TopLine="2253"/>
+      </Position18>
+      <Position19>
+        <Filename Value="..\mainclient.pas"/>
+      </Position19>
+      <Position20>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="458" Column="48" TopLine="433"/>
+      </Position20>
+      <Position21>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="442" Column="13" TopLine="427"/>
+      </Position21>
+      <Position22>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="2301" Column="18" TopLine="2279"/>
+      </Position22>
+      <Position23>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="1131" Column="12" TopLine="1115"/>
+      </Position23>
+      <Position24>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="81" Column="5" TopLine="67"/>
+      </Position24>
+      <Position25>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="78" Column="88" TopLine="67"/>
+      </Position25>
+      <Position26>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="1128" Column="91" TopLine="1111"/>
+      </Position26>
+      <Position27>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="1154" Column="67" TopLine="1147"/>
+      </Position27>
+      <Position28>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="1477" Column="12" TopLine="1455"/>
+      </Position28>
+      <Position29>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="1507" Column="7" TopLine="1560"/>
+      </Position29>
+      <Position30>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="1920" Column="3" TopLine="1918"/>
+      </Position30>
+    </JumpHistory>
+  </ProjectSession>
+  <Debugging>
+    <Watches Count="1">
+      <Item1>
+        <Expression Value="LocalTsap"/>
+        <DisplayStyle Value="wdfHex"/>
+      </Item1>
+    </Watches>
+  </Debugging>
+</CONFIG>

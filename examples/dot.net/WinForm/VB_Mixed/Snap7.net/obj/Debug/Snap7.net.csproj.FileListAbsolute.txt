@@ -1,0 +1,14 @@
+C:\VB_Mixed\Snap7.net\obj\Debug\ResolveAssemblyReference.cache
+C:\VB_Mixed\Snap7.net\obj\Debug\Snap7.net.dll
+C:\VB_Mixed\Snap7.net\obj\Debug\Snap7.net.pdb
+C:\VB_Mixed\Snap7.net.dll
+C:\VB_Mixed\Snap7.net.pdb
+C:\snap7-full-1.3.0\examples\WinForm.net\VB_Mixed\Snap7.net\obj\Debug\ResolveAssemblyReference.cache
+C:\snap7-full-1.3.0\examples\WinForm.net\VB_Mixed\Snap7.net\obj\Debug\Snap7.net.dll
+C:\snap7-full-1.3.0\examples\WinForm.net\VB_Mixed\Snap7.net\obj\Debug\Snap7.net.pdb
+C:\snap7-full-1.3.0\examples\WinForm.net\VB_Mixed\Snap7.net.dll
+C:\snap7-full-1.3.0\examples\WinForm.net\VB_Mixed\Snap7.net.pdb
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB_Mixed\Snap7.net\obj\Debug\Snap7.net.dll
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB_Mixed\Snap7.net\obj\Debug\Snap7.net.pdb
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB_Mixed\Snap7.net.dll
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB_Mixed\Snap7.net.pdb

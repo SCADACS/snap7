@@ -1,0 +1,6 @@
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinConsole\bin\x86\APartner.exe.config
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinConsole\bin\x86\APartner.exe
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinConsole\bin\x86\APartner.pdb
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinConsole\APartner\obj\x86\Debug\APartner.csprojResolveAssemblyReference.cache
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinConsole\APartner\obj\x86\Debug\APartner.exe
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinConsole\APartner\obj\x86\Debug\APartner.pdb

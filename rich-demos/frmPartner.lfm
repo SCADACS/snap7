@@ -1,0 +1,503 @@
+object PartnerForm: TPartnerForm
+  Left = 233
+  Height = 550
+  Top = 137
+  Width = 748
+  Caption = 'PartnerForm'
+  ClientHeight = 550
+  ClientWidth = 748
+  Color = clBtnFace
+  Constraints.MaxHeight = 554
+  Constraints.MaxWidth = 748
+  Constraints.MinHeight = 550
+  Constraints.MinWidth = 748
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  LCLVersion = '1.0.12.0'
+  Visible = True
+  object PageControl: TPageControl
+    Left = 0
+    Height = 441
+    Top = 86
+    Width = 748
+    ActivePage = TabBRecv
+    Align = alBottom
+    TabIndex = 1
+    TabOrder = 5
+    object TabBSend: TTabSheet
+      Caption = 'BSend'
+      ClientHeight = 409
+      ClientWidth = 742
+      object Label1: TLabel
+        Left = 608
+        Height = 14
+        Top = 8
+        Width = 25
+        Caption = 'R_ID'
+        ParentColor = False
+      end
+      object Label4: TLabel
+        Left = 608
+        Height = 14
+        Top = 48
+        Width = 20
+        Caption = 'Size'
+        ParentColor = False
+      end
+      object DataGrid: TStringGrid
+        Left = 0
+        Height = 415
+        Top = 0
+        Width = 601
+        Align = alLeft
+        ColCount = 17
+        DefaultColWidth = 32
+        DefaultDrawing = False
+        DefaultRowHeight = 18
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Courier New'
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goEditing]
+        ParentFont = False
+        RowCount = 4097
+        TabOrder = 0
+        TitleFont.CharSet = ANSI_CHARSET
+        TitleFont.Color = clWindowText
+        TitleFont.Height = -12
+        TitleFont.Name = 'Courier New'
+        OnDrawCell = DataGridDrawCell
+        OnExit = DataGridExit
+        OnKeyPress = DataGridKeyPress
+      end
+      object Ed_R_ID: TEdit
+        Left = 605
+        Height = 21
+        Top = 24
+        Width = 105
+        TabOrder = 1
+        Text = '$00000001'
+      end
+      object EdAmount: TEdit
+        Left = 605
+        Height = 21
+        Top = 64
+        Width = 105
+        TabOrder = 2
+        Text = '256'
+      end
+      object BsendBtn: TButton
+        Left = 607
+        Height = 25
+        Top = 104
+        Width = 102
+        Caption = 'BSend'
+        OnClick = BsendBtnClick
+        TabOrder = 3
+      end
+      object AsBsendBtn: TButton
+        Left = 607
+        Height = 25
+        Top = 144
+        Width = 102
+        Caption = 'Async BSend'
+        OnClick = AsBsendBtnClick
+        TabOrder = 4
+      end
+      object ChkSend: TCheckBox
+        Left = 607
+        Height = 19
+        Top = 184
+        Width = 80
+        Caption = 'Cyclic BSend'
+        OnClick = ChkSendClick
+        TabOrder = 5
+      end
+    end
+    object TabBRecv: TTabSheet
+      Caption = 'BRecv'
+      ClientHeight = 415
+      ClientWidth = 740
+      ImageIndex = 1
+      object lbldump: TLabel
+        Left = 4
+        Height = 14
+        Top = 8
+        Width = 100
+        Caption = 'Data Dump : 0 bytes'
+        ParentColor = False
+      end
+      object Label8: TLabel
+        Left = 529
+        Height = 14
+        Top = 8
+        Width = 25
+        Caption = 'R_ID'
+        ParentColor = False
+      end
+      object Label13: TLabel
+        Left = 532
+        Height = 14
+        Top = 156
+        Width = 63
+        Caption = 'Timeout (ms)'
+        ParentColor = False
+      end
+      object BRecvLbl: TLabel
+        Left = 504
+        Height = 53
+        Top = 245
+        Width = 186
+        Alignment = taCenter
+        Caption = 'After pressing this button, '#10'You should "Bsend" in the PLC. '#10'If not, after "timeout" ms the function '#10'will return errParRecvTimeout'
+        ParentColor = False
+        WordWrap = True
+      end
+      object RxMemo: TMemo
+        Left = 4
+        Height = 375
+        Top = 26
+        Width = 492
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Courier New'
+        ParentFont = False
+        ReadOnly = True
+        ScrollBars = ssVertical
+        TabOrder = 0
+        WordWrap = False
+      end
+      object EdR_ID_In: TEdit
+        Left = 529
+        Height = 21
+        Top = 26
+        Width = 130
+        ReadOnly = True
+        TabOrder = 1
+      end
+      object DataLed: TStaticText
+        Left = 529
+        Height = 19
+        Top = 59
+        Width = 59
+        Alignment = taCenter
+        BorderStyle = sbsSingle
+        Caption = 'DATA'
+        Color = clBtnFace
+        ParentColor = False
+        TabOrder = 2
+        Transparent = False
+      end
+      object EdTimeout: TEdit
+        Left = 529
+        Height = 21
+        Top = 172
+        Width = 132
+        TabOrder = 3
+        Text = '5000'
+      end
+      object BRecvBtn: TButton
+        Left = 532
+        Height = 25
+        Top = 208
+        Width = 102
+        Caption = 'BRecv'
+        OnClick = BRecvBtnClick
+        TabOrder = 4
+      end
+    end
+    object TabStat: TTabSheet
+      Caption = 'Statistics'
+      ClientHeight = 409
+      ClientWidth = 742
+      ImageIndex = 2
+      object Label10: TLabel
+        Left = 8
+        Height = 15
+        Top = 35
+        Width = 61
+        Caption = 'Bytes sent'
+        ParentColor = False
+      end
+      object Label11: TLabel
+        Left = 8
+        Height = 15
+        Top = 67
+        Width = 86
+        Caption = 'Bytes received'
+        ParentColor = False
+      end
+      object EdSent: TEdit
+        Left = 109
+        Height = 24
+        Top = 32
+        Width = 135
+        ReadOnly = True
+        TabStop = False
+        TabOrder = 0
+        Text = '0'
+      end
+      object EdRecv: TEdit
+        Left = 109
+        Height = 24
+        Top = 64
+        Width = 135
+        ReadOnly = True
+        TabStop = False
+        TabOrder = 1
+        Text = '0'
+      end
+    end
+  end
+  object SB: TStatusBar
+    Left = 0
+    Height = 23
+    Top = 527
+    Width = 748
+    Panels = <    
+      item
+        Text = 'Connecting'
+        Width = 100
+      end    
+      item
+        Width = 100
+      end    
+      item
+        Width = 200
+      end>
+    SimplePanel = False
+  end
+  object GR_Remote: TGroupBox
+    Left = 212
+    Height = 73
+    Top = 7
+    Width = 207
+    Caption = 'Remote Partner (PLC)'
+    ClientHeight = 55
+    ClientWidth = 203
+    TabOrder = 1
+    object Label5: TLabel
+      Left = 13
+      Height = 14
+      Top = 7
+      Width = 11
+      Caption = 'IP'
+      ParentColor = False
+    end
+    object Label6: TLabel
+      Left = 129
+      Height = 14
+      Top = 7
+      Width = 55
+      Caption = 'TSAP (hex)'
+      ParentColor = False
+    end
+    object Label7: TLabel
+      Left = 152
+      Height = 24
+      Top = 22
+      Width = 7
+      Alignment = taCenter
+      Caption = '.'
+      Font.Color = clWindowText
+      Font.Height = -19
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object EdRemoteIP: TEdit
+      Left = 10
+      Height = 21
+      Top = 22
+      Width = 98
+      TabOrder = 0
+      Text = '192.168.0.65'
+    end
+    object EdRemTsapHI: TEdit
+      Left = 114
+      Height = 21
+      Top = 22
+      Width = 35
+      Alignment = taCenter
+      TabOrder = 1
+      Text = '10'
+    end
+    object EdRemTsapLO: TEdit
+      Left = 162
+      Height = 21
+      Top = 22
+      Width = 37
+      Alignment = taCenter
+      TabOrder = 2
+      Text = '02'
+    end
+  end
+  object StartBtn: TButton
+    Left = 422
+    Height = 25
+    Top = 14
+    Width = 63
+    Caption = 'Start'
+    OnClick = StartBtnClick
+    TabOrder = 2
+  end
+  object StopBtn: TButton
+    Left = 422
+    Height = 25
+    Top = 54
+    Width = 63
+    Caption = 'Stop'
+    OnClick = StopBtnClick
+    TabOrder = 3
+  end
+  object GR_local: TGroupBox
+    Left = 3
+    Height = 73
+    Top = 7
+    Width = 207
+    Caption = 'Local Partner (Smart7)'
+    ClientHeight = 55
+    ClientWidth = 203
+    TabOrder = 0
+    object Label2: TLabel
+      Left = 13
+      Height = 14
+      Top = 7
+      Width = 11
+      Caption = 'IP'
+      ParentColor = False
+    end
+    object Label3: TLabel
+      Left = 129
+      Height = 14
+      Top = 7
+      Width = 55
+      Caption = 'TSAP (hex)'
+      ParentColor = False
+    end
+    object Label9: TLabel
+      Left = 152
+      Height = 24
+      Top = 22
+      Width = 7
+      Alignment = taCenter
+      Caption = '.'
+      Font.Color = clWindowText
+      Font.Height = -19
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object EdLocalIP: TEdit
+      Left = 10
+      Height = 21
+      Top = 22
+      Width = 98
+      TabOrder = 0
+      Text = '0.0.0.0'
+    end
+    object EdLocTsapHI: TEdit
+      Left = 114
+      Height = 21
+      Top = 22
+      Width = 35
+      Alignment = taCenter
+      TabOrder = 1
+      Text = '10'
+    end
+    object EdLocTsapLO: TEdit
+      Left = 162
+      Height = 21
+      Top = 22
+      Width = 37
+      Alignment = taCenter
+      TabOrder = 2
+      Text = '02'
+    end
+  end
+  object RGMode: TRadioGroup
+    Left = 488
+    Height = 81
+    Top = 3
+    Width = 103
+    AutoFill = True
+    Caption = 'BSend As Mode'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    ClientHeight = 63
+    ClientWidth = 99
+    ItemIndex = 0
+    Items.Strings = (
+      'Polling'
+      'Idle wait'
+      'Callback'
+    )
+    OnClick = RGModeClick
+    TabOrder = 4
+  end
+  object ARGMode: TRadioGroup
+    Left = 595
+    Height = 81
+    Top = 3
+    Width = 151
+    AutoFill = True
+    Caption = 'BRecv Mode'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    ClientHeight = 63
+    ClientWidth = 147
+    ItemIndex = 2
+    Items.Strings = (
+      'Sync with polling'
+      'Sync with idle wait'
+      'Async with callback'
+    )
+    OnClick = ARGModeClick
+    TabOrder = 7
+  end
+  object TLed: TTimer
+    Interval = 300
+    OnTimer = TLedTimer
+    left = 680
+    top = 472
+  end
+  object TBsend: TTimer
+    Enabled = False
+    Interval = 500
+    OnTimer = TBsendTimer
+    left = 640
+    top = 472
+  end
+  object TStat: TTimer
+    Interval = 100
+    OnTimer = TStatTimer
+    left = 680
+    top = 424
+  end
+  object TBRecv: TTimer
+    Enabled = False
+    Interval = 50
+    OnTimer = TBRecvTimer
+    left = 640
+    top = 424
+  end
+end

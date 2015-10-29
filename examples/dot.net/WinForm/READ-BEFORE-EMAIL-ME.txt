@@ -1,0 +1,5 @@
+There is a new chapter into the online (and offline documentation):
+.NET Environment
+
+Please read it and follow all suggestions before email me.
+Thanks

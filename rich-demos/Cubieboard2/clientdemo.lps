@@ -1,0 +1,141 @@
+<?xml version="1.0"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="9"/>
+    <BuildModes Active="Default"/>
+    <Units Count="9">
+      <Unit0>
+        <Filename Value="clientdemo.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="clientdemo"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="0"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="1" Y="17"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="..\unit1.pas"/>
+        <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Unit1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="9" Y="4"/>
+        <UsageCount Value="20"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="..\mainclient.lfm"/>
+        <UsageCount Value="20"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="..\rootinfo.lfm"/>
+        <UsageCount Value="20"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="clientdemo.lps"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="3"/>
+        <CursorPos X="13" Y="26"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="XML"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="..\mainclient.pas"/>
+        <ComponentName Value="FormClient"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="mainclient"/>
+        <EditorIndex Value="3"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1537"/>
+        <CursorPos X="29" Y="1552"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="..\sc_info.pas"/>
+        <ComponentName Value="SmartConnectInfo"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="sc_info"/>
+        <EditorIndex Value="4"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="5"/>
+        <CursorPos X="38" Y="26"/>
+        <ComponentState Value="1"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="..\snap7.pas"/>
+        <UnitName Value="snap7"/>
+        <EditorIndex Value="2"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="545"/>
+        <CursorPos X="7" Y="64"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="..\cp_info.pas"/>
+        <UnitName Value="cp_info"/>
+        <EditorIndex Value="1"/>
+        <WindowIndex Value="0"/>
+        <TopLine Value="1"/>
+        <CursorPos X="20" Y="26"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit8>
+    </Units>
+    <General>
+      <ActiveWindowIndexAtStart Value="0"/>
+    </General>
+    <JumpHistory Count="9" HistoryIndex="8">
+      <Position1>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="393" Column="14" TopLine="393"/>
+      </Position1>
+      <Position2>
+        <Filename Value="clientdemo.lpr"/>
+        <Caret Line="21" Column="41" TopLine="1"/>
+      </Position2>
+      <Position3>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="534" Column="52" TopLine="521"/>
+      </Position3>
+      <Position4>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="16" Column="25" TopLine="6"/>
+      </Position4>
+      <Position5>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="1" Column="11" TopLine="1"/>
+      </Position5>
+      <Position6>
+        <Filename Value="clientdemo.lpr"/>
+        <Caret Line="22" Column="34" TopLine="1"/>
+      </Position6>
+      <Position7>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="1143" Column="3" TopLine="1132"/>
+      </Position7>
+      <Position8>
+        <Filename Value="..\mainclient.pas"/>
+        <Caret Line="2075" Column="15" TopLine="2052"/>
+      </Position8>
+      <Position9>
+        <Filename Value="..\snap7.pas"/>
+        <Caret Line="64" Column="7" TopLine="545"/>
+      </Position9>
+    </JumpHistory>
+  </ProjectSession>
+</CONFIG>

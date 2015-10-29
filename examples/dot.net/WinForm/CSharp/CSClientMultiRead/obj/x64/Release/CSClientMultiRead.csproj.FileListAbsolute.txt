@@ -1,0 +1,8 @@
+C:\Snap7\Deploy-1.4.0\snap7-full-1.4.0\examples\dot.net\WinForm\CSharp\bin\x64\CSClientMultiRead.exe.config
+C:\Snap7\Deploy-1.4.0\snap7-full-1.4.0\examples\dot.net\WinForm\CSharp\bin\x64\CSClientMultiRead.exe
+C:\Snap7\Deploy-1.4.0\snap7-full-1.4.0\examples\dot.net\WinForm\CSharp\bin\x64\CSClientMultiRead.pdb
+C:\Snap7\Deploy-1.4.0\snap7-full-1.4.0\examples\dot.net\WinForm\CSharp\CSClientMultiRead\obj\x64\Release\CSClientMultiRead.Form1.resources
+C:\Snap7\Deploy-1.4.0\snap7-full-1.4.0\examples\dot.net\WinForm\CSharp\CSClientMultiRead\obj\x64\Release\CSClientMultiRead.Properties.Resources.resources
+C:\Snap7\Deploy-1.4.0\snap7-full-1.4.0\examples\dot.net\WinForm\CSharp\CSClientMultiRead\obj\x64\Release\CSClientMultiRead.csproj.GenerateResource.Cache
+C:\Snap7\Deploy-1.4.0\snap7-full-1.4.0\examples\dot.net\WinForm\CSharp\CSClientMultiRead\obj\x64\Release\CSClientMultiRead.exe
+C:\Snap7\Deploy-1.4.0\snap7-full-1.4.0\examples\dot.net\WinForm\CSharp\CSClientMultiRead\obj\x64\Release\CSClientMultiRead.pdb

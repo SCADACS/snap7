@@ -1,0 +1,6 @@
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinConsole\bin\x86\SrvResourceless.exe.config
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinConsole\bin\x86\SrvResourceless.exe
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinConsole\bin\x86\SrvResourceless.pdb
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinConsole\SrvResourceless\obj\x86\Debug\SrvResourceless.csprojResolveAssemblyReference.cache
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinConsole\SrvResourceless\obj\x86\Debug\SrvResourceless.exe
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinConsole\SrvResourceless\obj\x86\Debug\SrvResourceless.pdb

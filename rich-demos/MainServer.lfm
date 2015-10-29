@@ -1,0 +1,276 @@
+object FrmServer: TFrmServer
+  Left = 230
+  Height = 643
+  Top = 126
+  Width = 815
+  Caption = 'Server Demo'
+  ClientHeight = 643
+  ClientWidth = 815
+  Color = clBtnFace
+  Constraints.MinWidth = 760
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  Position = poScreenCenter
+  LCLVersion = '1.4.0.4'
+  object Splitter1: TSplitter
+    Cursor = crVSplit
+    Left = 0
+    Height = 3
+    Top = 362
+    Width = 815
+    Align = alBottom
+    Color = clMedGray
+    ParentColor = False
+    ResizeAnchor = akBottom
+  end
+  object Log: TMemo
+    Left = 0
+    Height = 255
+    Top = 365
+    Width = 815
+    Align = alBottom
+    Font.CharSet = ANSI_CHARSET
+    Font.Color = clBlack
+    Font.Height = -12
+    Font.Name = 'Courier New'
+    ParentFont = False
+    ReadOnly = True
+    ScrollBars = ssVertical
+    TabOrder = 0
+  end
+  object SB: TStatusBar
+    Left = 0
+    Height = 23
+    Top = 620
+    Width = 815
+    Panels = <    
+      item
+        Width = 80
+      end    
+      item
+        Width = 100
+      end    
+      item
+        Width = 50
+      end>
+    SimplePanel = False
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 362
+    Top = 0
+    Width = 129
+    Align = alLeft
+    BevelOuter = bvNone
+    ClientHeight = 362
+    ClientWidth = 129
+    TabOrder = 2
+    object Label1: TLabel
+      Left = 14
+      Height = 13
+      Top = 3
+      Width = 66
+      Caption = 'Local Address'
+      ParentColor = False
+    end
+    object StartBtn: TButton
+      Left = 14
+      Height = 25
+      Top = 62
+      Width = 97
+      Caption = 'Start'
+      OnClick = StartBtnClick
+      TabOrder = 0
+    end
+    object EdIP: TEdit
+      Left = 14
+      Height = 21
+      Top = 22
+      Width = 97
+      TabOrder = 1
+      Text = '0.0.0.0'
+    end
+    object StopBtn: TButton
+      Left = 14
+      Height = 25
+      Top = 102
+      Width = 97
+      Caption = 'Stop'
+      OnClick = StopBtnClick
+      TabOrder = 2
+    end
+  end
+  object PC: TPageControl
+    Left = 129
+    Height = 362
+    Top = 0
+    Width = 686
+    ActivePage = TabSheet1
+    Align = alClient
+    Constraints.MinHeight = 308
+    TabIndex = 0
+    TabOrder = 3
+    object TabSheet1: TTabSheet
+      Caption = 'Log Mask'
+      ClientHeight = 336
+      ClientWidth = 678
+      object Label2: TLabel
+        Left = 8
+        Height = 13
+        Top = 314
+        Width = 24
+        Caption = 'Mask'
+        ParentColor = False
+      end
+      object lblMask: TLabel
+        Left = 56
+        Height = 14
+        Top = 314
+        Width = 73
+        AutoSize = False
+        Caption = '$00000000'
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -12
+        Font.Name = 'Courier New'
+        ParentColor = False
+        ParentFont = False
+      end
+      object List: TCheckListBox
+        Left = 8
+        Height = 287
+        Top = 18
+        Width = 660
+        BorderStyle = bsNone
+        Columns = 2
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Courier New'
+        Items.Strings = (
+          '  evcServerStarted       : $00000001'
+          '  evcServerStopped       : $00000002'
+          '  evcListenerCannotStart : $00000004'
+          '  evcClientAdded         : $00000008'
+          '  evcClientRejected      : $00000010'
+          '  evcClientNoRoom        : $00000020'
+          '  evcClientException     : $00000040'
+          '  evcClientDisconnected  : $00000080'
+          '  evcClientTerminated    : $00000100'
+          '  evcClientsDropped      : $00000200'
+          '  evcReserved_0400       : $00000400'
+          '  evcReserved_0800       : $00000800'
+          '  evcReserved_1000       : $00001000'
+          '  evcReserved_2000       : $00002000'
+          '  evcReserved_4000       : $00004000'
+          '  evcReserved_8000       : $00008000'
+          '  evcPDUincoming         : $00010000'
+          '  evcDataRead            : $00020000'
+          '  evcDataWrite           : $00040000'
+          '  evcNegotiatePDU        : $00080000'
+          '  evcReadSZL             : $00100000'
+          '  evcClock               : $00200000'
+          '  evcUpload              : $00400000'
+          '  evcDirectory           : $00800000'
+          '  evcSecurity            : $01000000'
+          '  evcControl             : $02000000'
+          '  evcReserved_04000000   : $04000000'
+          '  evcReserved_08000000   : $08000000'
+          '  evcReserved_10000000   : $10000000'
+          '  evcReserved_20000000   : $20000000'
+          '  evcReserved_40000000   : $40000000'
+          '  evcReserved_80000000   : $80000000'
+        )
+        ItemHeight = 17
+        OnClick = ListClick
+        ParentFont = False
+        TabOrder = 0
+        Data = {
+          2000000000000000000000000000000000000000000000000000000000000000
+          00000000
+        }
+      end
+    end
+    object TabSheet2: TTabSheet
+      Caption = 'DB 1'
+      ClientHeight = 332
+      ClientWidth = 680
+      ImageIndex = 1
+      object MemoDB1: TMemo
+        Left = 0
+        Height = 332
+        Top = 0
+        Width = 680
+        Align = alClient
+        BorderStyle = bsNone
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -12
+        Font.Name = 'Courier New'
+        ParentFont = False
+        ReadOnly = True
+        ScrollBars = ssVertical
+        TabOrder = 0
+      end
+    end
+    object TabSheet3: TTabSheet
+      Caption = 'DB 2'
+      ClientHeight = 332
+      ClientWidth = 680
+      ImageIndex = 2
+      object MemoDB2: TMemo
+        Left = 0
+        Height = 332
+        Top = 0
+        Width = 680
+        Align = alClient
+        BorderStyle = bsNone
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -12
+        Font.Name = 'Courier New'
+        ParentFont = False
+        ReadOnly = True
+        ScrollBars = ssVertical
+        TabOrder = 0
+      end
+    end
+    object TabSheet4: TTabSheet
+      Caption = 'DB 3'
+      ClientHeight = 332
+      ClientWidth = 680
+      ImageIndex = 3
+      object MemoDB3: TMemo
+        Left = 0
+        Height = 332
+        Top = 0
+        Width = 680
+        Align = alClient
+        BorderStyle = bsNone
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -12
+        Font.Name = 'Courier New'
+        ParentFont = False
+        ReadOnly = True
+        ScrollBars = ssVertical
+        TabOrder = 0
+      end
+    end
+  end
+  object EvtTimer: TTimer
+    Interval = 100
+    OnTimer = EvtTimerTimer
+    left = 88
+    top = 240
+  end
+  object LogTimer: TTimer
+    Interval = 10
+    OnTimer = LogTimerTimer
+    left = 24
+    top = 240
+  end
+end

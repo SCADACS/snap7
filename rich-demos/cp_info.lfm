@@ -1,0 +1,57 @@
+object ParamsConnectInfo: TParamsConnectInfo
+  Left = 264
+  Height = 381
+  Top = 274
+  Width = 726
+  BorderIcons = []
+  BorderStyle = bsDialog
+  Caption = 'Info about connection params'
+  ClientHeight = 381
+  ClientWidth = 726
+  Position = poScreenCenter
+  LCLVersion = '0.9.30.4'
+  object Memo1: TMemo
+    Cursor = crHelp
+    Left = 0
+    Height = 312
+    Top = 0
+    Width = 726
+    Align = alTop
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -15
+    Font.Name = 'Courier New'
+    Font.Pitch = fpFixed
+    Font.Quality = fqDraft
+    Lines.Strings = (
+      'CPU S7 300/400/1200/1500/WinAC - Use Rack/Slot TAB'
+      ''
+      '"Connect as" is the Connection Type, [PG/OP/S7 Basic].'
+      'Each one is good enough.'
+      ''
+      'S7300  : Rack 0 - Slot 2'
+      'S7400  : Depends on the hardware configuration (Rack 0 - Slot 3 should be good)'
+      'S71200 : Rack 0 - Slot 0'
+      'S71500 : Rack 0 - Slot 0'
+      'WinAC  : Rack 0 - Slot See the Station Configuration.'
+      ''
+      ''
+      'CPU S7200/LOGO 0BA7/LOGO 8 - Use TSAP TAB'
+      ''
+      'S7200  : LocTSAP 4D.57 - RemTSAP 4D.57 (or 02.00 - 02.00)'
+      'LOGO   : Depends on Tools->Ethernet Connections of LOGOComfort.'
+    )
+    OnChange = Memo1Change
+    ParentFont = False
+    ReadOnly = True
+    TabOrder = 0
+  end
+  object Button1: TButton
+    Left = 296
+    Height = 25
+    Top = 336
+    Width = 75
+    Caption = 'OK'
+    ModalResult = 11
+    TabOrder = 1
+  end
+end

@@ -1,0 +1,12 @@
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB_Mixed\VBClient\bin\x64\VBClient.exe
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB_Mixed\VBClient\bin\x64\VBClient.pdb
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB_Mixed\VBClient\bin\x64\VBClient.xml
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB_Mixed\VBClient\bin\x64\Snap7.net.dll
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB_Mixed\VBClient\bin\x64\Snap7.net.pdb
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB_Mixed\VBClient\obj\x64\Debug\VBClient.vbprojResolveAssemblyReference.cache
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB_Mixed\VBClient\obj\x64\Debug\VBClient.MainForm.resources
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB_Mixed\VBClient\obj\x64\Debug\VBClient.Resources.resources
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB_Mixed\VBClient\obj\x64\Debug\VBClient.vbproj.GenerateResource.Cache
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB_Mixed\VBClient\obj\x64\Debug\VBClient.exe
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB_Mixed\VBClient\obj\x64\Debug\VBClient.xml
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB_Mixed\VBClient\obj\x64\Debug\VBClient.pdb
