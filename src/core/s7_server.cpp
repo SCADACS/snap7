@@ -1116,7 +1116,7 @@ bool TS7Worker::PerformGroupProgrammer()
     // there is a second kind of GP, a LED blink request w. subfunc 0x16,
     // might implement this when I get a PLC supporting it.
     PGPReqParams ReqParams;
-    PGPResData ReqData;
+    PGPReqData ReqData;
     PGPResParams ResParams;
     PGPResData ResData;
     TS7Answer17 Answer;
@@ -1126,7 +1126,7 @@ bool TS7Worker::PerformGroupProgrammer()
     byte job_id = 0;
 
     ReqParams=PGPReqParams(pbyte(PDUH_in)+ReqHeaderSize);
-    ReqData  =PGPResData(pbyte(PDUH_in)+ReqHeaderSize+sizeof(TGPReqParams));
+    ReqData  =PGPReqData(pbyte(PDUH_in)+ReqHeaderSize+sizeof(TGPReqParams));
     ResParams=PGPResParams(pbyte(&Answer)+ResHeaderSize17);
     ResData  =PGPResData(pbyte(ResParams)+sizeof(TGPResParams));
 

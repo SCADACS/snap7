@@ -163,12 +163,12 @@ const byte DIAG_REGISTER_DI     = 0x40;
 
 
 //------------------------------------------------------------------------------
-//                                  PARAMS LIST            
+//                                  PARAMS LIST
 // Notes for Local/Remote Port
 //   If the local port for a server and remote port for a client is != 102 they
 //   will be *no more compatible with S7 IsoTCP*
 //   A good reason to change them could be inside a debug session under Unix.
-//   Increasing the port over 1024 avoids the need of be root. 
+//   Increasing the port over 1024 avoids the need of be root.
 //   Obviously you need to work with the couple Snap7Client/Snap7Server and change
 //   both, or, use iptable and nat the port.
 //------------------------------------------------------------------------------
@@ -191,12 +191,12 @@ const int p_u32_KeepAliveTime   = 15;
 // Bool param is passed as int32_t : 0->false, 1->true
 // String param (only set) is passed as pointer
 
-typedef int16_t   *Pint16_t;     
-typedef uint16_t  *Puint16_t;     
-typedef int32_t   *Pint32_t;     
-typedef uint32_t  *Puint32_t;     
-typedef int64_t   *Pint64_t;     
-typedef uint64_t  *Puint64_t;     
+typedef int16_t   *Pint16_t;
+typedef uint16_t  *Puint16_t;
+typedef int32_t   *Pint32_t;
+typedef uint32_t  *Puint32_t;
+typedef int64_t   *Pint64_t;
+typedef uint64_t  *Puint64_t;
 typedef uintptr_t *Puintptr_t;
 //-----------------------------------------------------------------------------
 //                               INTERNALS CONSTANTS
@@ -1096,7 +1096,7 @@ typedef struct {
 typedef TGPData TGPResData;
 typedef TGPResData* PGPResData;
 typedef TGPData TGPReqData;
-typedef TGPReqData* PGPResData;
+typedef TGPReqData* PGPReqData;
 
 typedef TS7Params7 TGPResParams;
 typedef TGPResParams* PGPResParams;
