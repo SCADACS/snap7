@@ -1,1 +1,0 @@
-For BSD use gmake (clean|all) instead of make.

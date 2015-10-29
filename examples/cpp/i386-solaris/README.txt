@@ -1,1 +1,0 @@
-For Solaris 11 use gmake (clean|all) instead of make.
