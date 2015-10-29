@@ -928,6 +928,11 @@ bool TS7Worker::PerformFunctionUpload()
     DoEvent(evcUpload,0,BlkType,BlkNum,0,0);
     area = FServer->getArea(BlkType)->Find(BlkNum);
 
+    if (!area) {
+        // TODO reply with proper error
+        return false;
+    }
+
 
     Answer.Header.P=0x32;
     Answer.Header.PDUType =PduType_response;
@@ -1144,6 +1149,113 @@ bool TS7Worker::PerformGroupProgrammer()
     ResParams->resvd =0x0000;
     ResParams->Err   =0x0000;
 
+    // vartable
+    if (ReqParams->SubFun == SFun_VarTab) {
+        // TODO validate count!!!!!!
+        word item_count = SwapWord(*((word*)&ReqData->Data[24]));
+        VarTabItem* items = (VarTabItem*) &ReqData->Data[26];
+
+        //printf("C: %d I1: r: %d d: %d s: %d\n", item_count, items[0].repetition_factor, items[0].db_number, items[0].start_address);
+
+        // ACK request
+        ResData->FF = 0x0A;
+        ResData->TRSize = 0;
+        ResData->DataLength = 0;
+        Answer.Header.DataLen=0x0400;
+        dlen = 8;
+
+        TotalSize = 10 + sizeof(PGPResParams) + dlen;
+        isoSendBuffer(&Answer,TotalSize);
+
+        // send follow packet with requested values
+        ResParams->Tg = 0x01; // follow
+        ResData->FF = 0xFF;
+        ResData->TRSize = TS_ResOctet;
+
+        // - type response
+        ResData->Data[0] = 0x00;
+        ResData->Data[1] = 0x04;
+        // - unknown bytes
+        ResData->Data[4] = 0x01;
+        ResData->Data[5] = 0x00;
+        ResData->Data[6] = 0x00;
+        ResData->Data[7] = 0x01;
+
+        // number of items
+        *((word*)&ResData->Data[8]) = SwapWord(item_count);
+        // populate items
+        size_t offset = 10;
+        for (word i = 0; i < item_count; i++) {
+            //printf("i: %d o: %d\n", i, offset);
+            VarTabItem item = items[i];
+            item.start_address = SwapWord(item.start_address);
+            byte dt_width = item.getDataTypeLength();
+            byte data_length = dt_width * item.repetition_factor;
+            PS7Area memory_area;
+            pbyte memory;
+            word memory_size;
+
+            //printf("dtw: %d dlen: %d\n", dt_width, data_length);
+
+            switch (item.getMemoryArea()) {
+                case VT_M:
+                    memory_area = FServer->HA[srvAreaMK];
+                    break;
+                case VT_E:
+                    memory_area = FServer->HA[srvAreaPE];
+                    break;
+                case VT_A:
+                    memory_area = FServer->HA[srvAreaPA];
+                    break;
+                case VT_DB:
+                    memory_area = FServer->DBArea->Find(item.db_number);
+                    break;
+
+            }
+
+            // validate memory presence and valid access
+            if (!memory_area || (item.start_address + dt_width) > memory_area->Size) {
+                // object does not exist
+                ResData->Data[offset++] = 0x0a;
+                // no transport size
+                ResData->Data[offset++] = 0x00;
+                // no data
+                ResData->Data[offset++] = 0x00;
+                continue;
+            } else {
+                memory = memory_area->PData;
+                memory_size = memory_area->Size;
+            }
+            // success
+            ResData->Data[offset++] = 0xFF;
+            // TRSize
+            ResData->Data[offset++] = TS_ResOctet;
+
+            // data length
+            *((word*)&ResData->Data[offset]) = SwapWord(data_length);
+            offset += 2;
+
+            memcpy(ResData->Data + offset, memory + item.start_address, data_length);
+            offset += data_length;
+
+            //if (dt_width == 2) {
+            //    printf("AS: %p %p %p %d %d\n", memory, memory + item.start_address, &memory[2], memory[3], item.start_address);
+            //}
+
+            if (dt_width == 1) {
+                // add fill byte
+                ResData->Data[offset++] = 0;
+            }
+
+        }
+        Answer.Header.DataLen= SwapWord(offset + 4);
+        ResData->DataLength = SwapWord(offset);
+        // item length...
+        *((word*)&ResData->Data[2]) = SwapWord(offset - 8);
+        //printf("L: %d\n", offset - 8);
+
+        dlen = offset + 9;
+    }
     // Request Diag Data Type 2
     if (ReqParams->SubFun == SFun_ReqDiagT2
             || ReqParams->SubFun == SFun_ReadDiag
@@ -1284,7 +1396,7 @@ bool TS7Worker::PerformGroupProgrammer()
     }
 
     // TODO what was that????
-    if (ReqParams->SubFun == 0x02) {
+    if (false && ReqParams->SubFun == 0x02) {
         Answer.Header.DataLen=SwapWord(4);
         ResData->FF = 0x0a;
         ResData->TRSize = 0x00;

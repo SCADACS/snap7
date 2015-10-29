@@ -153,6 +153,27 @@ typedef struct {
 	int Len;
 }TCSZL;
 
+typedef enum : byte {
+    // TODO add other types
+    VT_M  = 0x0,
+    VT_E  = 0x1,
+    VT_A  = 0x2,
+    VT_DB = 0x7
+} VarTabMemoryArea;
+
+typedef struct {
+    VarTabMemoryArea memory_area_and_dt_width;
+    byte repetition_factor;
+    word db_number;
+    word start_address;
+    VarTabMemoryArea getMemoryArea() {
+        return (VarTabMemoryArea) (memory_area_and_dt_width >> 4);
+    }
+    byte getDataTypeLength() {
+        return memory_area_and_dt_width & 0x0F;
+    }
+} VarTabItem;
+
 class TSnap7Server; // forward declaration
 
 class TS7Worker : public TIsoTcpWorker
