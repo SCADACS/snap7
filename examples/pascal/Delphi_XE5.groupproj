@@ -1,0 +1,72 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{4E836F60-0954-40AF-9C59-898A6B8468F3}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="client.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="server.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="apartner.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="ppartner.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="client">
+        <MSBuild Projects="client.dproj"/>
+    </Target>
+    <Target Name="client:Clean">
+        <MSBuild Projects="client.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="client:Make">
+        <MSBuild Projects="client.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="server">
+        <MSBuild Projects="server.dproj"/>
+    </Target>
+    <Target Name="server:Clean">
+        <MSBuild Projects="server.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="server:Make">
+        <MSBuild Projects="server.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="apartner">
+        <MSBuild Projects="apartner.dproj"/>
+    </Target>
+    <Target Name="apartner:Clean">
+        <MSBuild Projects="apartner.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="apartner:Make">
+        <MSBuild Projects="apartner.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="ppartner">
+        <MSBuild Projects="ppartner.dproj"/>
+    </Target>
+    <Target Name="ppartner:Clean">
+        <MSBuild Projects="ppartner.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="ppartner:Make">
+        <MSBuild Projects="ppartner.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="client;server;apartner;ppartner"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="client:Clean;server:Clean;apartner:Clean;ppartner:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="client:Make;server:Make;apartner:Make;ppartner:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

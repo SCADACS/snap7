@@ -9,7 +9,7 @@ object ParamsConnectInfo: TParamsConnectInfo
   ClientHeight = 381
   ClientWidth = 726
   Position = poScreenCenter
-  LCLVersion = '1.0.12.0'
+  LCLVersion = '0.9.30.4'
   object Memo1: TMemo
     Cursor = crHelp
     Left = 0
@@ -35,7 +35,7 @@ object ParamsConnectInfo: TParamsConnectInfo
       'WinAC  : Rack 0 - Slot See the Station Configuration.'
       ''
       ''
-      'CPU S7200/LOGO 0BA7 - Use TSAP TAB'
+      'CPU S7200/LOGO 0BA7/LOGO 8 - Use TSAP TAB'
       ''
       'S7200  : LocTSAP 4D.57 - RemTSAP 4D.57 (or 02.00 - 02.00)'
       'LOGO   : Depends on Tools->Ethernet Connections of LOGOComfort.'

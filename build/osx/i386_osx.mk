@@ -9,4 +9,3 @@ CXXFLAGS   := -O3 -fPIC -pedantic
 # Standard part
 
 include common.mk
-

@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.2.0 |
+|  PROJECT SNAP7                                                         1.3.0 |
 |==============================================================================|
-|  Copyright (C) 2013, 2014 Davide Nardella                                    |
+|  Copyright (C) 2013, 2015 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -258,6 +258,27 @@ bool TS7Worker::CheckPDU_in(int PayloadSize)
         return true;
 }
 //------------------------------------------------------------------------------
+byte TS7Worker::BCD(word Value)
+{
+    return ((Value / 10) << 4) + (Value % 10);
+}
+//------------------------------------------------------------------------------
+void TS7Worker::FillTime(PS7Time PTime)
+{
+    time_t Now;
+    time(&Now);
+    struct tm *DT = localtime (&Now);
+
+    PTime->bcd_year=BCD(DT->tm_year-100);
+    PTime->bcd_mon =BCD(DT->tm_mon+1);
+    PTime->bcd_day =BCD(DT->tm_mday);
+    PTime->bcd_hour=BCD(DT->tm_hour);
+    PTime->bcd_min =BCD(DT->tm_min);
+    PTime->bcd_sec =BCD(DT->tm_sec);
+    PTime->bcd_himsec=0;
+    PTime->bcd_dow =BCD(DT->tm_wday);
+}
+//------------------------------------------------------------------------------
 void TS7Worker::DoEvent(longword Code, word RetCode, word Param1, word Param2,
   word Param3, word Param4)
 {
@@ -369,6 +390,23 @@ bool TS7Worker::PerformPDUUsrData(int &Size)
     };
     return Result;
 }
+//------------------------------------------------------------------------------
+int TS7Worker::DataSizeByte(int WordLength)
+{
+	switch (WordLength){
+		case S7WLBit     : return 1;  // S7 sends 1 byte per bit
+		case S7WLByte    : return 1;
+		case S7WLChar    : return 1;
+		case S7WLWord    : return 2;
+		case S7WLDWord   : return 4;
+		case S7WLInt     : return 2;
+		case S7WLDInt    : return 4;
+		case S7WLReal    : return 4;
+		case S7WLCounter : return 2;
+		case S7WLTimer   : return 2;
+		default          : return 0;
+     }
+}
 //==============================================================================
 // FUNCTION READ
 //==============================================================================
@@ -417,12 +455,11 @@ word TS7Worker::ReadArea(PResFunReadItem ResItemData, PReqFunReadItem ReqItemPar
      int &PDURemainder, TEv &EV)
 {
     PS7Area P;
-    word DBNum;
-    longword Start, Size, ASize;
-    longword OriginalSize;
+	word DBNum, Elements;
+    longword Start, Size, ASize, AStart;
     longword *PAdd;
     byte BitIndex, ByteVal;
-    int Multiplier;
+	int Multiplier;
     void *Source;
     PSnapCriticalSection pcs;
 
@@ -435,30 +472,23 @@ word TS7Worker::ReadArea(PResFunReadItem ResItemData, PReqFunReadItem ReqItemPar
     EV.EvArea=ReqItemPar->Area;
     // Get Pointer to selected Area
 
-    if (ReqItemPar->Area==S7AreaDB)
-    {
-            DBNum=SwapWord(ReqItemPar->DBNumber);
-            EV.EvIndex=DBNum;
-    };
-    P=GetArea(ReqItemPar->Area, DBNum);
+	if (ReqItemPar->Area==S7AreaDB)
+	{
+        DBNum=SwapWord(ReqItemPar->DBNumber);
+        EV.EvIndex=DBNum;
+	};
 
-    if (P==NULL)
-        return RA_NotFound(ResItemData, EV);
-
-    pcs=P->cs;
+	if (!FServer->ResourceLess)
+	{
+		P = GetArea(ReqItemPar->Area, DBNum);
+		if (P == NULL)
+			return RA_NotFound(ResItemData, EV);
+	}
 
     // Calcs the amount
-    switch (ReqItemPar->TransportSize)
-    {
-        case S7WLBit     : Multiplier=1; break;
-        case S7WLByte    : Multiplier=1; break;
-        case S7WLWord    : Multiplier=2; break;
-        case S7WLDWord   : Multiplier=4; break;
-        case S7WLReal    : Multiplier=4; break;
-        case S7WLTimer   : Multiplier=2; break;  // Timers and counters are word
-        case S7WLCounter : Multiplier=2; break;
-        default : return RA_OutOfRange(ResItemData, EV);
-    }
+	Multiplier = DataSizeByte(ReqItemPar->TransportSize);
+	if (Multiplier==0)
+		return RA_OutOfRange(ResItemData, EV);
 
     // Checks timers/counters coherence
     if ((ReqItemPar->Area==S7AreaTM) ^ (ReqItemPar->TransportSize==S7WLTimer))
@@ -468,12 +498,9 @@ word TS7Worker::ReadArea(PResFunReadItem ResItemData, PReqFunReadItem ReqItemPar
         return RA_OutOfRange(ResItemData, EV);
 
     // Calcs size
-    Size=Multiplier*SwapWord(ReqItemPar->Length);
-    OriginalSize=Size;
-    // S7 doesn't xfer odd byte amount
-    if ( Size % 2 != 0)
-       Size++;
-    EV.EvSize=Size;
+	Elements = SwapWord(ReqItemPar->Length);
+	Size=Multiplier*Elements;
+	EV.EvSize=Size;
 
     // The sum of the items must not exceed the PDU size negotiated
     if (PDURemainder-Size<=0)
@@ -481,35 +508,69 @@ word TS7Worker::ReadArea(PResFunReadItem ResItemData, PReqFunReadItem ReqItemPar
     else
         PDURemainder-=Size;
 
-    // More then 1 bit is not supported by S7 CPU (OriginalSize and not Size)
-    if ((ReqItemPar->TransportSize==S7WLBit) && (OriginalSize>1))
+    // More then 1 bit is not supported by S7 CPU
+    if ((ReqItemPar->TransportSize==S7WLBit) && (Size>1))
         return RA_OutOfRange(ResItemData, EV);
 
-    // Calcs the start point
+	// Calcs the start point
     PAdd=(longword*)(&ReqItemPar->Area);   // points to area since we need 4 bytes for a pointer
     Start=SwapDWord(*PAdd & 0xFFFFFF00);
 
-    // Checks if (the address is not multiple of 8 when transport size is not bit
-    if ((ReqItemPar->TransportSize!=S7WLBit) && ((Start % 8) !=0 ))
-        return RA_OutOfRange(ResItemData, EV);
+    // Checks if the address is not multiple of 8 when transport size is neither bit nor timer nor counter
+    if (
+		(ReqItemPar->TransportSize!=S7WLBit) &&
+		(ReqItemPar->TransportSize!=S7WLTimer) &&
+		(ReqItemPar->TransportSize!=S7WLCounter) &&
+		((Start % 8) !=0)
+	   )
+		return RA_OutOfRange(ResItemData, EV);
 
-    BitIndex  =Start & 0x07; // start bit
-    Start     =Start >> 3;   // start byte
-    EV.EvStart=Start;
-    // Checks bounds
-    ASize=P->Size; // Area size
-    if (Start+Size>ASize)
-        return RA_OutOfRange(ResItemData, EV);
+    // AStart is only for callback
+	if ((ReqItemPar->TransportSize != S7WLBit) && (ReqItemPar->TransportSize != S7WLCounter) && (ReqItemPar->TransportSize != S7WLTimer))
+		AStart = Start >> 3;
+	else
+		AStart = Start;
 
-    Source=P->PData+Start;
-    // Read Event (before copy data)
+	if ((ReqItemPar->TransportSize == S7WLCounter) || (ReqItemPar->TransportSize == S7WLTimer))
+	{
+		Start = Start >> 1;   // 1 Timer or Counter = 2 bytes
+	}
+	else
+	{
+		BitIndex  =Start & 0x07; // start bit
+		Start     =Start >> 3;   // start byte
+	}
+
+	EV.EvStart=Start;
+
+	// Checks bounds
+	if (!FServer->ResourceLess)
+	{
+		ASize = P->Size; // Area size
+		if (Start + Size > ASize)
+			return RA_OutOfRange(ResItemData, EV);
+		Source = P->PData + Start;
+	}
+
+	// Read Event (before copy data)
     DoReadEvent(evcDataRead,0,EV.EvArea,EV.EvIndex,EV.EvStart,EV.EvSize);
-    // Lock the area
-    pcs->Enter();
-    // Get Data
-    memcpy(&ResItemData->Data, Source, Size);
-    // Unlock the area
-    pcs->Leave();
+
+	if (FServer->ResourceLess)
+	{
+		memset(&ResItemData->Data, 0, IsoPayload_Size - 17);
+		if (!FServer->DoReadArea(ClientHandle, EV.EvArea, EV.EvIndex, AStart, Elements, ReqItemPar->TransportSize, &ResItemData->Data))
+			return RA_NotFound(ResItemData, EV);
+	}
+	else
+	{
+		// Lock the area
+		pcs = P->cs;
+		pcs->Enter();
+		// Get Data
+		memcpy(&ResItemData->Data, Source, Size);
+		// Unlock the area
+		pcs->Leave();
+	}
 
     ResItemData->ReturnCode=0xFF;
     // Set Result transport size and, for bit, performs the mask
@@ -528,10 +589,16 @@ word TS7Worker::ReadArea(PResFunReadItem ResItemData, PReqFunReadItem ReqItemPar
           ResItemData->DataLength=SwapWord(Size);
         };break;
       case S7WLByte:
-      case S7WLWord:
-      case S7WLDWord:
+	  case S7WLWord:
+	  case S7WLDWord:
         {
           ResItemData->TransportSize=TS_ResByte;
+          ResItemData->DataLength=SwapWord(Size*8);
+        };break;
+	  case S7WLInt:
+	  case S7WLDInt:
+        {
+          ResItemData->TransportSize=TS_ResInt;
           ResItemData->DataLength=SwapWord(Size*8);
         };break;
       case S7WLReal:
@@ -539,11 +606,17 @@ word TS7Worker::ReadArea(PResFunReadItem ResItemData, PReqFunReadItem ReqItemPar
           ResItemData->TransportSize=TS_ResReal;
           ResItemData->DataLength=SwapWord(Size);
         };break;
+      case S7WLChar:
       case S7WLTimer:
       case S7WLCounter:
         {
           ResItemData->TransportSize=TS_ResOctet;
           ResItemData->DataLength=SwapWord(Size);
+        };break;
+      default :
+        {
+          ResItemData->TransportSize=TS_ResByte;
+          ResItemData->DataLength=SwapWord(Size*8);
         };break;
     }
     EV.EvRetCode=evrNoError;
@@ -563,9 +636,9 @@ bool TS7Worker::PerformFunctionRead()
     PDURemainder;
     TEv EV;
 
-    PDURemainder=FPDULength;
+	PDURemainder=FPDULength;
     // Stage 1 : Setup pointers and initial check
-    ReqParams=PReqFunReadParams(pbyte(PDUH_in)+sizeof(TS7ReqHeader));
+	ReqParams=PReqFunReadParams(pbyte(PDUH_in)+sizeof(TS7ReqHeader));
     ResParams=PResFunReadParams(pbyte(&Answer)+ResHeaderSize23);        // Params after the header
 
     // trunk to 20 max items.
@@ -578,9 +651,14 @@ bool TS7Worker::PerformFunctionRead()
     Offset=sizeof(TResFunReadParams);      // = 2
 
     for (c = 0; c < ItemsCount; c++)
-    {
-        ResData[c]=PResFunReadItem(pbyte(ResParams)+Offset);
-        ItemSize=ReadArea(ResData[c],&ReqParams->Items[c],PDURemainder, EV);
+	{
+		ResData[c]=PResFunReadItem(pbyte(ResParams)+Offset);
+		ItemSize=ReadArea(ResData[c],&ReqParams->Items[c],PDURemainder, EV);
+
+        // S7 doesn't xfer odd byte amount
+        if ((c<ItemsCount-1) && (ItemSize % 2 != 0))
+	      ItemSize++;
+
         Offset+=(ItemSize+4);
         // For multiple items we have to create multiple events
         if (ItemsCount>1)
@@ -613,7 +691,7 @@ bool TS7Worker::PerformFunctionRead()
 //==============================================================================
 byte TS7Worker::WA_NotFound(TEv &EV)
 {
-    EV.EvRetCode=evrErrAreaNotFound;
+	EV.EvRetCode=evrErrAreaNotFound;
     return Code7ResItemNotAvailable;
 }
 //------------------------------------------------------------------------------
@@ -638,104 +716,128 @@ byte TS7Worker::WA_DataSizeMismatch(TEv &EV)
 byte TS7Worker::WriteArea(PReqFunWriteDataItem ReqItemData, PReqFunWriteItem ReqItemPar,
      TEv &EV)
 {
-    int Multiplier;
+	int Multiplier;
     PS7Area P = NULL;
-    word DBNum;
+	word DBNum, Elements;
     longword *PAdd;
-    PSnapCriticalSection pcs;
-    longword Start, Size, ASize, DataLen;
-    pbyte Target;
-    byte BitIndex;
+	PSnapCriticalSection pcs;
+	longword Start, Size, ASize, DataLen, AStart;
+	pbyte Target;
+	byte BitIndex;
 
     EV.EvStart   =0;
-    EV.EvSize    =0;
+	EV.EvSize    =0;
     EV.EvRetCode =evrNoError;
     EV.EvIndex   =0;
 
     EV.EvArea=ReqItemPar->Area;
     // Get Pointer to selected Area
-    if (ReqItemPar->Area==S7AreaDB)
-    {
-        DBNum=SwapWord(ReqItemPar->DBNumber);
-        EV.EvIndex=DBNum;
-    };
-    P=GetArea(ReqItemPar->Area, DBNum);
+	if (ReqItemPar->Area==S7AreaDB)
+	{
+		DBNum=SwapWord(ReqItemPar->DBNumber);
+		EV.EvIndex=DBNum;
+	};
 
-    if (P==NULL)
-        return WA_NotFound(EV);
-
-    pcs=P->cs;
+	if (!FServer->ResourceLess)
+	{
+		P=GetArea(ReqItemPar->Area, DBNum);
+		if (P==NULL)
+			return WA_NotFound(EV);
+	}
 
     // Calcs the amount
-    switch(ReqItemPar->TransportSize)
-    {
-        case S7WLBit     : Multiplier=1;break;
-        case S7WLByte    : Multiplier=1;break;
-        case S7WLWord    : Multiplier=2;break;
-        case S7WLDWord   : Multiplier=4;break;
-        case S7WLReal    : Multiplier=4;break;
-        case S7WLTimer   : Multiplier=2;break;  // Timers and counters are word
-        case S7WLCounter : Multiplier=2;break;
-        default          : return WA_InvalidTransportSize(EV);
-    };
+	Multiplier = DataSizeByte(ReqItemPar->TransportSize);
+	if (Multiplier==0)
+		return WA_InvalidTransportSize(EV);
 
     // Checks timers/counters coherence
     if ((ReqItemPar->Area==S7AreaTM) ^ (ReqItemPar->TransportSize==S7WLTimer))
         return WA_OutOfRange(EV);
 
-    if ((ReqItemPar->Area==S7AreaCT) ^ (ReqItemPar->TransportSize==S7WLCounter))
+	if ((ReqItemPar->Area==S7AreaCT) ^ (ReqItemPar->TransportSize==S7WLCounter))
         return WA_OutOfRange(EV);
 
-    // Calcs size
-    Size=Multiplier*SwapWord(ReqItemPar->Length);
+	// Calcs size
+	Elements = SwapWord(ReqItemPar->Length);
+	Size = Multiplier*Elements;
     EV.EvSize=Size;
 
     // More) 1 bit is not supported by S7 CPU
     if ((ReqItemPar->TransportSize==S7WLBit) && (Size>1))
         return WA_OutOfRange(EV);
 
-    // Calcs the start point
+    // Calcs the start point ??
     PAdd=(longword*)&ReqItemPar->Area;   // points to area since we need 4 bytes for a pointer
     Start=SwapDWord(*PAdd & 0xFFFFFF00);
 
-    // Checks if (the address is not multiple of 8 when transport size is not bit
-    if ((ReqItemPar->TransportSize!=S7WLBit) && ((Start % 8) != 0))
-        return WA_OutOfRange(EV);
+    // Checks if the address is not multiple of 8 when transport size is neither bit nor timer nor counter
+    if (
+		(ReqItemPar->TransportSize!=S7WLBit) &&
+		(ReqItemPar->TransportSize!=S7WLTimer) &&
+		(ReqItemPar->TransportSize!=S7WLCounter) &&
+		((Start % 8) !=0)
+	   )
+		return WA_OutOfRange(EV);
 
-    BitIndex   =Start & 0x07; // start bit
-    Start      =Start >> 3;      // start byte
-    EV.EvStart =Start;
-    // Checks bounds
-    ASize=P->Size; // Area size
-    if (Start+Size>ASize)
-        return WA_OutOfRange(EV);
+	// AStart is only for callback
+	if ((ReqItemPar->TransportSize != S7WLBit) && (ReqItemPar->TransportSize != S7WLCounter) && (ReqItemPar->TransportSize != S7WLTimer))
+		AStart = Start >> 3;
+	else
+		AStart = Start;
 
-    Target=pbyte(P->PData+Start);
+	if ((ReqItemPar->TransportSize == S7WLCounter) || (ReqItemPar->TransportSize == S7WLTimer))
+	{
+		Start = Start >> 1;   // 1 Timer or Counter = 2 bytes
+	}
+	else
+	{
+		BitIndex = Start & 0x07; // start bit
+		Start = Start >> 3;   // start byte
+	}
+	EV.EvStart =Start;
 
+	if (!FServer->ResourceLess)
+	{
+		// Checks bounds
+		ASize = P->Size; // Area size
+		if (Start + Size > ASize)
+			return WA_OutOfRange(EV);
+		Target = pbyte(P->PData + Start);
+	}
     // Checks data size coherence
     DataLen=SwapWord(ReqItemData->DataLength);
 
-    if (ReqItemData->TransportSize==TS_ResByte)
-        DataLen=DataLen / 8;
+	if ((ReqItemData->TransportSize!=TS_ResOctet) && (ReqItemData->TransportSize!=TS_ResReal) && (ReqItemData->TransportSize!=TS_ResBit))
+		DataLen=DataLen / 8;
 
-    if (DataLen!=Size)
+	if (DataLen!=Size)
         return WA_DataSizeMismatch(EV);
 
-    if (ReqItemPar->TransportSize==S7WLBit)
-    {
-      if ((ReqItemData->Data[0] & 0x01) != 0)   // bit set
-          *Target=*Target | BitMask[BitIndex];
-      else                                           // bit reset
-          *Target=*Target & (!BitMask[BitIndex]);
-    }
-    else {
-      // Lock the area
-        pcs->Enter();
-        // Write Data
-        memcpy(Target, &ReqItemData->Data[0], Size);
-        pcs->Leave();
-    };
-    return 0xFF;
+	if (FServer->ResourceLess)
+	{
+		if (!FServer->DoWriteArea(ClientHandle, EV.EvArea, EV.EvIndex, AStart, Elements, ReqItemPar->TransportSize, &ReqItemData->Data[0]))
+			return WA_NotFound(EV);
+	}
+	else
+	{
+		if (ReqItemPar->TransportSize==S7WLBit)
+		{
+		  if ((ReqItemData->Data[0] & 0x01) != 0)   // bit set
+			  *Target=*Target | BitMask[BitIndex];
+		  else                                      // bit reset
+			  *Target=*Target & (~BitMask[BitIndex]);
+		}
+		else {
+		  // Lock the area
+			pcs = P->cs;
+			pcs->Enter();
+			// Write Data
+			memcpy(Target, &ReqItemData->Data[0], Size);
+			pcs->Leave();
+		};
+	}
+
+	return 0xFF;
 }
 //------------------------------------------------------------------------------
 bool TS7Worker::PerformFunctionWrite()
@@ -744,40 +846,42 @@ bool TS7Worker::PerformFunctionWrite()
     TReqFunWriteData ReqData;
     PResFunWrite ResData;
     TS7Answer23 Answer;
-    int L;
+	int L;
 
-    uintptr_t StartData;
-    int c, ItemsCount;
-    int ResDSize;
-    TEv EV;
+	uintptr_t StartData;
+	int c, ItemsCount;
+	int ResDSize;
+	TEv EV;
 
-    // Stage 1 : Setup pointers and initial check
-    ReqParams=PReqFunWriteParams(pbyte(PDUH_in)+sizeof(TS7ReqHeader));
-    ResData  =PResFunWrite(pbyte(&Answer)+ResHeaderSize23);
+	// Stage 1 : Setup pointers and initial check
+	ReqParams=PReqFunWriteParams(pbyte(PDUH_in)+sizeof(TS7ReqHeader));
+	ResData  =PResFunWrite(pbyte(&Answer)+ResHeaderSize23);
 
-    StartData=sizeof(TS7ReqHeader)+SwapWord(PDUH_in->ParLen);
+	StartData=sizeof(TS7ReqHeader)+SwapWord(PDUH_in->ParLen);
 
-    ItemsCount=ReqParams->ItemsCount;
-    ResDSize  =ResHeaderSize23+2+ItemsCount;
-    for (c = 0; c < ItemsCount; c++)
-    {
-        ReqData[c]=PReqFunWriteDataItem(pbyte(PDUH_in)+StartData);
-        if (ReqData[c]->TransportSize==TS_ResBit)
-            L=SwapWord(ReqData[c]->DataLength);
-        else
-            L=(SwapWord(ReqData[c]->DataLength)/8);
-        StartData+=L+4;
-        // the datalength is always even
-        if ( L % 2 != 0) StartData++;
-    }
+	ItemsCount=ReqParams->ItemsCount;
+	ResDSize  =ResHeaderSize23+2+ItemsCount;
+	for (c = 0; c < ItemsCount; c++)
+	{
+		ReqData[c]=PReqFunWriteDataItem(pbyte(PDUH_in)+StartData);
 
-    ResData->FunWrite =pduFuncWrite;
-    ResData->ItemCount=ReqParams->ItemsCount;
+		if ((ReqParams->Items[c].TransportSize == S7WLTimer) || (ReqParams->Items[c].TransportSize == S7WLCounter) || (ReqParams->Items[c].TransportSize == S7WLBit))
+			L = SwapWord(ReqData[c]->DataLength);
+		else
+			L = (SwapWord(ReqData[c]->DataLength) / 8);
 
-    // Stage 2 : Write data
-    for (c = 0; c < ItemsCount; c++)
-    {
-      ResData->Data[c]=WriteArea(ReqData[c],&ReqParams->Items[c], EV);
+		StartData+=L+4;
+		// the datalength is always even
+		if ( L % 2 != 0) StartData++;
+	}
+
+	ResData->FunWrite =pduFuncWrite;
+	ResData->ItemCount=ReqParams->ItemsCount;
+
+	// Stage 2 : Write data
+	for (c = 0; c < ItemsCount; c++)
+	{
+	  ResData->Data[c]=WriteArea(ReqData[c],&ReqParams->Items[c], EV);
       // For multiple items we have to create multiple events
       if (ItemsCount>1)
            DoEvent(evcDataWrite,EV.EvRetCode,EV.EvArea,EV.EvIndex,EV.EvStart,EV.EvSize);
@@ -804,48 +908,51 @@ bool TS7Worker::PerformFunctionWrite()
 //==============================================================================
 bool TS7Worker::PerformFunctionNegotiate()
 {
-    PReqFunNegotiateParams ReqParams;
-    PResFunNegotiateParams ResParams;
-    word ReqLen;
-    TS7Answer23 Answer;
-    int Size;
+	PReqFunNegotiateParams ReqParams;
+	PResFunNegotiateParams ResParams;
+	word ReqLen;
+	TS7Answer23 Answer;
+	int Size;
 
-    // Setup pointers
-    ReqParams=PReqFunNegotiateParams(pbyte(PDUH_in)+sizeof(TS7ReqHeader));
-    ResParams=PResFunNegotiateParams(pbyte(&Answer)+sizeof(TS7ResHeader23));
-    // Prepares the answer
-    Answer.Header.P=0x32;
-    Answer.Header.PDUType=0x03;
-    Answer.Header.AB_EX=0x0000;
-    Answer.Header.Sequence=PDUH_in->Sequence;
-    Answer.Header.ParLen=SwapWord(sizeof(TResFunNegotiateParams));
-    Answer.Header.DataLen=0x0000;
-    Answer.Header.Error=0x0000;
-    // Params point at the end of the header
-    ResParams->FunNegotiate=pduNegotiate;
-    ResParams->Unknown=0x0;
-    // We offer the same
-    ResParams->ParallelJobs_1=ReqParams->ParallelJobs_1;
-    ResParams->ParallelJobs_2=ReqParams->ParallelJobs_2;
+	// Setup pointers
+	ReqParams=PReqFunNegotiateParams(pbyte(PDUH_in)+sizeof(TS7ReqHeader));
+	ResParams=PResFunNegotiateParams(pbyte(&Answer)+sizeof(TS7ResHeader23));
+	// Prepares the answer
+	Answer.Header.P=0x32;
+	Answer.Header.PDUType=0x03;
+	Answer.Header.AB_EX=0x0000;
+	Answer.Header.Sequence=PDUH_in->Sequence;
+	Answer.Header.ParLen=SwapWord(sizeof(TResFunNegotiateParams));
+	Answer.Header.DataLen=0x0000;
+	Answer.Header.Error=0x0000;
+	// Params point at the end of the header
+	ResParams->FunNegotiate=pduNegotiate;
+	ResParams->Unknown=0x0;
+	// We offer the same
+	ResParams->ParallelJobs_1=ReqParams->ParallelJobs_1;
+	ResParams->ParallelJobs_2=ReqParams->ParallelJobs_2;
 
-    // 480 is the minimum to manage our SZL packets in a single telegram
-    // Maximum is our Iso Payload size
-    ReqLen=SwapWord(ReqParams->PDULength);
-    if (ReqLen<480)
-        ResParams->PDULength=SwapWord(480);
-    else
-        if (ReqLen>IsoPayload_Size)
-            ResParams->PDULength=SwapWord(IsoPayload_Size);
-        else
-            ResParams->PDULength=ReqParams->PDULength;
+	if (FServer->ForcePDU == 0)
+	{
+		ReqLen = SwapWord(ReqParams->PDULength);
+		if (ReqLen<MinPduSize)
+			ResParams->PDULength = SwapWord(MinPduSize);
+		else
+			if (ReqLen>IsoPayload_Size)
+				ResParams->PDULength = SwapWord(IsoPayload_Size);
+			else
+				ResParams->PDULength = ReqParams->PDULength;
+	}
+	else
+		ResParams->PDULength = SwapWord(FServer->ForcePDU);
 
-    FPDULength=SwapWord(ReqParams->PDULength); // Stores the value
-    // Sends the answer
-    Size=sizeof(TS7ResHeader23) + sizeof(TResFunNegotiateParams);
-    isoSendBuffer(&Answer, Size);
-    // Store the event
-    DoEvent(evcNegotiatePDU, evrNoError, FPDULength, 0, 0, 0);
-    return true;
+	FPDULength=SwapWord(ResParams->PDULength); // Stores the value
+	// Sends the answer
+	Size=sizeof(TS7ResHeader23) + sizeof(TResFunNegotiateParams);
+	isoSendBuffer(&Answer, Size);
+	// Store the event
+	DoEvent(evcNegotiatePDU, evrNoError, FPDULength, 0, 0, 0);
+	return true;
 }
 //==============================================================================
 // FUNCTION CONTROL
@@ -891,10 +998,10 @@ bool TS7Worker::PerformFunctionControl(byte PduFun)
     DoEvent(evcControl,0,CtrlCode,0,0,0);
 
     if ((CtrlCode==CodeControlWarmStart) || (CtrlCode==CodeControlColdStart))
-        FServer->SetCpuStatus(S7CpuStatusRun);
+        FServer->CpuStatus=S7CpuStatusRun;
 
     if (CtrlCode==CodeControlStop)
-        FServer->SetCpuStatus(S7CpuStatusStop);
+        FServer->CpuStatus=S7CpuStatusStop;
 
     return true;
 }
@@ -1791,7 +1898,7 @@ bool TS7Worker::PerformGroupBlockInfo()
 void TS7Worker::SZLNotAvailable()
 {
     SZL.Answer.Header.DataLen=SwapWord(sizeof(SZLNotAvail));
-    SZL.ResParams->Err =0x01D4;
+	SZL.ResParams->Err = 0x02D4;
     memcpy(SZL.ResData, &SZLNotAvail, sizeof(SZLNotAvail));
     isoSendBuffer(&SZL.Answer,26);
     SZL.SZLDone=false;
@@ -1807,12 +1914,22 @@ void TS7Worker::SZLSystemState()
 }
 void TS7Worker::SZLData(void *P, int len)
 {
-    SZL.Answer.Header.DataLen=SwapWord(word(len));
-    SZL.ResParams->Err  =0x0000;
-    SZL.ResParams->resvd=0x0000; // this is the end, no more packets
-    memcpy(SZL.ResData, P, len);
-    isoSendBuffer(&SZL.Answer,22+len);
-    SZL.SZLDone=true;
+	int MaxSzl=FPDULength-22;
+
+	if (len>MaxSzl) {
+		len=MaxSzl;
+	}
+
+	SZL.Answer.Header.DataLen=SwapWord(word(len));
+	SZL.ResParams->Err  =0x0000;
+	SZL.ResParams->resvd=0x0000; // this is the end, no more packets
+	memcpy(SZL.ResData, P, len);
+
+	SZL.ResData[2]=((len-4)>>8) & 0xFF;
+	SZL.ResData[3]=(len-4) & 0xFF;
+
+	isoSendBuffer(&SZL.Answer,22+len);
+	SZL.SZLDone=true;
 }
 void TS7Worker::SZLCData(int SZLID, void *P, int len)
 {
@@ -1870,19 +1987,35 @@ void TS7Worker::SZL_ID124()
 // this block is dynamic (contains date/time and cpu status)
 void TS7Worker::SZL_ID424()
 {
-    PS7Time PTime;
-    pbyte PStatus;
+	PS7Time PTime;
+	pbyte PStatus;
 
-    SZL.Answer.Header.DataLen=SwapWord(sizeof(SZL_ID_0424_IDX_XXXX));
-    SZL.ResParams->Err  =0x0000;
-    PTime=PS7Time(pbyte(SZL.ResData)+24);
-    PStatus =pbyte(SZL.ResData)+15;
-    memcpy(SZL.ResData,&SZL_ID_0424_IDX_XXXX,sizeof(SZL_ID_0424_IDX_XXXX));
-    FillTime(PTime);
-    *PStatus=FServer->CpuStatus;
-    SZL.SZLDone=true;
-    isoSendBuffer(&SZL.Answer,22+sizeof(SZL_ID_0424_IDX_XXXX));
+	SZL.Answer.Header.DataLen=SwapWord(sizeof(SZL_ID_0424_IDX_XXXX));
+	SZL.ResParams->Err  =0x0000;
+	PTime=PS7Time(pbyte(SZL.ResData)+24);
+	PStatus =pbyte(SZL.ResData)+15;
+	memcpy(SZL.ResData,&SZL_ID_0424_IDX_XXXX,sizeof(SZL_ID_0424_IDX_XXXX));
+	FillTime(PTime);
+	*PStatus=FServer->CpuStatus;
+	SZL.SZLDone=true;
+	isoSendBuffer(&SZL.Answer,22+sizeof(SZL_ID_0424_IDX_XXXX));
 }
+
+void TS7Worker::SZL_ID131_IDX003()
+{
+	word len = sizeof(SZL_ID_0131_IDX_0003);
+	SZL.Answer.Header.DataLen=SwapWord(len);
+	SZL.ResParams->Err  =0x0000;
+	SZL.ResParams->resvd=0x0000; // this is the end, no more packets
+	memcpy(SZL.ResData, &SZL_ID_0131_IDX_0003, len);
+    // Set the max consistent data window to PDU size
+	SZL.ResData[18]=((FPDULength)>>8) & 0xFF;
+	SZL.ResData[19]=(FPDULength) & 0xFF;
+
+	isoSendBuffer(&SZL.Answer,22+len);
+	SZL.SZLDone=true;
+}
+
 bool TS7Worker::PerformGroupSZL()
 {
   SZL.SZLDone=false;
@@ -1958,7 +2091,7 @@ bool TS7Worker::PerformGroupSZL()
     case 0x0F95 : SZLData(&SZL_ID_0F95_IDX_XXXX,sizeof(SZL_ID_0F95_IDX_XXXX));break;
     case 0x00A0 : SZL_ID0A0();break;
     case 0x0FA0 : SZLData(&SZL_ID_0FA0_IDX_XXXX,sizeof(SZL_ID_0FA0_IDX_XXXX));break;
-    case 0x0017 : SZLData(&SZL_ID_0017_IDX_XXXX,sizeof(SZL_ID_0017_IDX_XXXX));break;
+	case 0x0017 : SZLData(&SZL_ID_0017_IDX_XXXX,sizeof(SZL_ID_0017_IDX_XXXX));break;
     case 0x0F17 : SZLData(&SZL_ID_0F17_IDX_XXXX,sizeof(SZL_ID_0F17_IDX_XXXX));break;
     case 0x0018 : SZLData(&SZL_ID_0018_IDX_XXXX,sizeof(SZL_ID_0018_IDX_XXXX));break;
     case 0x0F18 : SZLData(&SZL_ID_0F18_IDX_XXXX,sizeof(SZL_ID_0F18_IDX_XXXX));break;
@@ -1996,7 +2129,7 @@ bool TS7Worker::PerformGroupSZL()
                     case 0x0000 : SZLData(&SZL_ID_0692_IDX_0000,sizeof(SZL_ID_0692_IDX_0000));break;
                     default     : SZLNotAvailable();break;
                   };break;
-    case 0x0094 : switch(SZL.Index){
+	case 0x0094 : switch(SZL.Index){
                     case 0x0000 : SZLData(&SZL_ID_0094_IDX_0000,sizeof(SZL_ID_0094_IDX_0000));break;
                     default     : SZLNotAvailable();break;
                   };break;
@@ -2070,9 +2203,9 @@ bool TS7Worker::PerformGroupSZL()
                     default     : SZLNotAvailable();break;
                   };break;
     case 0x0131 : switch(SZL.Index){
-                    case 0x0001 : SZLData(&SZL_ID_0131_IDX_0001,sizeof(SZL_ID_0131_IDX_0001));break;
-                    case 0x0002 : SZLData(&SZL_ID_0131_IDX_0002,sizeof(SZL_ID_0131_IDX_0002));break;
-                    case 0x0003 : SZLData(&SZL_ID_0131_IDX_0003,sizeof(SZL_ID_0131_IDX_0003));break;
+					case 0x0001 : SZLData(&SZL_ID_0131_IDX_0001,sizeof(SZL_ID_0131_IDX_0001));break;
+					case 0x0002 : SZLData(&SZL_ID_0131_IDX_0002,sizeof(SZL_ID_0131_IDX_0002));break;
+					case 0x0003 : SZL_ID131_IDX003();break;
                     case 0x0004 : SZLData(&SZL_ID_0131_IDX_0004,sizeof(SZL_ID_0131_IDX_0004));break;
                     case 0x0005 : SZLData(&SZL_ID_0131_IDX_0005,sizeof(SZL_ID_0131_IDX_0005));break;
                     case 0x0006 : SZLData(&SZL_ID_0131_IDX_0006,sizeof(SZL_ID_0131_IDX_0006));break;
@@ -2315,9 +2448,10 @@ bool TS7Worker::PerformSetClock()
 //------------------------------------------------------------------------------
 TSnap7Server::TSnap7Server()
 {
-	OnReadEvent=NULL;
+    OnReadEvent=NULL;
     AddedDiagItemCount=0;
     CSDiag = new TSnapCriticalSection();
+    CSRWHook = new TSnapCriticalSection();
     AddDiagItem(SZL_DIAG_START);
     memset(&HA,0,sizeof(HA));
     DBArea = new PS7AreaContainer(MaxDB-1);
@@ -2325,6 +2459,8 @@ TSnap7Server::TSnap7Server()
     FB = new PS7AreaContainer(MaxDB-1);
     FC = new PS7AreaContainer(MaxDB-1);
     SDB = new PS7AreaContainer(MaxDB-1);
+    ForcePDU = 0;
+    ResourceLess = false;
     LocalPort=isoTcpPort;
     WorkInterval=100;
     for (int i = 0; i < CustomSZL; i++) {
@@ -2336,6 +2472,7 @@ TSnap7Server::TSnap7Server()
 TSnap7Server::~TSnap7Server()
 {
     DisposeAll();
+	delete CSRWHook;
 }
 //------------------------------------------------------------------------------
 PWorkerSocket TSnap7Server::CreateWorkerSocket(socket_t Sock)
@@ -2350,7 +2487,7 @@ PWorkerSocket TSnap7Server::CreateWorkerSocket(socket_t Sock)
 // Item must be DiagItemLength bytes long!
 void TSnap7Server::AddDiagItem(pbyte Item)
 {
-	// add item in reverse order (start at bottom)
+    // add item in reverse order (start at bottom)
     int i = pmod(MaxDiagBufferItems - AddedDiagItemCount - 1, MaxDiagBufferItems);
 
     memcpy(&DiagBuffer[i][0], Item, DiagItemLength);
@@ -2436,13 +2573,13 @@ void TSnap7Server::DisposeAll()
     delete FB;
     delete FC;
     delete SDB;
-    // Unregister other
-    for (int c = srvAreaPE; c < srvAreaDB; c++)
-        UnregisterSys(c);
     delete CSDiag;
     for (DiagRequestMap::iterator it = diag_requests.begin(); it != diag_requests.end(); it ++) {
         delete it->second;
     }
+    // Unregister other
+    for (int c = srvAreaPE; c < srvAreaDB; c++)
+        UnregisterSys(c);
 }
 //------------------------------------------------------------------------------
 int TSnap7Server::RegisterSys(int AreaCode, void *pUsrData, word Size)
@@ -2502,31 +2639,51 @@ int TSnap7Server::GetParam(int ParamNumber, void *pValue)
     case p_i32_MaxClients:
         *Pint32_t(pValue)=MaxClients;
         break;
-    default: return errSrvInvalidParamNumber;
+	case p_i32_PDURequest:
+		*Pint32_t(pValue) = ForcePDU;
+		break;
+	default: return errSrvInvalidParamNumber;
     }
     return 0;
 }
 //------------------------------------------------------------------------------
 int TSnap7Server::SetParam(int ParamNumber, void *pValue)
 {
-    switch (ParamNumber)
-    {
-    case p_u16_LocalPort:
-        if (Status==SrvStopped)
-                LocalPort=*Puint16_t(pValue);
-        else
-        return errSrvCannotChangeParam;
-        break;
-    case p_i32_WorkInterval:
-            WorkInterval=*Pint32_t(pValue);
+	switch (ParamNumber)
+	{
+	case p_u16_LocalPort:
+		if (Status == SrvStopped)
+			LocalPort = *Puint16_t(pValue);
+		else
+			return errSrvCannotChangeParam;
+		break;
+	case p_i32_PDURequest:
+		if (Status == SrvStopped)
+		{
+			int PDU = *Pint32_t(pValue);
+			if (PDU == 0)
+				ForcePDU = 0; // ForcePDU=0 --> The server accepts the client's proposal
+			else
+				{
+					if ((PDU < MinPduSize) || (PDU>IsoPayload_Size))
+						return errSrvInvalidParams; // Wrong value
+					else
+						ForcePDU = PDU; // The server imposes ForcePDU as PDU size
+				}
+	    }
+		else
+            return errSrvCannotChangeParam;
+		break;
+	case p_i32_WorkInterval:
+         WorkInterval=*Pint32_t(pValue);
+	     break;
+	case p_i32_MaxClients:
+	     if (ClientsCount==0 && Status==SrvStopped)
+	         MaxClients=*Pint32_t(pValue);
+         else
+	         return errSrvCannotChangeParam;
          break;
-    case p_i32_MaxClients:
-         if (ClientsCount==0 && Status==SrvStopped)
-             MaxClients=*Pint32_t(pValue);
-             else
-             return errSrvCannotChangeParam;
-             break;
-    default: return errSrvInvalidParamNumber;
+	default: return errSrvInvalidParamNumber;
     }
     return 0;
 }
@@ -2698,11 +2855,19 @@ int TSnap7Server::UnlockArea(int AreaCode, word DBNumber)
           return errSrvInvalidParams;
 }
 //------------------------------------------------------------------------------
-int TSnap7Server::SetReadEventsCallBack(pfn_SrvCallBack PCallBack, void *UsrPtr) 
+int TSnap7Server::SetReadEventsCallBack(pfn_SrvCallBack PCallBack, void *UsrPtr)
 {
     OnReadEvent = PCallBack;
     FReadUsrPtr = UsrPtr;
     return 0;
+}
+//---------------------------------------------------------------------------
+int TSnap7Server::SetRWAreaCallBack(pfn_RWAreaCallBack PCallBack, void *UsrPtr)
+{
+	OnRWArea = PCallBack;
+	FRWAreaUsrPtr = UsrPtr;
+	ResourceLess = OnRWArea != NULL;
+	return 0;
 }
 //---------------------------------------------------------------------------
 void TSnap7Server::DoReadEvent(int Sender, longword Code, word RetCode, word Param1,
@@ -2732,5 +2897,56 @@ void TSnap7Server::DoReadEvent(int Sender, longword Code, word RetCode, word Par
     };
 }
 //---------------------------------------------------------------------------
+bool TSnap7Server::DoReadArea(int Sender, int Area, int DBNumber, int Start, int Size, int WordLen, void *pUsrData)
+{
+	TS7Tag Tag;
+	bool Result = false;
+	if (!Destroying && (OnRWArea != NULL))
+	{
+		CSRWHook->Enter();
+		try
+		{
+			Tag.Area = Area;
+			Tag.DBNumber = DBNumber;
+			Tag.Start = Start;
+			Tag.Size = Size;
+			Tag.WordLen = WordLen;
+			// callback is outside here, we have to shield it
+			Result = OnRWArea(FRWAreaUsrPtr, Sender, OperationRead, &Tag, pUsrData) == 0;
+		}
+		catch (...)
+		{
+			Result = false;
+		};
+		CSRWHook->Leave();
+	}
+	return Result;
+}
+//---------------------------------------------------------------------------
+bool TSnap7Server::DoWriteArea(int Sender, int Area, int DBNumber, int Start, int Size, int WordLen, void *pUsrData)
+{
+	TS7Tag Tag;
+	bool Result = false;
+	if (!Destroying && (OnRWArea != NULL))
+	{
+		CSRWHook->Enter();
+		try
+		{
+			Tag.Area = Area;
+			Tag.DBNumber = DBNumber;
+			Tag.Start = Start;
+			Tag.Size = Size;
+			Tag.WordLen = WordLen;
+			// callback is outside here, we have to shield it
+			Result = OnRWArea(FRWAreaUsrPtr, Sender, OperationWrite, &Tag, pUsrData) == 0;
+		}
+		catch (...)
+		{
+			Result = false;
+		};
+		CSRWHook->Leave();
+	}
+	return Result;
+}
 
 

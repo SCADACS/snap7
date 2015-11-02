@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.1.0 |
+|  PROJECT SNAP7                                                         1.3.0 |
 |==============================================================================|
-|  Copyright (C) 2013, Davide Nardella                                         |
+|  Copyright (C) 2013, 2014 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -10,7 +10,7 @@
 |  (at your option) any later version.                                         |
 |                                                                              |
 |  It means that you can distribute your commercial software linked with       |
-|  SMART7 without the requirement to distribute the source code of your        |
+|  SNAP7 without the requirement to distribute the source code of your         |
 |  application and without the requirement that your application be itself     |
 |  distributed under LGPL.                                                     |
 |                                                                              |
@@ -767,4 +767,138 @@ TextString SrvEventText(TSrvEvent *Event)
     Srv_EventText(Event, text, TextLen);
     return TextString(text);
 }
+//==============================================================================
+// Helper GET routines
+//==============================================================================
+word SwapWord(pword Value)
+{
+	return ((*Value >> 8) & 0xFF) | ((*Value << 8) & 0xFF00);	
+}
+//---------------------------------------------------------------------------
+longword SwapDWord(plongword Value)
+{
+	return (*Value >> 24) | ((*Value << 8) & 0x00FF0000) | ((*Value >> 8) & 0x0000FF00) | (*Value << 24);
+}
+//---------------------------------------------------------------------------
+bool GetBitAt(void *Buffer, int Pos, int Bit)
+{
+	byte Mask[] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};
+	if (Bit < 0) Bit = 0;
+    if (Bit > 7) Bit = 7;
+    return (*(pbyte(Buffer)+Pos) & Mask[Bit]) != 0;
+}
+//---------------------------------------------------------------------------
+byte GetByteAt(void *Buffer, int Pos)
+{
+	return *(pbyte(Buffer)+Pos);
+}
+//---------------------------------------------------------------------------
+word GetWordAt(void *Buffer, int Pos)
+{
+	return SwapWord(pword(pbyte(Buffer)+Pos));
+}
+//---------------------------------------------------------------------------
+smallint GetIntAt(void *Buffer, int Pos)
+{
+	return smallint(SwapWord(pword(pbyte(Buffer)+Pos)));
+}
+//---------------------------------------------------------------------------
+longword GetDWordAt(void *Buffer, int Pos)
+{
+	return SwapDWord(plongword(pbyte(Buffer)+Pos));
+}
+//---------------------------------------------------------------------------
+longint GetDIntAt(void *Buffer, int Pos)
+{
+	return longint(SwapDWord(plongword(pbyte(Buffer)+Pos)));
+}
+//---------------------------------------------------------------------------
+float GetRealAt(void *Buffer, int Pos)
+{
+	longword lw=SwapDWord(plongword(pbyte(Buffer)+Pos));
+	return *pfloat(&lw);
+}
+//---------------------------------------------------------------------------
+byte BCDtoByte(byte B)
+{
+    return ((B >> 4) * 10) + (B & 0x0F);
+}
+//---------------------------------------------------------------------------
+struct tm GetDateTimeAt(void *Buffer, int Pos)
+{
+	struct tm DateTime;
+	pbyte p = pbyte(Buffer)+Pos;
+	word Year=BCDtoByte(*p);
 
+    if (Year<90) Year+=100;
+    DateTime.tm_year=Year;
+    DateTime.tm_mon =BCDtoByte(*(p+1))-1;
+    DateTime.tm_mday=BCDtoByte(*(p+2));
+    DateTime.tm_hour=BCDtoByte(*(p+3));
+    DateTime.tm_min =BCDtoByte(*(p+4));
+    DateTime.tm_sec =BCDtoByte(*(p+5));
+    DateTime.tm_wday=(*(p+7) & 0x0F)-1;
+	return DateTime;
+}
+//==============================================================================
+// Helper SET routines
+//==============================================================================
+void SetBitAt(void *Buffer, int Pos, int Bit, bool Value)
+{
+	byte Mask[] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};
+	pbyte p = pbyte(Buffer)+Pos;
+	if (Bit < 0) Bit = 0;
+    if (Bit > 7) Bit = 7;
+	(Value) ? *p |= Mask[Bit] : *p &= ~Mask[Bit];
+}
+//---------------------------------------------------------------------------
+void SetByteAt(void *Buffer, int Pos, byte Value)
+{
+	*(pbyte(Buffer)+Pos)=Value;
+}
+//---------------------------------------------------------------------------
+void SetWordAt(void *Buffer, int Pos, word Value)
+{
+	*(pword(pbyte(Buffer)+Pos))=SwapWord(&Value);
+}
+//---------------------------------------------------------------------------
+void SetIntAt(void *Buffer, int Pos, smallint Value)
+{
+	*(psmallint(pbyte(Buffer)+Pos))=SwapWord(pword(&Value));
+}
+//---------------------------------------------------------------------------
+void SetDWordAt(void *Buffer, int Pos, longword Value)
+{
+	*(plongword(pbyte(Buffer)+Pos))=SwapDWord(&Value);
+}
+//---------------------------------------------------------------------------
+void SetDIntAt(void *Buffer, int Pos, longint Value)
+{
+	*(plongint(pbyte(Buffer)+Pos))=SwapDWord(plongword(&Value));
+}
+//---------------------------------------------------------------------------
+void SetRealAt(void *Buffer, int Pos, float Value)
+{
+	*(plongword(pbyte(Buffer)+Pos))=SwapDWord(plongword(&Value));
+}
+//---------------------------------------------------------------------------
+byte WordToBCD(word Value)
+{
+    return ((Value / 10) << 4) | (Value % 10);
+}
+//---------------------------------------------------------------------------
+void SetDateTimeAt(void *Buffer, int Pos, tm Value)
+{
+    pbyte p = pbyte(Buffer)+Pos;
+	word Year = Value.tm_year;
+    
+	if (Year>99) Year-=100;
+	*p=WordToBCD(Year);
+	*(p+1)=WordToBCD(Value.tm_mon+1);
+	*(p+2)=WordToBCD(Value.tm_mday);
+	*(p+3)=WordToBCD(Value.tm_hour);
+	*(p+4)=WordToBCD(Value.tm_min);
+	*(p+5)=WordToBCD(Value.tm_sec);
+	*(p+6)=0;
+	*(p+7)=Value.tm_wday+1;
+}

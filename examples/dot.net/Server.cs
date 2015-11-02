@@ -1,4 +1,4 @@
-/*=============================================================================|
+﻿/*=============================================================================|
 |  PROJECT SNAP7                                                         1.0.0 |
 |==============================================================================|
 |  Copyright (C) 2013, Davide Nardella                                         |
@@ -61,11 +61,11 @@ class ServerDemo
         // Share some resources with our virtual PLC
         Server.RegisterArea(S7Server.srvAreaDB,  // We are registering a DB
                             1,                   // Its number is 1 (DB1)
-                            DB1,                 // Our buffer for DB1
+                            ref DB1,             // Our buffer for DB1
                             DB1.Length);         // Its size
         // Do the same for DB2 and DB3
-        Server.RegisterArea(S7Server.srvAreaDB, 2, DB2, DB2.Length);
-        Server.RegisterArea(S7Server.srvAreaDB, 3, DB3, DB3.Length);
+        Server.RegisterArea(S7Server.srvAreaDB, 2, ref DB2, DB2.Length);
+        Server.RegisterArea(S7Server.srvAreaDB, 3, ref DB3, DB3.Length);
         
         // Exclude read event to avoid the double report
         // Set the callbacks (using the static var to avoid the garbage collect)

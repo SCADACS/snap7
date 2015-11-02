@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.1.0 |
+|  PROJECT SNAP7                                                         1.3.0 |
 |==============================================================================|
-|  Copyright (C) 2013, Davide Nardella                                         |
+|  Copyright (C) 2013, 2015 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -51,6 +51,7 @@ class TSnap7Client: public TSnap7MicroClient
 {
 private:
     TClientThread *FThread;
+	bool ThreadCreated;
     void CloseThread();
     void OpenThread();
     void StartAsyncJob();

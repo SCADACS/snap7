@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.2.0 |
+|  PROJECT SNAP7                                                         1.3.0 |
 |==============================================================================|
-|  Copyright (C) 2013, 2014 Davide Nardella                                    |
+|  Copyright (C) 2013, 2015 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -27,7 +27,8 @@
 #include "snap_sysutils.h"
 
 #ifdef OS_OSX
-int clock_gettime(int clk_id, struct timespec* t) {
+int clock_gettime(int clk_id, struct timespec* t)
+{
     struct timeval now;
     int rv = gettimeofday(&now, NULL);
     if (rv) return rv;

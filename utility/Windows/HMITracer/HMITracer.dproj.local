@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2015/05/24 12:03:18.000.977,=C:\Users\davide.nardella\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/06/10 14:07:24.000.761,=C:\Users\davide.nardella\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/06/10 14:07:50.000.514,C:\Test\listview\Unit1.dfm=C:\Users\davide.nardella\Documents\RAD Studio\Projects\Unit1.dfm</Transaction>
+    <Transaction>2015/06/10 14:07:50.000.514,C:\Test\listview\Unit1.pas=C:\Users\davide.nardella\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2015/06/10 14:07:51.000.498,C:\Test\listview\Project1.dproj=C:\Users\davide.nardella\Documents\RAD Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>2015/06/10 16:35:22.000.646,C:\Test\listview\frmMain.dfm=C:\Test\listview\Unit1.dfm</Transaction>
+    <Transaction>2015/06/10 16:35:22.000.646,C:\Test\listview\frmMain.pas=C:\Test\listview\Unit1.pas</Transaction>
+    <Transaction>2015/06/13 11:31:07.000.084,=C:\Test\listview\Unit2.pas</Transaction>
+    <Transaction>2015/06/13 11:31:17.000.535,C:\Test\listview\Unit2.dfm=C:\Test\listview\frmReport.dfm</Transaction>
+    <Transaction>2015/06/13 11:31:17.000.535,C:\Test\listview\Unit2.pas=C:\Test\listview\frmReport.pas</Transaction>
+    <Transaction>2015/06/14 11:11:54.000.879,C:\Test\listview\HMITracer.dproj=C:\Test\listview\Project1.dproj</Transaction>
+  </Transactions>
+</BorlandProject>

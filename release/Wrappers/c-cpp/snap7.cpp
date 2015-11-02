@@ -1,5 +1,5 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.2.0 |
+|  PROJECT SNAP7                                                         1.4.0 |
 |==============================================================================|
 |  Copyright (C) 2013, 2014 Davide Nardella                                    |
 |  All rights reserved.                                                        |
@@ -524,7 +524,12 @@ int TS7Server::SetEventsCallback(pfn_SrvCallBack PCallBack, void *UsrPtr)
 //---------------------------------------------------------------------------
 int TS7Server::SetReadEventsCallback(pfn_SrvCallBack PCallBack, void *UsrPtr)
 {
-    return Srv_SetReadEventsCallback(Server, PCallBack, UsrPtr);
+	return Srv_SetReadEventsCallback(Server, PCallBack, UsrPtr);
+}
+//---------------------------------------------------------------------------
+int TS7Server::SetRWAreaCallback(pfn_RWAreaCallBack PCallBack, void *UsrPtr)
+{
+	return Srv_SetRWAreaCallback(Server, PCallBack, UsrPtr);
 }
 //---------------------------------------------------------------------------
 bool TS7Server::PickEvent(TSrvEvent *pEvent)

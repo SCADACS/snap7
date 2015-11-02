@@ -104,6 +104,7 @@ EXPORTS
   Srv_SetMask
   Srv_SetEventsCallback
   Srv_SetReadEventsCallback
+  Srv_SetRWAreaCallback
   Srv_ErrorText
   Srv_EventText
   Par_Create

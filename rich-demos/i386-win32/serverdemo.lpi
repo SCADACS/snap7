@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
     <Version Value="9"/>
@@ -39,7 +39,6 @@
       <Unit0>
         <Filename Value="serverdemo.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="serverdemo"/>
       </Unit0>
       <Unit1>
         <Filename Value="..\MainServer.pas"/>
@@ -74,12 +73,6 @@
         </Win32>
       </Options>
     </Linking>
-    <Other>
-      <CompilerMessages>
-        <MsgFileName Value=""/>
-      </CompilerMessages>
-      <CompilerPath Value="$(CompPath)"/>
-    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">

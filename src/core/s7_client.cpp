@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.1.0 |
+|  PROJECT SNAP7                                                         1.3.0 |
 |==============================================================================|
-|  Copyright (C) 2013, Davide Nardella                                         |
+|  Copyright (C) 2013, 2015 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -30,9 +30,10 @@ TSnap7Client::TSnap7Client()
 {
      FThread = 0;
      CliCompletion = 0;
-     EvtJob =  new TSnapEvent(false);
-     EvtComplete = new TSnapEvent(false);
-     OpenThread();
+	 EvtJob = NULL;
+     EvtComplete = NULL;
+	 FThread=NULL;
+	 ThreadCreated = false;
 }
 //---------------------------------------------------------------------------
 TSnap7Client::~TSnap7Client()
@@ -40,9 +41,13 @@ TSnap7Client::~TSnap7Client()
     Destroying=true;
     Disconnect();
     CliCompletion=NULL;
-    CloseThread();
-    delete EvtComplete;
-    delete EvtJob;
+	if (ThreadCreated)
+	{
+	    CloseThread();
+	    delete EvtComplete;
+	    delete EvtJob;
+		ThreadCreated=false;
+	}
 }
 //---------------------------------------------------------------------------
 void TSnap7Client::CloseThread()
@@ -57,13 +62,14 @@ void TSnap7Client::CloseThread()
           else
               Timeout=1000;
           EvtJob->Set();
-          if (FThread->WaitFor(Timeout)!=WAIT_OBJECT_0)
+		  if (FThread->WaitFor(Timeout)!=WAIT_OBJECT_0)
               FThread->Kill();
           try {
              delete FThread;
           }
           catch (...){
           }
+
           FThread=0;
      }
 }
@@ -77,10 +83,16 @@ void TSnap7Client::OpenThread()
 int TSnap7Client::Reset(bool DoReconnect)
 {
     bool WasConnected = Connected;
-    CloseThread();
-    Disconnect();
-    OpenThread();
-    if (DoReconnect || WasConnected)
+    if (ThreadCreated)
+	{
+		CloseThread();
+		Disconnect();
+		OpenThread();
+	}
+	else
+		Disconnect();
+	
+	if (DoReconnect || WasConnected)
        return Connect();
     else
        return 0;
@@ -440,7 +452,14 @@ int TSnap7Client::AsDBFill(int DBNumber, int FillChar)
 void TSnap7Client::StartAsyncJob()
 {
     ClrError();
-    EvtComplete->Reset(); // reset if previously was not called WaitAsCompletion
+	if (!ThreadCreated)
+	{
+		EvtJob =  new TSnapEvent(false);
+		EvtComplete = new TSnapEvent(false);
+	    OpenThread();
+		ThreadCreated=true;
+	}
+	EvtComplete->Reset(); // reset if previously was not called WaitAsCompletion
     EvtJob->Set();
 }
 //---------------------------------------------------------------------------
@@ -448,15 +467,20 @@ int TSnap7Client::WaitAsCompletion(unsigned long Timeout)
 {
     if (Job.Pending)
     {
-        if (EvtComplete->WaitFor(Timeout)==WAIT_OBJECT_0)
-            return Job.Result;
-        else
-        {  
-            if (Destroying)
-                return errCliDestroying;
-            else
-                return SetError(errCliJobTimeout);
-        }
+        if (ThreadCreated)
+		{
+			if (EvtComplete->WaitFor(Timeout)==WAIT_OBJECT_0)
+				return Job.Result;
+			else
+			{  
+				if (Destroying)
+					return errCliDestroying;
+				else
+					return SetError(errCliJobTimeout);
+			}
+		}
+		else
+			return SetError(errCliJobTimeout);
     }
     else
         return Job.Result;

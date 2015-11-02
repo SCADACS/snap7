@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.2.0 |
+|  PROJECT SNAP7                                                         1.3.0 |
 |==============================================================================|
-|  Copyright (C) 2013, 2014 Davide Nardella                                    |
+|  Copyright (C) 2013, 2015 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -62,7 +62,7 @@ TServersManager::TServersManager()
 //---------------------------------------------------------------------------
 TServersManager::~TServersManager()
 {
-    int c;
+	int c;
     Lock();
     if (ServersCount>0)
     {
@@ -101,7 +101,7 @@ void TServersManager::AddServer(PConnectionServer Server)
 	    Servers[c]=Server;
             ServersCount++;
             break;
-        }
+		}
     }
     Unlock();
 }
@@ -140,7 +140,7 @@ int TServersManager::GetServer(longword BindAddress, PConnectionServer &Server)
             Server=Servers[c];
             break;
         }
-    }
+	}
     if (Server==0)
         return CreateServer(BindAddress, Server);
     else
@@ -179,7 +179,7 @@ void TConnListenerThread::Execute()
     {
 	if (FListener->CanRead(FListener->WorkInterval))
 	{
-	    Sock=FListener->SckAccept(); // in any case we must accept
+		Sock=FListener->SckAccept(); // in any case we must accept
 	    Valid=Sock!=INVALID_SOCKET;
 	    // check if we are not destroying
 	    if ((!Terminated) && (!FServer->Destroying))
@@ -257,7 +257,7 @@ void TConnectionServer::Stop()
 {
     if (FRunning)
     {
-        // Kills the listener thread
+		// Kills the listener thread
         ServerThread->Terminate();
         if (ServerThread->WaitFor(csTimeout)!=WAIT_OBJECT_0)
            ServerThread->Kill();
@@ -374,7 +374,7 @@ void TPartnerThread::Execute()
 			SysSleep(FRecoveryTime);
         // Keep Alive
         if (!Terminated && (!FPartner->Destroying) && FPartner->Active && FPartner->Connected)
-        {
+		{
              TheTime=SysGetTick();
              if (TheTime-FKaElapsed>FPartner->KeepAliveTime)
              {
@@ -732,171 +732,173 @@ bool TSnap7Partner::BlockSend()
 
     while ((TotalSize>0) && (LastError==0))
     {
-        Source=pbyte(&TxBuffer.Data+Offset);
-        Slice=TotalSize;
+		Source=pbyte(&TxBuffer.Data)+Offset;
+		Slice=TotalSize;
 
-        if (Slice>MaxSlice)
-            Slice=MaxSlice;
+		if (Slice>MaxSlice)
+			Slice=MaxSlice;
 
-        TotalSize-=Slice;
-        Offset+=Slice;
-        Last=TotalSize==0;
+		TotalSize-=Slice;
+		Offset+=Slice;
+		Last=TotalSize==0;
 
-        // Prepare send
-        DataPtrOffset=sizeof(TS7ReqHeader)+sizeof(TBSendParams);
-        // Header
-        PDUH_out->P=0x32;                     // Always 0x32
-        PDUH_out->PDUType=PduType_userdata;  // 7
-        PDUH_out->AB_EX=0x0000;               // Always 0x0000
-        PDUH_out->Sequence=GetNextWord();      // Autoinc
-        PDUH_out->ParLen=SwapWord(sizeof(TBSendParams)); // 16 bytes
+		// Prepare send
+		DataPtrOffset=sizeof(TS7ReqHeader)+sizeof(TBSendParams);
+		// Header
+		PDUH_out->P=0x32;                     // Always 0x32
+		PDUH_out->PDUType=PduType_userdata;  // 7
+		PDUH_out->AB_EX=0x0000;               // Always 0x0000
+		PDUH_out->Sequence=GetNextWord();      // Autoinc
+		PDUH_out->ParLen=SwapWord(sizeof(TBSendParams)); // 16 bytes
 
-        ReqParams->Head[0]=0x00;
-        ReqParams->Head[1]=0x01;
-        ReqParams->Head[2]=0x12;
-        ReqParams->Plen   =0x08; // length from here up the end of the record
-        ReqParams->Uk     =0x12;
-        ReqParams->Tg     =grBSend; // 0x46
-        ReqParams->SubFun =0x01;
-        ReqParams->Seq    =Seq_IN;
-        ReqParams->Err    =0x0000;
-        if (Last)
-            ReqParams->EoS  =0x00;
-        else
-            ReqParams->EoS  =0x01;
-        // Next byte is auto inc and not zero for partial sequences
-        // Is zero for lonely sequences.
-        if (First && Last)
-            ReqParams->IDSeq=0x00;
-        else
-            ReqParams->IDSeq=GetNextByte();
+		ReqParams->Head[0]=0x00;
+		ReqParams->Head[1]=0x01;
+		ReqParams->Head[2]=0x12;
+		ReqParams->Plen   =0x08; // length from here up the end of the record
+		ReqParams->Uk     =0x12;
+		ReqParams->Tg     =grBSend; // 0x46
+		ReqParams->SubFun =0x01;
+		ReqParams->Seq    =Seq_IN;
+		ReqParams->Err    =0x0000;
+		if (Last)
+			ReqParams->EoS  =0x00;
+		else
+			ReqParams->EoS  =0x01;
+		// Next byte is auto inc and not zero for partial sequences
+		// Is zero for lonely sequences.
+		if (First && Last)
+			ReqParams->IDSeq=0x00;
+		else
+			ReqParams->IDSeq=GetNextByte();
 
-        DataSendReq=PBsendRequestData(pbyte(PDUH_out)+DataPtrOffset);
-        if (First)
-        {
-            // in the first pdu, after data header there is the whole packet length
-            TotalPackSize=pword(pbyte(DataSendReq)+sizeof(TBsendRequestData));
-            Data=pbyte(TotalPackSize)+sizeof(word);
-            *TotalPackSize=SwapWord(word(TxBuffer.Size));
-            Extra=2; // extra bytes (total pack size indicator)
-        }
-        else
-        {
-            Data=pbyte(DataSendReq)+sizeof(TBsendRequestData);
-            Extra=0;
-        };
+		DataSendReq=PBsendRequestData(pbyte(PDUH_out)+DataPtrOffset);
+		if (First)
+		{
+			// in the first pdu, after data header there is the whole packet length
+			TotalPackSize=pword(pbyte(DataSendReq)+sizeof(TBsendRequestData));
+			Data=pbyte(TotalPackSize)+sizeof(word);
+			*TotalPackSize=SwapWord(word(TxBuffer.Size));
+			Extra=2; // extra bytes (total pack size indicator)
+		}
+		else
+		{
+			Data=pbyte(DataSendReq)+sizeof(TBsendRequestData);
+			Extra=0;
+		};
 
-        PDUH_out->DataLen=SwapWord(word(sizeof(TBsendRequestData))+Slice+Extra);
-        DataSendReq->Len =SwapWord(Slice+8+Extra);
-        TxIsoSize=Slice+sizeof(TS7ReqHeader)+sizeof(TBSendParams)+sizeof(TBsendRequestData)+Extra;
+		PDUH_out->DataLen=SwapWord(word(sizeof(TBsendRequestData))+Slice+Extra);
+		DataSendReq->Len =SwapWord(Slice+8+Extra);
+		TxIsoSize=Slice+sizeof(TS7ReqHeader)+sizeof(TBSendParams)+sizeof(TBsendRequestData)+Extra;
 
-        DataSendReq->FF      =0xFF;
-        DataSendReq->TRSize  =TS_ResOctet;
-        DataSendReq->DHead[0]=0x12;
-        DataSendReq->DHead[1]=0x06;
-        DataSendReq->DHead[2]=0x13;
-        DataSendReq->DHead[3]=0x00;
-        DataSendReq->R_ID    =SwapDWord(TxBuffer.R_ID);
-        memcpy(Data, Source ,Slice);
+		DataSendReq->FF      =0xFF;
+		DataSendReq->TRSize  =TS_ResOctet;
+		DataSendReq->DHead[0]=0x12;
+		DataSendReq->DHead[1]=0x06;
+		DataSendReq->DHead[2]=0x13;
+		DataSendReq->DHead[3]=0x00;
+		DataSendReq->R_ID    =SwapDWord(TxBuffer.R_ID);
+		memcpy(Data, Source ,Slice);
 
-        if (isoExchangeBuffer(NULL, TxIsoSize)!=0)
-            SetError(errParSendingBlock);
+		if (isoExchangeBuffer(NULL, TxIsoSize)!=0)
+			SetError(errParSendingBlock);
 
-        if (LastError==0)
-        {
-           Seq_IN=ResParams->Seq;
-           if (SwapWord(ResParams->Err)!=0)
-               LastError=errParSendRefused;
-        }
+		if (LastError==0)
+		{
+		   Seq_IN=ResParams->Seq;
+		   if (SwapWord(ResParams->Err)!=0)
+			   LastError=errParSendRefused;
+		}
 
-        if (First)
-        {
-            First =false;
-            MaxSlice+=2; // only in the first frame we have the extra info
-        };
-    };
+		if (First)
+		{
+			First =false;
+			MaxSlice+=2; // only in the first frame we have the extra info
+		};
+	};
 
-    SendTime=SysGetTick()-FSendElapsed;
-    if (LastError==0)
-        BytesSent+=SentSize;
+	SendTime=SysGetTick()-FSendElapsed;
+	if (LastError==0)
+		BytesSent+=SentSize;
 
-    return LastError==0;
+	return LastError==0;
 }
 //------------------------------------------------------------------------------
 bool TSnap7Partner::PickData()
 {
-    PBSendReqParams   ReqParams;
-    PBSendReqParams   ResParams;
-    PBSendResData     ResData;
-    PBsendRequestData DataSendReq;
-    pbyte Source, Target;
-    pword TotalPackSize;
-    word Slice;
-    int AnswerLen;
+	PBSendReqParams   ReqParams;
+	PBSendReqParams   ResParams;
+	PBSendResData     ResData;
+	PBsendRequestData DataSendReq;
+	pbyte Source, Target;
+	pword TotalPackSize;
+	word Slice;
+	int AnswerLen;
 
-    ClrError();
-    // Setup pointers
-    ReqParams  =PBSendReqParams(pbyte(PDUH_in)+sizeof(TS7ReqHeader));
-    ResParams  =ReqParams; // pdu 7 is symmetrical
-    DataSendReq=PBsendRequestData(pbyte(ReqParams)+sizeof(TBSendParams));
+	ClrError();
+	// Setup pointers
+	ReqParams  =PBSendReqParams(pbyte(PDUH_in)+sizeof(TS7ReqHeader));
+	ResParams  =ReqParams; // pdu 7 is symmetrical
+	DataSendReq=PBsendRequestData(pbyte(ReqParams)+sizeof(TBSendParams));
 
-    // Checks if PDU is a BSend request
-    if ((PDUH_in->PDUType!=PduType_userdata) || (ReqParams->Tg!=grBSend))
-    {
-        LastError=errParInvalidPDU;
-        return false;
-    }
+	// Checks if PDU is a BSend request
+	if ((PDUH_in->PDUType!=PduType_userdata) || (ReqParams->Tg!=grBSend))
+	{
+		LastError=errParInvalidPDU;
+		return false;
+	}
 
-    if (FRecvStatus.First)
-    {
-        TotalPackSize=(word*)(pbyte(DataSendReq)+sizeof(TBsendRequestData));
-        FRecvStatus.TotalLength=SwapWord(*TotalPackSize);
-        Source=pbyte(DataSendReq)+sizeof(TBsendRequestData)+2;
-        FRecvStatus.In_R_ID=SwapDWord(DataSendReq->R_ID);
-        FRecvStatus.Offset=0;
-    }
-    else
-        Source=pbyte(DataSendReq+sizeof(TBsendRequestData));
+	if (FRecvStatus.First)
+	{
+		TotalPackSize=(word*)(pbyte(DataSendReq)+sizeof(TBsendRequestData));
+		FRecvStatus.TotalLength=SwapWord(*TotalPackSize);
+		Source=pbyte(DataSendReq)+sizeof(TBsendRequestData)+2;
+		FRecvStatus.In_R_ID=SwapDWord(DataSendReq->R_ID);
+		FRecvStatus.Offset=0;
+		Slice=SwapWord(DataSendReq->Len)-10;
+	}
+	else {
+		Slice=SwapWord(DataSendReq->Len)-8;
+		Source=pbyte(DataSendReq)+sizeof(TBsendRequestData);
+	}
 
-    FRecvStatus.Done=ReqParams->EoS==0x00;
+	FRecvStatus.Done=ReqParams->EoS==0x00;
 
-    Target=pbyte(&RxBuffer+FRecvStatus.Offset);
-    Slice=SwapWord(DataSendReq->Len);
-    memcpy(Target, Source, Slice);
-    FRecvStatus.Offset+=Slice;
+	Target=pbyte(&RxBuffer)+FRecvStatus.Offset;
+	memcpy(Target, Source, Slice);
+	FRecvStatus.Offset+=Slice;
 
-    ResData =PBSendResData(pbyte(ResParams)+sizeof(TBSendParams));
-    // Send Answer
-    PDUH_out->ParLen  =SwapWord(sizeof(TBSendParams));
-    PDUH_out->DataLen =SwapWord(sizeof(TBSendResData));
+	ResData =PBSendResData(pbyte(ResParams)+sizeof(TBSendParams));
+	// Send Answer
+	PDUH_out->ParLen  =SwapWord(sizeof(TBSendParams));
+	PDUH_out->DataLen =SwapWord(sizeof(TBSendResData));
 
-    ResParams->Head[0]=0x00;
-    ResParams->Head[1]=0x01;
-    ResParams->Head[2]=0x12;
-    ResParams->Plen   =0x08; // length from here up the end of the record
-    ResParams->Uk     =0x12;
-    ResParams->Tg     =0x86;
-    ResParams->SubFun =0x01;
-    ResParams->Seq    =FRecvStatus.Seq_Out;
-    ResParams->Err    =0x0000;
-    ResParams->EoS    =0x00;
-    ResParams->IDSeq  =0x00;
+	ResParams->Head[0]=0x00;
+	ResParams->Head[1]=0x01;
+	ResParams->Head[2]=0x12;
+	ResParams->Plen   =0x08; // length from here up the end of the record
+	ResParams->Uk     =0x12;
+	ResParams->Tg     =0x86;
+	ResParams->SubFun =0x01;
+	ResParams->Seq    =FRecvStatus.Seq_Out;
+	ResParams->Err    =0x0000;
+	ResParams->EoS    =0x00;
+	ResParams->IDSeq  =0x00;
 
-    ResData->DHead[0] =0x0A;
-    ResData->DHead[1] =0x00;
-    ResData->DHead[2] =0x00;
-    ResData->DHead[3] =0x00;
+	ResData->DHead[0] =0x0A;
+	ResData->DHead[1] =0x00;
+	ResData->DHead[2] =0x00;
+	ResData->DHead[3] =0x00;
 
-    AnswerLen=sizeof(TS7ReqHeader)+sizeof(TBSendParams)+sizeof(TBSendResData);
-    if (isoSendBuffer(NULL,AnswerLen)!=0)
-        SetError(errParRecvingBlock);
+	AnswerLen=sizeof(TS7ReqHeader)+sizeof(TBSendParams)+sizeof(TBSendResData);
+	if (isoSendBuffer(NULL,AnswerLen)!=0)
+		SetError(errParRecvingBlock);
 
-    return LastError==0;
+	return LastError==0;
 }
 //------------------------------------------------------------------------------
 bool TSnap7Partner::BlockRecv()
 {
-    bool Result;
+	bool Result;
     if (!FRecvPending) // Start sequence
     {
         FRecvPending=true;
@@ -914,7 +916,7 @@ bool TSnap7Partner::BlockRecv()
           FRecvLast.Count=0;
     };
 
-    Result=PickData();
+	Result=PickData();
     FRecvStatus.First=false;
 
     if (!Result || FRecvStatus.Done)

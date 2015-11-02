@@ -1,5 +1,5 @@
 #
-# Common for every unix flavour (any changes will be reflected on all platforms)
+# Common for OSX (any changes will be reflected on all platforms)
 #
 Platform               :=$(TargetCPU)-$(OS)
 ConfigurationName      :=Release
@@ -13,8 +13,9 @@ LibrarySwitch          :=-l
 OutputSwitch           :=-o 
 LibraryPathSwitch      :=-L
 PreprocessorSwitch     :=-D
-SourceSwitch           :=-c 
-OutputFile             :=../bin/$(Platform)/libsnap7.so
+SourceSwitch           :=-c
+LibExt                 :=dylib 
+OutputFile             :=../bin/$(Platform)/libsnap7.$(LibExt)
 PreprocessOnlySwitch   :=-E 
 ObjectsFileList        :="filelist.txt"
 MakeDirCommand         :=mkdir -p
@@ -22,6 +23,7 @@ LinkOptions            :=  -O3
 IncludePath            :=  $(IncludeSwitch). $(IncludeSwitch)../../src/sys $(IncludeSwitch)../../src/core $(IncludeSwitch)../../src/lib 
 Libs                   := $(LibrarySwitch)pthread 
 LibPath                := $(LibraryPathSwitch). 
+LibInstall             := /usr/lib
 
 ##
 ## Common variables (CXXFLAGS varies across platforms)
@@ -106,5 +108,5 @@ clean:
 	$(RM) $(OutputFile)
 
 install: all
-	cp -f $(OutputFile) /usr/lib
+	cp -f $(OutputFile) $(LibInstall)
 

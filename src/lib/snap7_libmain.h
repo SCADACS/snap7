@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.2.0 |
+|  PROJECT SNAP7                                                         1.3.0 |
 |==============================================================================|
-|  Copyright (C) 2013, 2014 Davide Nardella                                    |
+|  Copyright (C) 2013, 2015 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -167,6 +167,7 @@ EXPORTSPEC int S7API Srv_SetMask(S7Object Server, int MaskKind, longword Mask);
 EXPORTSPEC int S7API Srv_SetEventsCallback(S7Object Server, pfn_SrvCallBack pCallback, void *usrPtr);
 EXPORTSPEC int S7API Srv_SetReadEventsCallback(S7Object Server, pfn_SrvCallBack pCallback, void *usrPtr);
 EXPORTSPEC int S7API Srv_EventText(TSrvEvent &Event, char *Text, int TextLen);
+EXPORTSPEC int S7API Srv_SetRWAreaCallback(S7Object Server, pfn_RWAreaCallBack pCallback, void *usrPtr);
 // Misc
 EXPORTSPEC int S7API Srv_GetStatus(S7Object Server, int &ServerStatus, int &CpuStatus, int &ClientsCount);
 EXPORTSPEC int S7API Srv_SetCpuStatus(S7Object Server, int CpuStatus);
@@ -179,7 +180,7 @@ EXPORTSPEC void S7API Par_Destroy(S7Object &Partner);
 EXPORTSPEC int S7API Par_GetParam(S7Object Partner, int ParamNumber, void *pValue);
 EXPORTSPEC int S7API Par_SetParam(S7Object Partner, int ParamNumber, void *pValue);
 EXPORTSPEC int S7API Par_Start(S7Object Partner);
-EXPORTSPEC int S7API Par_StartTo(S7Object Partner, const char *LocalAddress, const char *RemoteAddress, 
+EXPORTSPEC int S7API Par_StartTo(S7Object Partner, const char *LocalAddress, const char *RemoteAddress,
 	word LocTsap, word RemTsap);
 EXPORTSPEC int S7API Par_Stop(S7Object Partner);
 // BSend

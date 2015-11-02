@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.1.0 |
+|  PROJECT SNAP7                                                         1.3.0 |
 |==============================================================================|
-|  Copyright (C) 2013, Davide Nardella                                         |
+|  Copyright (C) 2013, 2014 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -10,7 +10,7 @@
 |  (at your option) any later version.                                         |
 |                                                                              |
 |  It means that you can distribute your commercial software linked with       |
-|  SMART7 without the requirement to distribute the source code of your        |
+|  SNAP7 without the requirement to distribute the source code of your         |
 |  application and without the requirement that your application be itself     |
 |  distributed under LGPL.                                                     |
 |                                                                              |
@@ -53,7 +53,11 @@
 # define OS_BSD
 #endif
 
-#if defined(PLATFORM_UNIX)
+#if defined(__APPLE__)
+# define OS_OSX
+#endif
+
+#if defined(PLATFORM_UNIX) || defined(OS_OSX)
 # include <unistd.h>
 # if defined(_POSIX_VERSION)
 #   define POSIX
@@ -96,12 +100,34 @@ extern "C" {
 // C exact length types
 //---------------------------------------------------------------------------
 #ifndef __cplusplus
-typedef unsigned char   uint8_t;  //  8 bit unsigned integer
-typedef unsigned short  uint16_t; // 16 bit unsigned integer
-typedef unsigned int    uint32_t; // 32 bit unsigned integer
-#if !defined(_UINTPTR_T_DEFINED) && !defined(OS_SOLARIS)  && !defined(OS_BSD)
+
+#ifdef OS_BSD
+#  include <stdint.h>
+#  include <time.h>
+#endif
+
+#ifdef OS_OSX
+#  include <stdint.h>  
+#  include <time.h>
+#endif
+
+#ifdef OS_SOLARIS
+#  include <stdint.h>  
+#  include <time.h>
+#endif
+
+#if defined(_UINTPTR_T_DEFINED)
+#  include <stdint.h>
+#  include <time.h>
+#endif
+
+#if !defined(_UINTPTR_T_DEFINED) && !defined(OS_SOLARIS) && !defined(OS_BSD) && !defined(OS_OSX)
+  typedef unsigned char   uint8_t;  //  8 bit unsigned integer
+  typedef unsigned short  uint16_t; // 16 bit unsigned integer
+  typedef unsigned int    uint32_t; // 32 bit unsigned integer
   typedef unsigned long   uintptr_t;// 64 bit unsigned integer
 #endif
+
 #endif
 
 #ifdef OS_WINDOWS
@@ -117,9 +143,15 @@ typedef unsigned int    uint32_t; // 32 bit unsigned integer
 // Exact length types regardless of platform/processor
 typedef uint8_t    byte;
 typedef uint16_t   word;
+typedef int16_t    smallint;
 typedef uint32_t   longword;
+typedef int32_t    longint;
 typedef byte       *pbyte;
 typedef word       *pword;
+typedef longword   *plongword;
+typedef smallint   *psmallint;
+typedef longint    *plongint;
+typedef float      *pfloat;
 typedef uintptr_t  S7Object; // multi platform/processor object reference
                              // DON'T CONFUSE IT WITH AN OLE OBJECT, IT'S SIMPLY
                              // AN INTEGER VALUE (32 OR 64 BIT) USED AS HANDLE.
@@ -702,6 +734,28 @@ int S7API Par_GetLastError(S7Object Partner, int *LastError);
 int S7API Par_GetStatus(S7Object Partner, int *Status);
 int S7API Par_ErrorText(int Error, char *Text, int TextLen);
 
+//******************************************************************************
+//                           HELPER DATA ACCESS FUNCTIONS
+//******************************************************************************
+// GET 
+bool GetBitAt(void *Buffer, int Pos, int Bit);
+byte GetByteAt(void *Buffer, int Pos);
+word GetWordAt(void *Buffer, int Pos);
+smallint GetIntAt(void *Buffer, int Pos);
+longword GetDWordAt(void *Buffer, int Pos);
+longint GetDIntAt(void *Buffer, int Pos);
+float GetRealAt(void *Buffer, int Pos);
+struct tm GetDateTimeAt(void *Buffer, int Pos);
+// SET
+void SetBitAt(void *Buffer, int Pos, int Bit, bool Value);
+void SetByteAt(void *Buffer, int Pos, byte Value);
+void SetWordAt(void *Buffer, int Pos, word Value);
+void SetIntAt(void *Buffer, int Pos, smallint Value);
+void SetDWordAt(void *Buffer, int Pos, longword Value);
+void SetDIntAt(void *Buffer, int Pos, longint Value);
+void SetRealAt(void *Buffer, int Pos, float Value);
+void SetDateTimeAt(void *Buffer, int Pos, tm Value);
+
 
 #pragma pack()
 #ifdef __cplusplus
@@ -831,13 +885,13 @@ public:
     int Stop();
     int GetParam(int ParamNumber, void *pValue);
     int SetParam(int ParamNumber, void *pValue);
-	// Events
-	int SetEventsCallback(pfn_SrvCallBack PCallBack, void *UsrPtr);
-	int SetReadEventsCallback(pfn_SrvCallBack PCallBack, void *UsrPtr);
-	bool PickEvent(TSrvEvent *pEvent);
-	void ClearEvents();
+    // Events
+    int SetEventsCallback(pfn_SrvCallBack PCallBack, void *UsrPtr);
+    int SetReadEventsCallback(pfn_SrvCallBack PCallBack, void *UsrPtr);
+    bool PickEvent(TSrvEvent *pEvent);
+    void ClearEvents();
     longword GetEventsMask();
-	longword GetLogMask();
+    longword GetLogMask();
     void SetEventsMask(longword Mask);
     void SetLogMask(longword Mask);
     // Resources

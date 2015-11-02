@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.1.0 |
+|  PROJECT SNAP7                                                         1.3.0 |
 |==============================================================================|
-|  Copyright (C) 2013, Davide Nardella                                         |
+|  Copyright (C) 2013, 2015 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -31,6 +31,17 @@
 //----------------------------------------------------------------------------
 #if defined(OS_WINDOWS) || defined (OS_SOLARIS) || defined(OS_OSX)
 # define MSG_NOSIGNAL    0
+#endif
+//----------------------------------------------------------------------------
+// Non blocking connection to avoid root priviledges under UNIX 
+// i.e. raw socket pinger is not more used.
+// Thanks to Rolf Stalder that made it ;)
+//----------------------------------------------------------------------------
+#ifdef PLATFORM_UNIX
+	#define NON_BLOCKING_CONNECT
+#endif
+#ifdef NON_BLOCKING_CONNECT
+	#include <fcntl.h>
 #endif
 //----------------------------------------------------------------------------
 /*
@@ -210,7 +221,18 @@ public:
 };
 typedef TPinger *PPinger;
 //---------------------------------------------------------------------------
-class TMsgSocket
+class TSnapBase // base class endian-aware
+{
+private:
+		bool LittleEndian;
+protected:
+		longword SwapDWord(longword Value);
+		word SwapWord(word Value);
+public:
+		TSnapBase();
+};
+//---------------------------------------------------------------------------
+class TMsgSocket : public TSnapBase
 {
 private:
         PPinger Pinger;

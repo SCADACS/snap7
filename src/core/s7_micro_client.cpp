@@ -74,6 +74,9 @@ int TSnap7MicroClient::opReadArea()
      // First check : params bounds
      if ((Job.Number<0) || (Job.Number>65535) || (Job.Start<0) || (Job.Amount<1))
         return errCliInvalidParams;
+     // Second check : transport size
+	 if ((Job.WordLen==S7WLBit) && (Job.Amount>1))
+        return errCliInvalidTransportSize;
      // Request Params size
      RPSize    =sizeof(TReqFunReadItem)+2; // 1 item + FunRead + ItemsCount
      // Setup pointers (note : PDUH_out and PDU.Payload are the same pointer)
@@ -182,6 +185,9 @@ int TSnap7MicroClient::opWriteArea()
      // First check : params bounds
      if ((Job.Number<0) || (Job.Number>65535) || (Job.Start<0) || (Job.Amount<1))
         return errCliInvalidParams;
+     // Second check : transport size
+	 if ((Job.WordLen==S7WLBit) && (Job.Amount>1))
+        return errCliInvalidTransportSize;
 
      RHSize =sizeof(TS7ReqHeader)+    // Request header
              2+                       // FunWrite+ItemCount (of TReqFunWriteParams)
@@ -381,9 +387,13 @@ int TSnap7MicroClient::opReadMultiVars()
     };
 
     IsoSize=RPSize+sizeof(TS7ReqHeader);
-	if (IsoSize>PDULength) 
+	if (IsoSize>PDULength)
 		return errCliSizeOverPDU;
-    Result=isoExchangeBuffer(0,IsoSize);
+	Result=isoExchangeBuffer(0,IsoSize);
+
+	if (Result!=0)
+        return Result;
+
     // Function level error
     if (Answer->Error!=0)
     	return CpuError(SwapWord(Answer->Error));
@@ -548,12 +558,16 @@ int TSnap7MicroClient::opWriteMultiVars()
     PDUH_out->DataLen=SwapWord(word(Offset));
 
     IsoSize=RPSize+sizeof(TS7ReqHeader)+int(Offset);
-	if (IsoSize>PDULength) 
+	if (IsoSize>PDULength)
 		return errCliSizeOverPDU;
     Result=isoExchangeBuffer(0,IsoSize);
-    // Function level error
-    if (Answer->Error!=0)
-        return CpuError(SwapWord(Answer->Error));
+
+	if (Result!=0)
+		return Result;
+
+	// Function level error
+	if (Answer->Error!=0)
+		return CpuError(SwapWord(Answer->Error));
 
     if (ResParams->ItemCount!=ItemsCount)
         return errCliInvalidPlcAnswer;
@@ -1199,14 +1213,12 @@ int TSnap7MicroClient::opUpload()
         if (Full)
         {
             opSize=int(Offset);
-            //printf("OS: %d\n", opSize);
-            if (opSize<76) // 76 for SDB5, 80 for empty DB
+            if (opSize<78)
                 Result=errCliInvalidDataSizeRecvd;
         }
         else
         {
             opSize=BlockLength;
-            //printf("BL: %d\n", opSize);
             if (opSize<1)
                 Result=errCliInvalidDataSizeRecvd;
         };
@@ -2494,7 +2506,7 @@ int TSnap7MicroClient::CheckBlock(int BlockType, int BlockNum,  void * pBlock,  
           if (BlockNum>0xFFFF)
             return errCliInvalidBlockNumber;
       };
-      //printf("%d != %d\n", SwapDWord(Info->LenLoadMem), longword(Size));
+
       if (SwapDWord(Info->LenLoadMem)!=longword(Size))
           return errCliInvalidBlockSize;
 

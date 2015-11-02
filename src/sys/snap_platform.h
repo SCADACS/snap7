@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.1.0 |
+|  PROJECT SNAP7                                                         1.3.0 |
 |==============================================================================|
-|  Copyright (C) 2013, Davide Nardella                                         |
+|  Copyright (C) 2013, 2015 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -50,6 +50,11 @@
 
 #if defined(__SVR4) || defined(__svr4__)
 # define OS_SOLARIS
+// Thanks to Rolf Stalder now it's possible to use pthreads also for Solaris
+// In any case the Solaris native threads model is still present and can be
+// used uncommenting the #define line below.
+# undef OS_SOLARIS_NATIVE_THREADS
+// # define OS_SOLARIS_NATIVE_THREADS
 #endif
 
 #if defined(PLATFORM_UNIX)

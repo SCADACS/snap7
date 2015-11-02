@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.2.0 |
+|  PROJECT SNAP7                                                         1.3.0 |
 |==============================================================================|
-|  Copyright (C) 2013, 2014 Davide Nardella                                    |
+|  Copyright (C) 2013, 2015 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -35,12 +35,10 @@ void* ThreadProc(void* param)
 {
     PSnapThread Thread;
     // Unix but not Solaris
-#if (defined(POSIX) || defined(OS_OSX)) && (!defined(OS_SOLARIS))
+#if (defined(POSIX) || defined(OS_OSX)) && (!defined(OS_SOLARIS_NATIVE_THREADS))
     int last_type, last_state;
     pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &last_type);
     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &last_state);
-#endif
-#ifdef OS_SOLARIS
 #endif
     Thread = PSnapThread(param);
 
@@ -59,13 +57,13 @@ void* ThreadProc(void* param)
 #ifdef OS_WINDOWS
     ExitThread(0);
 #endif
-#if defined(POSIX) && (!defined(OS_SOLARIS))
+#if defined(POSIX) && (!defined(OS_SOLARIS_NATIVE_THREADS))
     pthread_exit((void*)0);
 #endif
 #if defined(OS_OSX)
     pthread_exit((void*)0);
 #endif
-#ifdef OS_SOLARIS
+#ifdef OS_SOLARIS_NATIVE_THREADS
     thr_exit((void*)0);
 #endif
     return 0; // never reach, only to avoid compiler warning
@@ -86,6 +84,10 @@ TSnapThread::~TSnapThread()
         Terminate();
         Join();
     };
+#ifdef OS_WINDOWS
+	if (Started)
+		CloseHandle(th);
+#endif
 }
 //---------------------------------------------------------------------------
 void TSnapThread::ThreadCreate() 
@@ -93,13 +95,16 @@ void TSnapThread::ThreadCreate()
 #ifdef OS_WINDOWS
     th = CreateThread(0, 0, ThreadProc, this, 0, 0);
 #endif
-#if defined(POSIX) && (!defined(OS_SOLARIS))
-    pthread_create(&th, 0, &ThreadProc, this);
+#if defined(POSIX) && (!defined(OS_SOLARIS_NATIVE_THREADS))
+    pthread_attr_t a;
+    pthread_attr_init(&a);
+    pthread_attr_setdetachstate(&a, PTHREAD_CREATE_DETACHED);
+    pthread_create(&th, &a, &ThreadProc, this);
 #endif  
 #if defined(OS_OSX)
     pthread_create(&th, 0, &ThreadProc, this);
 #endif
-#ifdef OS_SOLARIS
+#ifdef OS_SOLARIS_NATIVE_THREADS
     thr_create(0, // default stack base
                0, // default stack size
                &ThreadProc, // Thread routine

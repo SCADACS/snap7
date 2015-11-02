@@ -1,5 +1,5 @@
 #
-# Win32 barebone makefile for c++ examples.
+# Win64 barebone makefile for c++ examples.
 #
 # Simply run make or make clean
 # Intend this makefile only as a "batch examples updater" after library modification.
@@ -14,7 +14,7 @@ MINREL   =4.7.1
 #
 CPP      = g++.exe
 CC       = gcc.exe
-LIBS     = -L"$(MINGW)/lib" -static-libgcc $(MINGW)/lib/gcc/x86_64-w64-mingw32/$(MINREL)/libstdc++.a ../../../build/bin/win64/snap7.lib 
+LIBS     = -L"$(MINGW)/lib" -static-libgcc $(MINGW)/lib/gcc/x86_64-w64-mingw32/$(MINREL)/libstdc++.a snap7.lib 
 INCS     = -I"$(MINGW)/include" -I"../"
 CXXINCS  = -I"$(MINGW)/include" -I"../"
 CXXFLAGS = $(CXXINCS) 
@@ -26,12 +26,14 @@ RM       = rm -f
 all:
 	$(CPP) -o client.exe ../client.cpp ../snap7.cpp $(LIBS) $(CXXFLAGS)
 	$(CPP) -o server.exe ../server.cpp ../snap7.cpp $(LIBS) $(CXXFLAGS)
+	$(CPP) -o srv_resourceless.exe ../srv_resourceless.cpp ../snap7.cpp $(LIBS) $(CXXFLAGS)
 	$(CPP) -o apartner.exe ../apartner.cpp ../snap7.cpp $(LIBS) $(CXXFLAGS)
 	$(CPP) -o ppartner.exe ../ppartner.cpp ../snap7.cpp $(LIBS) $(CXXFLAGS)
 
 clean: 
 	${RM} client.exe 
 	${RM} server.exe 
+	${RM} srv_resourceless.exe 
 	${RM} apartner.exe 
 	${RM} ppartner.exe 
 

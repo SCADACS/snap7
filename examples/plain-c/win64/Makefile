@@ -14,7 +14,7 @@ MINREL   =4.7.1
 #
 CPP      = g++.exe
 CC       = gcc.exe
-LIBS     = -L"$(MINGW)/lib" -static-libgcc ../../../build/bin/win64/snap7.lib 
+LIBS     = -L"$(MINGW)/lib" -static-libgcc ../../../build/bin/legacy/win64/snap7.lib 
 INCS     = -I"$(MINGW)/include" -I"../"
 CXXINCS  = -I"$(MINGW)/include" -I"../"
 CXXFLAGS = -O3 $(CXXINCS) 
@@ -26,12 +26,14 @@ RM       = rm -f
 all:
 	$(CC) -o client.exe ../client.c $(LIBS) $(CFLAGS)
 	$(CC) -o server.exe ../server.c $(LIBS) $(CFLAGS)
+	$(CC) -o srv_resourceless.exe ../srv_resourceless.c $(LIBS) $(CFLAGS)
 	$(CC) -o apartner.exe ../apartner.c $(LIBS) $(CFLAGS)
 	$(CC) -o ppartner.exe ../ppartner.c $(LIBS) $(CFLAGS)
 
 clean: 
 	${RM} client.exe 
 	${RM} server.exe 
+	${RM} srv_resourceless.exe 
 	${RM} apartner.exe 
 	${RM} ppartner.exe 
 

@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.2.0 |
+|  PROJECT SNAP7                                                         1.3.0 |
 |==============================================================================|
-|  Copyright (C) 2013, 2014 Davide Nardella                                    |
+|  Copyright (C) 2013, 2015 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -69,7 +69,7 @@ BOOL APIENTRY DllMain (HINSTANCE hInst,
 // CLIENT
 //***************************************************************************
 S7Object S7API Cli_Create()
-{    
+{
     return S7Object(new TSnap7Client());
 }
 //---------------------------------------------------------------------------
@@ -1033,6 +1033,14 @@ int S7API Srv_SetReadEventsCallback(S7Object Server, pfn_SrvCallBack pCallback, 
 {
 	if (Server)
 		return PSnap7Server(Server)->SetReadEventsCallBack(pCallback, usrPtr);
+	else
+		return errLibInvalidObject;
+}
+//---------------------------------------------------------------------------
+int S7API Srv_SetRWAreaCallback(S7Object Server, pfn_RWAreaCallBack pCallback, void *usrPtr)
+{
+	if (Server)
+		return PSnap7Server(Server)->SetRWAreaCallBack(pCallback, usrPtr);
 	else
 		return errLibInvalidObject;
 }

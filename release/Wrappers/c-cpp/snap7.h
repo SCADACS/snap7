@@ -1,5 +1,5 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.2.0 |
+|  PROJECT SNAP7                                                         1.4.0 |
 |==============================================================================|
 |  Copyright (C) 2013, 2014 Davide Nardella                                    |
 |  All rights reserved.                                                        |
@@ -193,6 +193,15 @@ const longword errIsoResvd_1            = 0x000C0000; // Unassigned
 const longword errIsoResvd_2            = 0x000D0000; // Unassigned
 const longword errIsoResvd_3            = 0x000E0000; // Unassigned
 const longword errIsoResvd_4            = 0x000F0000; // Unassigned
+
+// Tag Struct
+typedef struct{
+	int Area;
+	int DBNumber;
+	int Start;
+	int Size;
+	int WordLen;
+}TS7Tag, *PS7Tag;
 
 //------------------------------------------------------------------------------
 //                                  PARAMS LIST            
@@ -519,6 +528,8 @@ int S7API Cli_WaitAsCompletion(S7Object Client, int Timeout);
 //******************************************************************************
 //                                   SERVER
 //******************************************************************************
+const int OperationRead  = 0;
+const int OperationWrite = 1;
 
 const int mkEvent = 0;
 const int mkLog   = 1;
@@ -638,8 +649,11 @@ typedef struct{
 	word EvtParam4;    // Param 4 (if available)
 }TSrvEvent, *PSrvEvent;
 
-// Server Evants callback
-typedef void (S7API *pfn_SrvCallBack)(void * usrPtr, PSrvEvent PEvent, int Size);
+// Server Events callback
+typedef void (S7API *pfn_SrvCallBack)(void *usrPtr, PSrvEvent PEvent, int Size);
+// Server Read/Write callback
+typedef int(S7API *pfn_RWAreaCallBack)(void *usrPtr, int Sender, int Operation, PS7Tag PTag, void *pUsrData);
+
 S7Object S7API Srv_Create();
 void S7API Srv_Destroy(S7Object *Server);
 int S7API Srv_GetParam(S7Object Server, int ParamNumber, void *pValue);
@@ -659,6 +673,7 @@ int S7API Srv_GetMask(S7Object Server, int MaskKind, longword *Mask);
 int S7API Srv_SetMask(S7Object Server, int MaskKind, longword Mask);
 int S7API Srv_SetEventsCallback(S7Object Server, pfn_SrvCallBack pCallback, void *usrPtr);
 int S7API Srv_SetReadEventsCallback(S7Object Server, pfn_SrvCallBack pCallback, void *usrPtr);
+int S7API Srv_SetRWAreaCallback(S7Object Server, pfn_RWAreaCallBack pCallback, void *usrPtr);
 int S7API Srv_EventText(TSrvEvent *Event, char *Text, int TextLen);
 int S7API Srv_ErrorText(int Error, char *Text, int TextLen);
 
@@ -859,7 +874,8 @@ public:
     int SetParam(int ParamNumber, void *pValue);
     // Events
     int SetEventsCallback(pfn_SrvCallBack PCallBack, void *UsrPtr);
-    int SetReadEventsCallback(pfn_SrvCallBack PCallBack, void *UsrPtr);
+	int SetReadEventsCallback(pfn_SrvCallBack PCallBack, void *UsrPtr);
+	int SetRWAreaCallback(pfn_RWAreaCallBack PCallBack, void *UsrPtr);
     bool PickEvent(TSrvEvent *pEvent);
     void ClearEvents();
     longword GetEventsMask();

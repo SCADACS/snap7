@@ -25,12 +25,14 @@ RM       = rm -f
 all:
 	$(CC) -o client.exe ../client.c $(LIBS) $(CFLAGS)
 	$(CC) -o server.exe ../server.c $(LIBS) $(CFLAGS)
+	$(CC) -o srv_resourceless.exe ../srv_resourceless.c $(LIBS) $(CFLAGS)
 	$(CC) -o apartner.exe ../apartner.c $(LIBS) $(CFLAGS)
 	$(CC) -o ppartner.exe ../ppartner.c $(LIBS) $(CFLAGS)
 
 clean: 
 	${RM} client.exe 
 	${RM} server.exe 
+	${RM} srv_resourceless.exe 
 	${RM} apartner.exe 
 	${RM} ppartner.exe 
 

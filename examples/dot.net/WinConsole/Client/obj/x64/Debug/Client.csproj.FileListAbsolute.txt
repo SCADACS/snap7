@@ -1,0 +1,10 @@
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinConsole\bin\x64\Client.exe.config
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinConsole\bin\x64\Client.exe
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinConsole\bin\x64\Client.pdb
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinConsole\Client\obj\x64\Debug\Client.exe
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinConsole\Client\obj\x64\Debug\Client.pdb
+C:\Snap7\Deploy-1.4.0\snap7-full-1.4.0\examples\dot.net\WinConsole\bin\x64\Client.exe.config
+C:\Snap7\Deploy-1.4.0\snap7-full-1.4.0\examples\dot.net\WinConsole\Client\obj\x64\Debug\Client.exe
+C:\Snap7\Deploy-1.4.0\snap7-full-1.4.0\examples\dot.net\WinConsole\bin\x64\Client.exe
+C:\Snap7\Deploy-1.4.0\snap7-full-1.4.0\examples\dot.net\WinConsole\bin\x64\Client.pdb
+C:\Snap7\Deploy-1.4.0\snap7-full-1.4.0\examples\dot.net\WinConsole\Client\obj\x64\Debug\Client.pdb

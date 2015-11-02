@@ -9,7 +9,7 @@ object SmartConnectInfo: TSmartConnectInfo
   ClientHeight = 381
   ClientWidth = 671
   Position = poScreenCenter
-  LCLVersion = '1.0.8.0'
+  LCLVersion = '0.9.30.4'
   object Memo1: TMemo
     Cursor = crHelp
     Left = 0
@@ -21,20 +21,14 @@ object SmartConnectInfo: TSmartConnectInfo
     Font.Height = -15
     Font.Name = 'Sans'
     Lines.Strings = (
-      'Snap7Client uses "smart connect" feature to avoid the TCP connection timeout when a PLC is off or '
-      'unwired.'
+      'Snap7Client uses "smart connect" feature to avoid the TCP connection timeout when a PLC is off or unwired.'
       'First the PLC is pinged. Then, if the ping result is ok, the TCP connection is performed.'
       ''
-      'Under Unix an ICMP (raw) socket has to be created and this is allowed only having root rights (the '
-      'ping program itself has SUID flag set).'
-      ''
       'Under Windows this is accomplished using the system library "iphlpapi.dll", if it is not available (very '
-      'rare case) a raw socket is created, and, in this case, under Vista/Windows 7/Windows 8 you need '
-      'administrative priviledges.'
+      'rare case) a raw socket is created, and, in this case, under Vista/Windows 7/Windows 8 you need administrative priviledges.'
       ''
       'During the initialization, the library checks if the ping can be performed trying the above methods.'
-      'If all they fail, the ping will not be performed by any client created, and they will try to connect '
-      'directly.'
+      'If all they fail, the ping will not be performed by any client created, and they will try to connect directly.'
     )
     OnChange = Memo1Change
     ParentFont = False

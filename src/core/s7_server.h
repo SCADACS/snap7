@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.2.0 |
+|  PROJECT SNAP7                                                         1.3.0 |
 |==============================================================================|
-|  Copyright (C) 2013, 2014 Davide Nardella                                    |
+|  Copyright (C) 2013, 2015 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -48,6 +48,8 @@
 // a modulo which is always positive
 #define pmod(X,Y)     (X%Y+Y)%Y
 
+#define MinPduSize 240
+#define CPU315PduSize 240
 //---------------------------------------------------------------------------
 // Server Interface errors
 const longword errSrvDBNullPointer      = 0x00200000; // Pssed null as PData
@@ -71,8 +73,6 @@ const int srvAreaFB = 7;
 const int srvAreaFC = 8;
 const int srvAreaSDB = 9;
 
-
-void FillTime(PS7Time PTime);
 
 typedef struct{
 	word   Number; // Number (only for DB)
@@ -183,11 +183,13 @@ private:
 	int DBCnt;
     byte LastBlk;
     TSZL SZL;
-    TS7Buffer Buffer;
+    byte BCD(word Value);
     // Checks the consistence of the incoming PDU
     bool CheckPDU_in(int PayloadSize);
     size_t copyDiagDataLine(pbyte to, byte registers, bool add_offset, DiagDataLine* ddl);
+    void FillTime(PS7Time PTime);
 protected:
+    int DataSizeByte(int WordLength);
     bool ExecuteRecv();
     void DoEvent(longword Code, word RetCode, word Param1, word Param2,
       word Param3, word Param4);
@@ -253,6 +255,7 @@ protected:
     void SZL_ID0A0();
     void SZL_ID124();
     void SZL_ID424();
+	void SZL_ID131_IDX003();
 public:
     TSnap7Server *FServer;
     int FPDULength;
@@ -267,12 +270,25 @@ typedef TS7Worker *PS7Worker;
 typedef std::pair<longword, byte> DiagID;
 typedef std::map<DiagID, RequestDiag*> DiagRequestMap;
 typedef std::map<DiagID, ResponseDiag*> DiagResponseMap;
+
+extern "C"
+{
+	typedef int (S7API *pfn_RWAreaCallBack)(void *usrPtr, int Sender, int Operation, PS7Tag PTag, void *pUsrData);
+}
+const int OperationRead  = 0;
+const int OperationWrite = 1;
+
 class TSnap7Server : public TCustomMsgServer
 {
 private:
     // Read Callback related
     pfn_SrvCallBack OnReadEvent;
+    pfn_RWAreaCallBack OnRWArea;
+    // Critical section to lock Read/Write Hook Area
+    PSnapCriticalSection CSRWHook;
     void *FReadUsrPtr;
+    void *FRWAreaUsrPtr;
+    void DisposeAll();
     // ring buffer for diagnostic messages
     byte DiagBuffer[MaxDiagBufferItems][DiagItemLength];
     uint AddedDiagItemCount;
@@ -280,7 +296,6 @@ private:
     DiagRequestMap diag_requests;
     DiagResponseMap diag_responses;
     uint GetDiagItemCount();
-    void DisposeAll();
     byte freeDiagJobID(longword client_id);
 protected:
     PS7AreaContainer *DBArea;
@@ -297,6 +312,10 @@ protected:
     // The Read event
     void DoReadEvent(int Sender, longword Code, word RetCode, word Param1,
       word Param2, word Param3, word Param4);
+    bool ResourceLess;
+    word ForcePDU;
+    bool DoReadArea(int Sender, int Area, int DBNumber, int Start, int Size, int WordLen, void *pUsrData);
+    bool DoWriteArea(int Sender, int Area, int DBNumber, int Start, int Size, int WordLen, void *pUsrData);
 public:
     int WorkInterval;
     byte CpuStatus;
@@ -321,6 +340,7 @@ public:
     int SetReadEventsCallBack(pfn_SrvCallBack PCallBack, void *UsrPtr);
     RequestDiag* GetDiagRequest(longword client_id, byte job_id);
     int AddDiagResponse(longword client_id, byte job_id, ResponseDiag* rd);
+    int SetRWAreaCallBack(pfn_RWAreaCallBack PCallBack, void *UsrPtr);
     friend class TS7Worker;
 };
 typedef TSnap7Server *PSnap7Server;

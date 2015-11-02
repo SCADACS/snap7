@@ -436,12 +436,26 @@ const
     S7AreaDB, S7AreaPE, S7AreaPA, S7AreaMK, S7AreaTM, S7AreaCT
   );
 
-  WLenOf : array[0..6] of integer = (
-    S7WLBit, S7WLByte, S7WLWord, S7WLDword, S7WLReal, S7WLCounter, S7WLTimer
+  WLenOf : array[0..14] of integer = (
+    S7WLBit,
+    S7WLByte,
+    S7WLChar,
+    S7WLWord,
+    S7WLInt,
+    S7WLDWord,
+    S7WLDInt,
+    S7WLReal,
+    S7WLDate,
+    S7WLTOD,
+    S7WLTime,
+    S7WLS5Time,
+    S7WLDT,
+    S7WLCounter,
+    S7WLTimer
   );
 
-  SizeByte : array[0..6] of integer = (
-    1, 1, 2, 4, 4, 2, 2
+  SizeByte : array[0..14] of integer = (
+    1, 1, 1, 2, 2, 4, 4, 4, 2, 4, 4, 2, 8, 2, 2
   );
 
   BlockOf : array[0..6] of integer = (
@@ -1134,10 +1148,10 @@ end;
 
 procedure TFormClient.CheckArea;
 begin
-  LblArea.Visible:=((CbArea.ItemIndex=4) and (cbWLen.ItemIndex<>6)) or
-                   ((CbArea.ItemIndex=5) and (cbWLen.ItemIndex<>5)) or
-                   ((CbArea.ItemIndex<>4) and (cbWLen.ItemIndex=6)) or
-                   ((CbArea.ItemIndex<>5) and (cbWLen.ItemIndex=5));
+  LblArea.Visible:=((CbArea.ItemIndex=4) and (cbWLen.ItemIndex<>14)) or
+                   ((CbArea.ItemIndex=5) and (cbWLen.ItemIndex<>13)) or
+                   ((CbArea.ItemIndex<>4) and (cbWLen.ItemIndex=14)) or
+                   ((CbArea.ItemIndex<>5) and (cbWLen.ItemIndex=13));
 end;
 
 procedure TFormClient.ChkFullClick(Sender: TObject);
@@ -1460,10 +1474,9 @@ end;
 procedure TFormClient.FormCreate(Sender: TObject);
 var
   c: Integer;
-  Platform : string;
+  ThePlatform : string;
   Wide : string;
 begin
-
   // Infamous trick to get the platform size
   // Maybe it could not work ever, but we need only a form caption....
   case SizeOf(NativeUint) of
@@ -1472,11 +1485,11 @@ begin
     else Wide := ' [?? bit]';
   end;
   {$IFDEF MSWINDOWS}
-     Platform:='Windows platform';
+     ThePlatform:='Windows platform';
   {$ELSE}
-     Platform:='Unix platform';
+     ThePlatform:='Unix platform';
   {$ENDIF}
-  Caption:='Snap7 Client Demo - '+Platform+Wide+
+  Caption:='Snap7 Client Demo - '+ThePlatform+Wide+
   {$IFDEF FPC}
     ' [Lazarus]';
   {$ELSE}
@@ -1852,7 +1865,10 @@ begin
 
   // for simplicity we allocate 1k per item
   for c := 0 to 4 do
+  begin
     GetMem(DataItems[c].pdata,1024);
+    fillchar(DataItems[c].pdata^,1024,#0);
+  end;
 
   EditToBuffer(ChEd_1,DataItems[0].pdata);
   EditToBuffer(ChEd_2,DataItems[1].pdata);

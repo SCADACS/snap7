@@ -1,0 +1,4 @@
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\BuildSnap7Assembly\bin\x64\Release\Snap7.net.dll
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\BuildSnap7Assembly\bin\x64\Release\Snap7.net.pdb
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\BuildSnap7Assembly\obj\x64\Release\Snap7.net.dll
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\BuildSnap7Assembly\obj\x64\Release\Snap7.net.pdb

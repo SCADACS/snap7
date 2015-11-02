@@ -25,12 +25,14 @@ RM       = rm -f
 all:
 	$(CPP) -o client.exe ../client.cpp ../snap7.cpp $(LIBS) $(CXXFLAGS)
 	$(CPP) -o server.exe ../server.cpp ../snap7.cpp $(LIBS) $(CXXFLAGS)
+	$(CPP) -o srv_resourceless.exe ../srv_resourceless.cpp ../snap7.cpp $(LIBS) $(CXXFLAGS)
 	$(CPP) -o apartner.exe ../apartner.cpp ../snap7.cpp $(LIBS) $(CXXFLAGS)
 	$(CPP) -o ppartner.exe ../ppartner.cpp ../snap7.cpp $(LIBS) $(CXXFLAGS)
 
 clean: 
 	${RM} client.exe 
 	${RM} server.exe 
+	${RM} srv_resourceless.exe 
 	${RM} apartner.exe 
 	${RM} ppartner.exe 
 

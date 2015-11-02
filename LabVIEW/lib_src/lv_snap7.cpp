@@ -214,6 +214,7 @@ int S7API lv_Cli_GetAgBlockInfo(S7Object Client, int BlockType, int BlockNum, TS
 //---------------------------------------------------------------------------
 int S7API lv_Cli_GetPgBlockInfo(S7Object Client, TS7IntBlockInfo *pIntBlkInfo, PLVString *pChrBlkInfo, PLVString *pStringData, int BlockSize)
 {
+	int Result;
 	TS7BlockInfo Info;
     int32_t StringSize = *pint32_t(*pChrBlkInfo);
     int32_t ChrBlkInfoSize = sizeof(TS7BlockInfo)-sizeof(TS7IntBlockInfo);
@@ -224,7 +225,7 @@ int S7API lv_Cli_GetPgBlockInfo(S7Object Client, TS7IntBlockInfo *pIntBlkInfo, P
 	pbyte pBlock=pbyte(*pStringData) + sizeof(int32_t);
     if (StringSize>=ChrBlkInfoSize)
     {
-        int Result = Cli_GetPgBlockInfo(Client, pBlock, &Info, BlockSize);
+        Result = Cli_GetPgBlockInfo(Client, pBlock, &Info, BlockSize);
         if (Result==0)
         {
             memcpy(pIntBlkInfo, &Info, sizeof(TS7IntBlockInfo));
@@ -232,7 +233,9 @@ int S7API lv_Cli_GetPgBlockInfo(S7Object Client, TS7IntBlockInfo *pIntBlkInfo, P
         }
     }	
 	else
-        return errCliBufferTooSmall;
+        Result = errCliBufferTooSmall;
+	
+	return Result;
 }
 //---------------------------------------------------------------------------
 int S7API lv_Cli_ListBlocksOfType(S7Object Client, int BlockType, PAdaptToType1D *pArrayData, int &ItemsCount)

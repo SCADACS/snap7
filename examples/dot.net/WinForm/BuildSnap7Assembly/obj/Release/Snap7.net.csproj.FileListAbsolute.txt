@@ -1,0 +1,10 @@
+C:\snap7-full-1.3.0\examples\WinForm.net\BuildSnap7Assembly\bin\Release\Snap7.net.dll
+C:\snap7-full-1.3.0\examples\WinForm.net\BuildSnap7Assembly\bin\Release\Snap7.net.pdb
+C:\snap7-full-1.3.0\examples\WinForm.net\BuildSnap7Assembly\obj\Release\ResolveAssemblyReference.cache
+C:\snap7-full-1.3.0\examples\WinForm.net\BuildSnap7Assembly\obj\Release\Snap7.net.dll
+C:\snap7-full-1.3.0\examples\WinForm.net\BuildSnap7Assembly\obj\Release\Snap7.net.pdb
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\BuildSnap7Assembly\bin\Release\Snap7.net.dll
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\BuildSnap7Assembly\bin\Release\Snap7.net.pdb
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\BuildSnap7Assembly\obj\Release\Snap7.net.csprojResolveAssemblyReference.cache
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\BuildSnap7Assembly\obj\Release\Snap7.net.dll
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\BuildSnap7Assembly\obj\Release\Snap7.net.pdb

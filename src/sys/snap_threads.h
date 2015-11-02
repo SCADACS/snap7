@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.2.0 |
+|  PROJECT SNAP7                                                         1.3.0 |
 |==============================================================================|
-|  Copyright (C) 2013, 2014 Davide Nardella                                    |
+|  Copyright (C) 2013, 2015 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -31,10 +31,10 @@
 #ifdef OS_WINDOWS
 # include "win_threads.h"
 #endif
-#if defined(POSIX) && (!defined(OS_SOLARIS))
+#if defined(POSIX) && (!defined(OS_SOLARIS_NATIVE_THREADS))
 # include "unix_threads.h"
 #endif
-#ifdef OS_SOLARIS
+#ifdef OS_SOLARIS_NATIVE_THREADS
 # include "sol_threads.h"
 #endif
 #if defined(OS_OSX)

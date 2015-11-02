@@ -1,7 +1,7 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.2.0 |
+|  PROJECT SNAP7                                                         1.3.0 |
 |==============================================================================|
-|  Copyright (C) 2013, 2014 Davide Nardella                                    |
+|  Copyright (C) 2013, 2015 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
@@ -59,7 +59,6 @@ const int S7WLDInt    = 0x07;
 const int S7WLReal    = 0x08;
 const int S7WLCounter = 0x1C;
 const int S7WLTimer   = 0x1D;
-
 
   // Block type
 const byte Block_OB   = 0x38;
@@ -204,26 +203,26 @@ typedef uintptr_t *Puintptr_t;
 
 const word DBMaxName = 0xFFFF; // max number (name) of DB
 
-const longword errS7Mask   	 = 0xFFF00000;
-const longword errS7Base   	 = 0x000FFFFF;
+const longword errS7Mask         = 0xFFF00000;
+const longword errS7Base         = 0x000FFFFF;
 const longword errS7notConnected = errS7Base+0x0001; // Client not connected
 const longword errS7InvalidMode  = errS7Base+0x0002; // Requested a connection to...
 const longword errS7InvalidPDUin = errS7Base+0x0003; // Malformed input PDU
 
 // S7 outcoming Error code
-const word Code7Ok   			= 0x0000;
+const word Code7Ok                      = 0x0000;
 const word Code7AddressOutOfRange       = 0x0005;
 const word Code7InvalidTransportSize    = 0x0006;
 const word Code7WriteDataSizeMismatch   = 0x0007;
 const word Code7ResItemNotAvailable   	= 0x000A;
 const word Code7ResItemNotAvailable1    = 0xD209;
 const word Code7InvalidValue   	        = 0xDC01;
-const word Code7NeedPassword      	= 0xD241;
+const word Code7NeedPassword            = 0xD241;
 const word Code7InvalidPassword         = 0xD602;
 const word Code7NoPasswordToClear   	= 0xD604;
-const word Code7NoPasswordToSet   	= 0xD605;
-const word Code7FunNotAvailable   	= 0x8104;
-const word Code7DataOverPDU   		= 0x8500;
+const word Code7NoPasswordToSet         = 0xD605;
+const word Code7FunNotAvailable         = 0x8104;
+const word Code7DataOverPDU             = 0x8500;
 
 // Result transport size
 const byte TS_ResBit   = 0x03;
@@ -260,14 +259,14 @@ const byte pduResponse    	= 0x02;   // Response (when error)
 const byte pduFuncRead    	= 0x04;   // Read area
 const byte pduFuncWrite   	= 0x05;   // Write area
 const byte pduNegotiate   	= 0xF0;   // Negotiate PDU length
-const byte pduStart   	    	= 0x28;   // CPU start
-const byte pduStop              = 0x29;   // CPU stop
-const byte pduStartUpload 	= 0x1D;   // Start Upload
-const byte pduUpload	      	= 0x1E;   // Upload
-const byte pduEndUpload         = 0x1F;   // EndUpload
-const byte pduReqDownload 	= 0x1A;   // Start Download request
-const byte pduDownload    	= 0x1B;   // Download request
-const byte pduDownloadEnded     = 0x1C;   // Download end request
+const byte pduStart         = 0x28;   // CPU start
+const byte pduStop          = 0x29;   // CPU stop
+const byte pduStartUpload   = 0x1D;   // Start Upload
+const byte pduUpload        = 0x1E;   // Upload
+const byte pduEndUpload     = 0x1F;   // EndUpload
+const byte pduReqDownload   = 0x1A;   // Start Download request
+const byte pduDownload      = 0x1B;   // Download request
+const byte pduDownloadEnded = 0x1C;   // Download end request
 const byte pduControl   	= 0x28;   // Control (insert/delete..)
 
 // PDU SubFunctions
@@ -275,10 +274,10 @@ const byte SFun_ListAll   	= 0x01;   // List all blocks
 const byte SFun_ListBoT   	= 0x02;   // List Blocks of type
 const byte SFun_BlkInfo   	= 0x03;   // Get Block info
 const byte SFun_ReadSZL   	= 0x01;   // Read SZL
-const byte SFun_ReadClock       = 0x01;   // Read Clock (Date and Time)
+const byte SFun_ReadClock   = 0x01;   // Read Clock (Date and Time)
 const byte SFun_SetClock  	= 0x02;   // Set Clock (Date and Time)
-const byte SFun_EnterPwd        = 0x01;   // Enter password    for this session
-const byte SFun_CancelPwd   	= 0x02;   // Cancel password    for this session
+const byte SFun_EnterPwd    = 0x01;   // Enter password    for this session
+const byte SFun_CancelPwd   = 0x02;   // Cancel password    for this session
 const byte SFun_Insert   	= 0x50;   // Insert block
 const byte SFun_Delete   	= 0x42;   // Delete block
 const byte SFun_Blink       = 0x16;   // blink LED
@@ -295,6 +294,15 @@ typedef tm *PTimeStruct;
 //                                   HEADERS
 //==============================================================================
 #pragma pack(1)
+
+// Tag Struct
+typedef struct{
+	int Area;
+	int DBNumber;
+	int Start;
+	int Size;
+	int WordLen;
+}TS7Tag, *PS7Tag;
 
 // Incoming header, it will be mapped onto IsoPDU payload
 typedef struct {

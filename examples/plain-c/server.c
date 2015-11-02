@@ -1,5 +1,5 @@
 /*=============================================================================|
-|  PROJECT SNAP7                                                         1.2.0 |
+|  PROJECT SNAP7                                                         1.4.0 |
 |==============================================================================|
 |  Copyright (C) 2013, 2014 Davide Nardella                                    |
 |  All rights reserved.                                                        |
@@ -114,8 +114,6 @@ byte SZLC_ID_001C_IDX_XXXX[352] = {
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-
-
 // Here we use the callback to show the log, this is not the best choice since
 // the callback is synchronous with the client access, i.e. the server cannot
 // handle futher request from that client until the callback is complete.
@@ -138,7 +136,7 @@ int main(int argc, char* argv[])
 
     // Share some resources with our virtual PLC
     Srv_RegisterArea(Server,
-		             srvAreaDB,     // We are registering a DB
+		     srvAreaDB,     // We are registering a DB
                      1,             // Its number is 1 (DB1)
                      &DB1,          // Our buffer for DB1
                      sizeof(DB1));  // Its size

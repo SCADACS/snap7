@@ -1,0 +1,6 @@
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB\VBClient\bin\x64\VBClient.exe
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB\VBClient\bin\x64\snap7.net.dll
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB\VBClient\obj\x64\Release\VBClient.MainForm.resources
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB\VBClient\obj\x64\Release\VBClient.Resources.resources
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB\VBClient\obj\x64\Release\VBClient.vbproj.GenerateResource.Cache
+C:\Snap7\Deploy-1.4.0\examples\dot.net\WinForm\VB\VBClient\obj\x64\Release\VBClient.exe
