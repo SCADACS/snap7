@@ -29,7 +29,12 @@
 #include "snap_tcpsrvr.h"
 #include "s7_types.h"
 #include "s7_isotcp.h"
+
+#include <memory>
+
 #include <map>
+#include <unordered_map>
+#include <vector>
 //---------------------------------------------------------------------------
 
 // Maximum number of DB, change it to increase/decrease the limit.
@@ -153,6 +158,13 @@ typedef struct {
 	int Len;
 }TCSZL;
 
+// Identifier used to find SZLs in a hashmap
+typedef uint32_t TSZLKey;
+
+// Map used to save loaded SZL answers
+typedef std::unordered_map
+        <TSZLKey, std::shared_ptr<std::vector<byte>> > SZLAnswerMap;
+
 typedef enum : byte {
     // TODO add other types
     VT_M  = 0x0,
@@ -183,6 +195,7 @@ private:
 	int DBCnt;
     byte LastBlk;
     TSZL SZL;
+    SZLAnswerMap cache;
     byte BCD(word Value);
     // Checks the consistence of the incoming PDU
     bool CheckPDU_in(int PayloadSize);
@@ -247,10 +260,28 @@ protected:
     bool PerformSetClock();
     // SZL Group
     bool PerformGroupSZL();
+    // Will replace PerformGroupSZL() once done;
+    bool PerformNewGroupSZL();
+
+    /*
+     * Loads a dumped SZL response from the filesystem.
+     *
+     * The loading process first finds the folder for the specific SZL-ID and
+     * then tries to load the correct file for the specific index.
+     * If the folder contains a file named "all.bin", the contents of this file
+     * are loaded and returned as the answer. Otherwise, a file with the name
+     * <szl-index>.bin is searched for and returned, if found. If no file is
+     * found satisfying the constraints, null is returned.
+     *
+     * Returns a vector with the bytes from the dumped SZL response or null if
+     * the SZL-entry does not exist in our file database.
+     */
+    std::shared_ptr<std::vector<byte>> loadSZLDataFromFile();
     // Subfunctions (called by PerformGroupSZL)
     void SZLNotAvailable();
     void SZLSystemState();
     void SZLData(void *P, int len);
+    void SZLNewData(std::weak_ptr<std::vector<byte>> dataptr);
     void SZLCData(int SZLID, void *P, int len);
     void SZL_ID0A0();
     void SZL_ID124();
