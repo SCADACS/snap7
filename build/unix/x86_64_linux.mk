@@ -4,7 +4,7 @@
 ##
 TargetCPU  :=x86_64
 OS         :=linux
-CXXFLAGS   := -O3 -fPIC -pedantic
+CXXFLAGS   := -std=c++11 -fdiagnostics-color -O3 -fPIC -pedantic
 
 # Standard part
 
