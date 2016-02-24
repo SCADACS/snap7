@@ -25,7 +25,14 @@
 |=============================================================================*/
 #include "s7_server.h"
 #include "s7_firmware.h"
-#include <stdio.h>
+#include <stdio.h>          // TODO delete/comment out, used for debug only
+#include <iostream>
+#include <iomanip>          // TODO delete debug only
+
+#include <fstream>          // Needed to load SZL responses from files
+#include <unordered_map>    // A hashmap is used to cache already used SZL files
+#include <boost/format.hpp>
+#include <boost/filesystem.hpp>
 
 const byte BitMask[8] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};
 
@@ -373,7 +380,8 @@ bool TS7Worker::PerformPDUUsrData(int &Size)
           break;
       case grBlocksInfo : Result=PerformGroupBlockInfo();
           break;
-      case grSZL        : Result=PerformGroupSZL();
+//      case grSZL        : Result=PerformGroupSZL();
+      case grSZL        : Result=PerformNewGroupSZL();
           break;
       case grPassword   : Result=PerformGroupSecurity();
           break;
@@ -1607,7 +1615,113 @@ size_t TS7Worker::copyDiagDataLine(pbyte to, byte registers, bool add_offset, Di
 //------------------------------------------------------------------------------
 bool TS7Worker::PerformGroupCyclicData()
 {
-    DoEvent(evcPDUincoming,evrNotImplemented,grCyclicData,0,0,0);
+    /*
+     * We will be answering requests regarding the PROFINET interface of the
+     * PLC asked by TIA when looking at "online and diagnostics" tab. Everything
+     * else will not get an answer for now
+     *
+     * We will also want to answer "Message Service" like requests, as they
+     * might be useful in letting TIA think we are a REAL plc and not just a
+     * fake knock off software pretending ;)
+     */
+
+    // Use some variables to handle request and result packages more comfortably
+    PGCRequestParams    RequestParams;
+    PGCRequestData      RequestData;
+    PGCAnswerParams     AnswerParams;
+    PGCAnswerData       AnswerData;
+
+    // Answer packet type for these kind of requests
+    TS7Answer17         Answer;
+
+    // total size of the answer package
+    int TotalSize = 0;
+
+    word evs, param2 = 0, param3 = 0, param4 = 0;
+
+    RequestParams    = PGCRequestParams(pbyte(PDUH_in)+ReqHeaderSize);
+    RequestData      = PGCRequestData(pbyte(PDUH_in)+ReqHeaderSize+sizeof(TGCRequestParams));
+    AnswerParams     = PGCAnswerParams(pbyte(&Answer)+ResHeaderSize17);
+    AnswerData       = PGCAnswerData(pbyte(AnswerParams)+sizeof(TGCAnswerParams));
+
+    // Fill header of the answer packet with known values
+    Answer.Header.P         =0x32;
+    Answer.Header.PDUType   =PduType_userdata;
+    Answer.Header.AB_EX     =0x0000;
+    Answer.Header.Sequence  =PDUH_in->Sequence;
+    Answer.Header.ParLen    =SwapWord(sizeof(TGCAnswerParams));
+    Answer.Header.DataLen   =SwapWord(0x0010); // gets set later if bigger
+
+    // Fill parameters of answer packet with known values
+    AnswerParams->Head[0]=RequestParams->Head[0];
+    AnswerParams->Head[1]=RequestParams->Head[1];
+    AnswerParams->Head[2]=RequestParams->Head[2];
+    AnswerParams->Plen  =0x08;
+    AnswerParams->Uk    =0x12;
+    AnswerParams->Tg    =0x82; // Type response, group cyclic data
+    AnswerParams->SubFun=RequestParams->SubFun;
+    AnswerParams->Seq   =RequestParams->Seq + 2; //Seems to be always 2 (0 + 2)
+
+    // The field AnswerParams->resvd actually has 2 parts:
+    // The first 2 bytes:
+    //      The Data Unit Reference (DUR) which references to which Data Unit a
+    //      packet belongs to if the Data Unit has been split into multiple
+    //      packages
+    // The last 2 bytes:
+    //      The Last Data Unit (LDU) indicator, showing if this was the last
+    //      packet of a data unit split into multiple packages
+    AnswerParams->resvd =0x0000;
+    AnswerParams->Err   =0x0000; // All Zero for all correct
+
+
+    // Check request and send appropriate answer
+
+    if (RequestParams->SubFun == SFun_Profinet) {
+
+        AnswerData->ReturnCode      = ReturnCode_Success;
+        // Set transport size of Data to OCTET:
+        AnswerData->TransportSize   = TS_ResOctet;
+
+        // Size = 92
+        unsigned char ResponseData[] = { /* Answer String for Cyclic Request*/
+        0x00, 0x01, 0xff, 0x09, 0x00, 0x00, 0x00,
+        0x54, 0x04, 0x00, 0x00, 0x50, 0x01, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x81,
+        0x00, 0x02, 0x11, 0x00, 0x24, 0x01, 0x00, 0x00,
+        0x00, 0xc3, 0xd6, 0x87, 0xfe, 0x78, 0x9e, 0x03,
+        0xa1, 0xac, 0xdb, 0xe5, 0xbf, 0xcb, 0xbc, 0x27,
+        0xb6, 0x00, 0x00, 0x00, 0x00, 0x0b, 0x6d, 0x72,
+        0x70, 0x64, 0x6f, 0x6d, 0x61, 0x69, 0x6e, 0x2d,
+        0x31, 0x02, 0x13, 0x00, 0x18, 0x01, 0x00, 0x00,
+        0x00, 0xc3, 0xd6, 0x87, 0xfe, 0x78, 0x9e, 0x03,
+        0xa1, 0xac, 0xdb, 0xe5, 0xbf, 0xcb, 0xbc, 0x27,
+        0xb6, 0x00, 0x00, 0x00, 0x00 };
+
+        // Fill Answer with Response Data
+        int i;
+        for (i = 0; i < sizeof(ResponseData); i++) {
+            AnswerData->Data[i] = ResponseData[i];
+        }
+
+        // Set answer data size in header (+4 Bytes for redundant length field,
+        // return code and transport size)
+        Answer.Header.DataLen       = SwapWord(sizeof(ResponseData) + 4);
+        // Now set it again in actual data segment of the packet
+        AnswerData->DataLength      = SwapWord(sizeof(ResponseData));
+
+        // Calculate size
+        // 4 extra for parameter head and 4 extra for return code and
+        // transport size of response data
+        TotalSize = sizeof(Answer.Header)
+                    + sizeof(PGCAnswerParams) + 4
+                    + sizeof(ResponseData) + 4;
+
+        //Send
+        isoSendBuffer(&Answer, TotalSize);
+    }
+
+    // TODO sent correct events
+    DoEvent(evcCyclicData,evrNotImplemented,grCyclicData,0,0,0);
     return true;
 }
 //==============================================================================
@@ -1912,6 +2026,84 @@ void TS7Worker::SZLSystemState()
     SZL.SZLDone=true;
 
 }
+
+void TS7Worker::SZLNewData(std::weak_ptr<std::vector<byte>> dataptr){
+    //TODO implement sending our data
+
+
+    // maximum size the result data can have without overflowing our buffer
+	word MaxSzl                           = FPDULength-22;
+    // Lock weak ptr to allow indirection
+    auto buffer                           = dataptr.lock();
+
+    // -1 because we skip 1 byte of data
+    word dataSize                         = (word) buffer->size() + 9 - 1;
+    word headerSize                       = 22;
+
+    // Size check, if too big send SZL not Available for now..
+    // TODO do something senseful here
+    if ( dataSize > MaxSzl ){
+        SZLNotAvailable();
+        return;
+    }else{
+        //XXX SZLdump.cpp does not dump SZL entries correctly, as the 13th
+        //byte is an extra nullbyte. To negate this, we copy till the 12th
+        //byte and then from the 14th byte till the end..
+        //std::copy(buffer->begin(),buffer->end(), SZL.ResData[4]);
+        if (dataSize > 4) {
+            std::cout << "SKIPPING 13th BYTE" << std::endl;
+            memcpy(&SZL.ResData[9], buffer->data(), (sizeof(byte) * 4));
+            memcpy(&SZL.ResData[13], &buffer->data()[5], (sizeof(byte) *(buffer->size() - 5)));
+        }
+        else {
+            memcpy(&SZL.ResData[9], buffer->data(), (sizeof(byte) *(buffer->size())));
+        }
+    }
+
+	SZL.Answer.Header.DataLen=SwapWord(dataSize);
+
+    // No error and no more packets TODO allow for more than one packet
+	SZL.ResParams->Err  =0x0000;
+	SZL.ResParams->resvd=0x0000; // this is the end, no more packets
+
+    // Set Success Code and Transport Size
+    SZL.ResData[0] = ReturnCode_Success;
+    SZL.ResData[1] = 0x09;
+
+    // Compute the remaining data length for the SZL packet (-4 bytes) and save
+    // in Big Endian format
+    // Might be necessary, might be not TODO find out
+	SZL.ResData[2]=((dataSize-4)>>8) & 0xFF;
+	SZL.ResData[3]=(dataSize -4) & 0xFF;
+
+    // Set SZL-ID and SZL-Index for response
+    SZL.ResData[4]= (SZL.ID >> 8) & 0xFF;
+    SZL.ResData[5]= SZL.ID & 0xFF;
+    SZL.ResData[6]= (SZL.Index >> 8) & 0xFF;
+    SZL.ResData[7]= SZL.Index & 0xFF;
+
+    // SZL dump doesn't dump the upper byte for SZL partial list length
+    SZL.ResData[8]= 0x00;       // Upper Byte of partial list length
+                                // length TODO fix SZLDump to
+                                // dump this correctly, just assuming 0 here
+
+
+    //For now, just print out what would be sent TODO place real send here
+    int i;
+    for (i=0; i < (headerSize+dataSize); i++){
+        std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned) pbyte (&SZL.Answer)[i] << " ";
+        if ((i%16) == 0) {
+            std::cout << "\n";
+        }
+    }
+    std::cout << "\n";
+    std::cout << "\n";
+
+    isoSendBuffer(&SZL.Answer,headerSize + dataSize);
+    SZL.SZLDone=true;
+    //SZLNotAvailable();
+}
+
 void TS7Worker::SZLData(void *P, int len)
 {
 	int MaxSzl=FPDULength-22;
@@ -2014,6 +2206,131 @@ void TS7Worker::SZL_ID131_IDX003()
 
 	isoSendBuffer(&SZL.Answer,22+len);
 	SZL.SZLDone=true;
+}
+
+bool TS7Worker::PerformNewGroupSZL()
+{
+  SZL.SZLDone                = false;
+  // Setup pointers
+  SZL.ReqParams              = PReqFunReadSZLFirst(pbyte(PDUH_in)+ReqHeaderSize);
+  SZL.ResParams              = PS7ResParams7(pbyte(&SZL.Answer)+ResHeaderSize17);
+  SZL.ResData                = pbyte(&SZL.Answer)+ResHeaderSize17+sizeof(TS7Params7);
+  // Prepare Answer header
+  SZL.Answer.Header.P        = 0x32;
+  SZL.Answer.Header.PDUType  = PduType_userdata;
+  SZL.Answer.Header.AB_EX    = 0x0000;
+  SZL.Answer.Header.Sequence = PDUH_in->Sequence;
+  SZL.Answer.Header.ParLen   = SwapWord(sizeof(TS7Params7));
+
+  SZL.ResParams->Head[0]     = SZL.ReqParams->Head[0];
+  SZL.ResParams->Head[1]     = SZL.ReqParams->Head[1];
+  SZL.ResParams->Head[2]     = SZL.ReqParams->Head[2];
+  SZL.ResParams->Plen        = 0x08;
+  SZL.ResParams->Uk          = 0x12;
+  SZL.ResParams->Tg          = 0x84; // Type response + group szl
+  SZL.ResParams->SubFun      = SZL.ReqParams->SubFun;
+  SZL.ResParams->Seq         = SZL.ReqParams->Seq;
+  SZL.ResParams->Err         = 0x0000; // If any errors occur, they will be set
+  SZL.ResParams->resvd       = 0x0000; // this is the end, no more packets
+
+  // only two subfunction are defined : 0x01 read, 0x02 system state
+  if (SZL.ResParams->SubFun==0x02)   // 0x02 = subfunction system state
+  {
+      SZLSystemState();
+      return true;
+  };
+  if (SZL.ResParams->SubFun!=0x01)
+  {
+      SZLNotAvailable();
+      return true;
+  };
+  // From here we assume subfunction = 0x01
+  SZL.ReqData=PS7ReqSZLData(pbyte(PDUH_in)+ReqHeaderSize+sizeof(TReqFunReadSZLFirst));// Data after params
+
+  SZL.ID=SwapWord(SZL.ReqData->ID);
+  SZL.Index=SwapWord(SZL.ReqData->Index);
+
+  /*
+   * To answer to SZL queries, we have dumped the answers of a real Siemens
+   * S7-300 PLC and saved them in our filesystem.
+   * To not load a file everytime we wish to answer an SZL request, we will
+   * cache already asked SZL-entries in a hashmap and return the results from
+   * there.
+   *
+   */
+  std::shared_ptr<std::vector<byte>> SZLAnswer;
+  TSZLKey szl_key = 0;
+
+  // Set ID and Index for SZL request
+  szl_key = SZL.ID << 16;
+  szl_key |= SZL.Index;
+  // TODO delete debug stuff
+  std::cout << (boost::format("%08X") % szl_key).str() << "<--- Requested SZL ID" << std::endl;
+
+  SZLAnswer = cache[szl_key];
+  if ( SZLAnswer == nullptr ) {
+      SZLAnswer = loadSZLDataFromFile();
+      if (SZLAnswer == nullptr){
+          //TODO optimize
+          SZLNotAvailable();
+          // We are done handling the SZL response, GOTO epilogue
+          goto epilogue;
+      }
+      cache[szl_key]  = SZLAnswer;
+  }
+
+  // At this point, we have not handled the SZL response, but we have the
+  // correct bytes in SZLAnswer.
+  // For now, just send SZLnotAvailable and Print SZL data in our send func
+  SZLNewData(SZLAnswer);
+
+
+  // Event (Function epilogue)
+epilogue:
+  if (SZL.SZLDone)
+      DoEvent(evcReadSZL,evrNoError,SZL.ID,SZL.Index,0,0);
+  else
+      DoEvent(evcReadSZL,evrInvalidSZL,SZL.ID,SZL.Index,0,0);
+  return true;
+}
+
+std::shared_ptr<std::vector<byte>> TS7Worker::loadSZLDataFromFile() {
+    //Try it with all.bin first
+    std::string file_path = "data/szl/" +                // data directory
+        (boost::format("%04X") % SZL.ID).str() +         // SZL-ID
+        "/all.bin";                                      // "all"-file
+    std::shared_ptr<std::vector<byte>> result = nullptr;
+
+    // Find the correct file, or return nullptr
+    std::ifstream file;
+    std::cout << file_path << std::endl;
+    file.open(file_path, std::ios::binary | std::ios::ate);
+    if (not file.good() ) {
+        // all.bin wasn't the solution, try the specific index next
+        file_path = "data/szl/" +                               // data directory
+            (boost::format("%04X") % SZL.ID).str() + "/" +      // SZL ID
+            (boost::format("%04X") % SZL.Index).str() + ".bin"; // SZL index file
+
+        std::cout << file_path << std::endl;
+        file.open(file_path, std::ios::binary | std::ios::ate);
+        if (not file.good() ) {
+            // This SZL-ID + Index do not exist in our filebase, return nullptr
+            return result;
+        }
+    }
+
+    // Write file into buffer
+    std::streamsize size = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    result.reset(new std::vector<byte> (size));
+    if (file.read(reinterpret_cast<char*> (result->data() ), size))
+    {
+        return result;
+    } else{
+        // Also a possibility: return SZLnotAVAIL as standard if not found
+        return nullptr;
+    }
 }
 
 bool TS7Worker::PerformGroupSZL()
