@@ -106,7 +106,7 @@ const longword evcDirectory           = 0x01000000;
 const longword evcSecurity            = 0x02000000;
 const longword evcControl             = 0x04000000;
 const longword evcGroupProgrammer     = 0x08000000;
-const longword evcReserved_10000000   = 0x10000000;
+const longword evcCyclicData          = 0x10000000;
 const longword evcReserved_20000000   = 0x20000000;
 const longword evcReserved_40000000   = 0x40000000;
 const longword evcReserved_80000000   = 0x80000000;
@@ -281,12 +281,18 @@ const byte SFun_CancelPwd   = 0x02;   // Cancel password    for this session
 const byte SFun_Insert   	= 0x50;   // Insert block
 const byte SFun_Delete   	= 0x42;   // Delete block
 const byte SFun_Blink       = 0x16;   // blink LED
-const byte SFun_Forces      = 0x10;   // blink LED
+const byte SFun_Forces      = 0x10;   // Forces Command (no idea what it does)
 const byte SFun_ReqDiagT1   = 0x01;   // request diag data type 1
 const byte SFun_VarTab      = 0x02;   // variable table
 const byte SFun_ReqDiagT2   = 0x13;   // request diag data type 2
 const byte SFun_ReadDiag    = 0x0E;   // read diag data
 const byte SFun_RemoveDiag  = 0x0F;   // remove diag data
+
+// PDU SubFunctions for Cyclic Data Group
+const byte SFun_Profinet    = 0x08;   // Request Profinet Info? Not 100% sure..
+
+// Return Codes
+const byte ReturnCode_Success  = 0xFF;   // Everything okay
 
 typedef tm *PTimeStruct;
 
@@ -1153,6 +1159,30 @@ typedef struct {
     byte uk8_0;
     byte diag_lines;
 } ResponseDiagData;
+
+//==============================================================================
+//                             GROUP CYCLIC DATA
+// The structure of the packets is pretty much like it is for Group Programmer
+// stuff.
+//==============================================================================
+typedef struct {
+	byte    ReturnCode;     // Default: 0xFF for success
+	byte    TransportSize;  // Default: 0x09 (octet)
+	word    DataLength;	    // following data length (bytes)
+	byte    Data [IsoPayload_Size - 17];
+} TCyclicData;
+
+// Typedefs for more readability
+typedef TCyclicData         TGCRequestData;
+typedef TCyclicData         TGCAnswerData;
+
+typedef TGCRequestData*     PGCRequestData;
+typedef TGCAnswerData*      PGCAnswerData;
+
+typedef TS7Params7          TGCRequestParams;
+typedef TS7Params7          TGCAnswerParams;
+typedef TGCRequestParams*   PGCRequestParams;
+typedef TGCAnswerParams*    PGCAnswerParams;
 
 #pragma pack()
 #endif // s7_types_h
