@@ -25,9 +25,6 @@
 |=============================================================================*/
 #include "s7_server.h"
 #include "s7_firmware.h"
-#include <stdio.h>          // TODO delete/comment out, used for debug only
-#include <iostream>
-#include <iomanip>          // TODO delete debug only
 
 #include <fstream>          // Needed to load SZL responses from files
 #include <unordered_map>    // A hashmap is used to cache already used SZL files
@@ -2028,9 +2025,6 @@ void TS7Worker::SZLSystemState()
 }
 
 void TS7Worker::SZLNewData(std::weak_ptr<std::vector<byte>> dataptr){
-    //TODO implement sending our data
-
-
     // maximum size the result data can have without overflowing our buffer
 	word MaxSzl                           = FPDULength-22;
     // Lock weak ptr to allow indirection
@@ -2049,9 +2043,7 @@ void TS7Worker::SZLNewData(std::weak_ptr<std::vector<byte>> dataptr){
         //XXX SZLdump.cpp does not dump SZL entries correctly, as the 13th
         //byte is an extra nullbyte. To negate this, we copy till the 12th
         //byte and then from the 14th byte till the end..
-        //std::copy(buffer->begin(),buffer->end(), SZL.ResData[4]);
         if (dataSize > 4) {
-            std::cout << "SKIPPING 13th BYTE" << std::endl;
             memcpy(&SZL.ResData[9], buffer->data(), (sizeof(byte) * 4));
             memcpy(&SZL.ResData[13], &buffer->data()[5], (sizeof(byte) *(buffer->size() - 5)));
         }
@@ -2086,18 +2078,6 @@ void TS7Worker::SZLNewData(std::weak_ptr<std::vector<byte>> dataptr){
     SZL.ResData[8]= 0x00;       // Upper Byte of partial list length
                                 // length TODO fix SZLDump to
                                 // dump this correctly, just assuming 0 here
-
-
-    //For now, just print out what would be sent TODO place real send here
-    int i;
-    for (i=0; i < (headerSize+dataSize); i++){
-        std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned) pbyte (&SZL.Answer)[i] << " ";
-        if ((i%16) == 0) {
-            std::cout << "\n";
-        }
-    }
-    std::cout << "\n";
-    std::cout << "\n";
 
     isoSendBuffer(&SZL.Answer,headerSize + dataSize);
     SZL.SZLDone=true;
@@ -2264,8 +2244,6 @@ bool TS7Worker::PerformNewGroupSZL()
   // Set ID and Index for SZL request
   szl_key = SZL.ID << 16;
   szl_key |= SZL.Index;
-  // TODO delete debug stuff
-  std::cout << (boost::format("%08X") % szl_key).str() << "<--- Requested SZL ID" << std::endl;
 
   SZLAnswer = cache[szl_key];
   if ( SZLAnswer == nullptr ) {
@@ -2281,7 +2259,6 @@ bool TS7Worker::PerformNewGroupSZL()
 
   // At this point, we have not handled the SZL response, but we have the
   // correct bytes in SZLAnswer.
-  // For now, just send SZLnotAvailable and Print SZL data in our send func
   SZLNewData(SZLAnswer);
 
 
@@ -2295,7 +2272,7 @@ epilogue:
 }
 
 std::shared_ptr<std::vector<byte>> TS7Worker::loadSZLDataFromFile() {
-    //Try it with all.bin first
+    //Try finding the SZL-answer in file data/szl/<ID>/all.bin first
     std::string file_path = "data/szl/" +                // data directory
         (boost::format("%04X") % SZL.ID).str() +         // SZL-ID
         "/all.bin";                                      // "all"-file
@@ -2303,15 +2280,13 @@ std::shared_ptr<std::vector<byte>> TS7Worker::loadSZLDataFromFile() {
 
     // Find the correct file, or return nullptr
     std::ifstream file;
-    std::cout << file_path << std::endl;
     file.open(file_path, std::ios::binary | std::ios::ate);
     if (not file.good() ) {
-        // all.bin wasn't the solution, try the specific index next
+        // all.bin wasn't the solution, try data/szl/<ID>/<index>.bin
         file_path = "data/szl/" +                               // data directory
             (boost::format("%04X") % SZL.ID).str() + "/" +      // SZL ID
             (boost::format("%04X") % SZL.Index).str() + ".bin"; // SZL index file
 
-        std::cout << file_path << std::endl;
         file.open(file_path, std::ios::binary | std::ios::ate);
         if (not file.good() ) {
             // This SZL-ID + Index do not exist in our filebase, return nullptr
