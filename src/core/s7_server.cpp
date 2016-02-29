@@ -1212,7 +1212,7 @@ bool TS7Worker::PerformFunctionDownload()
         FServer->getArea(BlkType)->Register(BlkNum, buffer, BlkLen);
         RetCode = evrNoError;
     } else {
-        delete buffer;
+        delete[] buffer;
         RetCode = evrDataSizeMismatch;
     }
 
