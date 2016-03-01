@@ -71,7 +71,9 @@
 #include <string>
 #include <time.h>
 #include <map>
-
+#include <unordered_map>
+#include <vector>
+typedef std::unordered_map<uint32_t , std::vector<unsigned char>> SZLAnswerMap;
 // Visual C++ not C99 compliant (VS2008--)
 #ifdef _MSC_VER
 # if _MSC_VER >= 1600
@@ -704,6 +706,8 @@ void S7API Srv_Destroy(S7Object *Server);
 int S7API Srv_GetParam(S7Object Server, int ParamNumber, void *pValue);
 int S7API Srv_SetParam(S7Object Server, int ParamNumber, void *pValue);
 int S7API Srv_SetSZL(S7Object Server, int SZLID, pbyte Val, int len);
+int S7API Srv_SetUseSZLCache(S7Object Server, const SZLAnswerMap& cache);
+int S7API Srv_UnsetUseSZLCache(S7Object Server);
 int S7API Srv_StartTo(S7Object Server, const char *Address);
 int S7API Srv_Start(S7Object Server);
 int S7API Srv_Stop(S7Object Server);
@@ -924,6 +928,8 @@ public:
     int GetParam(int ParamNumber, void *pValue);
     int SetParam(int ParamNumber, void *pValue);
     int SetSZL(int SZLID, pbyte val, int len);
+    int SetUseSZLCache(const SZLAnswerMap &cache);
+    int UnsetUseSZLCache();
     // Events
     int SetEventsCallback(pfn_SrvCallBack PCallBack, void *UsrPtr);
 	int SetReadEventsCallback(pfn_SrvCallBack PCallBack, void *UsrPtr);
