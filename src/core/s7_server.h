@@ -163,7 +163,7 @@ typedef uint32_t TSZLKey;
 
 // Map used to save loaded SZL answers
 typedef std::unordered_map
-        <TSZLKey, std::shared_ptr<std::vector<byte>> > SZLAnswerMap;
+        <TSZLKey, std::vector<byte> > SZLAnswerMap;
 
 typedef enum : byte {
     // TODO add other types
@@ -195,7 +195,6 @@ private:
 	int DBCnt;
     byte LastBlk;
     TSZL SZL;
-    SZLAnswerMap cache;
     byte BCD(word Value);
     // Checks the consistence of the incoming PDU
     bool CheckPDU_in(int PayloadSize);
@@ -261,27 +260,18 @@ protected:
     // SZL Group
     bool PerformGroupSZL();
     // Will replace PerformGroupSZL() once done;
-    bool PerformNewGroupSZL();
-
+    bool PerformGroupSZLFromCache();
     /*
-     * Loads a dumped SZL response from the filesystem.
+     * Takes an SZL key  ( A 32bit int representing <ID><Index> ) and transforms
+     * it into ( <0xFFFF><ID>)
      *
-     * The loading process first finds the folder for the specific SZL-ID and
-     * then tries to load the correct file for the specific index.
-     * If the folder contains a file named "all.bin", the contents of this file
-     * are loaded and returned as the answer. Otherwise, a file with the name
-     * <szl-index>.bin is searched for and returned, if found. If no file is
-     * found satisfying the constraints, null is returned.
-     *
-     * Returns a vector with the bytes from the dumped SZL response or null if
-     * the SZL-entry does not exist in our file database.
      */
-    std::shared_ptr<std::vector<byte>> loadSZLDataFromFile();
+    TSZLKey toHeader(TSZLKey toTransform);
     // Subfunctions (called by PerformGroupSZL)
     void SZLNotAvailable();
     void SZLSystemState();
     void SZLData(void *P, int len);
-    void SZLNewData(std::weak_ptr<std::vector<byte>> dataptr);
+    void SZLDataFromCache(std::vector<byte> &dataptr);
     void SZLCData(int SZLID, void *P, int len);
     void SZL_ID0A0();
     void SZL_ID124();
@@ -328,6 +318,9 @@ private:
     DiagResponseMap diag_responses;
     uint GetDiagItemCount();
     byte freeDiagJobID(longword client_id);
+    // An unordered map with SZL answers keyed by ID and INDEX
+    SZLAnswerMap cache;
+    bool useSZLCache = false;
 protected:
     PS7AreaContainer *DBArea;
     PS7AreaContainer *OB, *FB, *FC, *SDB;
@@ -356,6 +349,11 @@ public:
     int GetParam(int ParamNumber, void *pValue);
     int SetParam(int ParamNumber, void *pValue);
     void SetSZL(int SZLID, pbyte val, int len);
+    // If set, this will use the new SZL cache for answering SZL-queries
+    // Needs to be supplied a cache to use.
+    void SetUseSZLCache(const SZLAnswerMap& cache);
+    // Unsets the use of the SZLCache, falling back to default snap7 behaviour.
+    void UnsetUseSZLCache();
     void SetCpuStatus(byte State);
     int AddBlock(void *pBinary, int Size);
     void AddDiagItem(pbyte Item);
