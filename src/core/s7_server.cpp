@@ -26,11 +26,6 @@
 #include "s7_server.h"
 #include "s7_firmware.h"
 
-#include <fstream>          // Needed to load SZL responses from files
-#include <unordered_map>    // A hashmap is used to cache already used SZL files
-#include <boost/format.hpp>
-#include <boost/filesystem.hpp>
-
 const byte BitMask[8] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};
 
 //---------------------------------------------------------------------------
@@ -377,8 +372,12 @@ bool TS7Worker::PerformPDUUsrData(int &Size)
           break;
       case grBlocksInfo : Result=PerformGroupBlockInfo();
           break;
-//      case grSZL        : Result=PerformGroupSZL();
-      case grSZL        : Result=PerformNewGroupSZL();
+      case grSZL        :
+            if (this->FServer->useSZLCache){
+                          Result=PerformGroupSZLFromCache();
+            } else{
+                          Result=PerformGroupSZL();
+            }
           break;
       case grPassword   : Result=PerformGroupSecurity();
           break;
@@ -2024,14 +2023,12 @@ void TS7Worker::SZLSystemState()
 
 }
 
-void TS7Worker::SZLNewData(std::weak_ptr<std::vector<byte>> dataptr){
+void TS7Worker::SZLDataFromCache(std::vector<byte>& buffer){
     // maximum size the result data can have without overflowing our buffer
 	word MaxSzl                           = FPDULength-22;
-    // Lock weak ptr to allow indirection
-    auto buffer                           = dataptr.lock();
 
     // -1 because we skip 1 byte of data
-    word dataSize                         = (word) buffer->size() + 9 - 1;
+    word dataSize                         = (word) buffer.size() + 9 - 1;
     word headerSize                       = 22;
 
     // Size check, if too big send SZL not Available for now..
@@ -2040,15 +2037,15 @@ void TS7Worker::SZLNewData(std::weak_ptr<std::vector<byte>> dataptr){
         SZLNotAvailable();
         return;
     }else{
-        //XXX SZLdump.cpp does not dump SZL entries correctly, as the 13th
+        //FIXME SZLdump.cpp does not dump SZL entries correctly, as the 13th
         //byte is an extra nullbyte. To negate this, we copy till the 12th
         //byte and then from the 14th byte till the end..
         if (dataSize > 4) {
-            memcpy(&SZL.ResData[9], buffer->data(), (sizeof(byte) * 4));
-            memcpy(&SZL.ResData[13], &buffer->data()[5], (sizeof(byte) *(buffer->size() - 5)));
+            memcpy(&SZL.ResData[9], buffer.data(), (sizeof(byte) * 4));
+            memcpy(&SZL.ResData[13], &buffer.data()[5], (sizeof(byte) *(buffer.size() - 5)));
         }
         else {
-            memcpy(&SZL.ResData[9], buffer->data(), (sizeof(byte) *(buffer->size())));
+            memcpy(&SZL.ResData[9], buffer.data(), (sizeof(byte) *(buffer.size())));
         }
     }
 
@@ -2064,7 +2061,6 @@ void TS7Worker::SZLNewData(std::weak_ptr<std::vector<byte>> dataptr){
 
     // Compute the remaining data length for the SZL packet (-4 bytes) and save
     // in Big Endian format
-    // Might be necessary, might be not TODO find out
 	SZL.ResData[2]=((dataSize-4)>>8) & 0xFF;
 	SZL.ResData[3]=(dataSize -4) & 0xFF;
 
@@ -2081,7 +2077,7 @@ void TS7Worker::SZLNewData(std::weak_ptr<std::vector<byte>> dataptr){
 
     isoSendBuffer(&SZL.Answer,headerSize + dataSize);
     SZL.SZLDone=true;
-    //SZLNotAvailable();
+    return;
 }
 
 void TS7Worker::SZLData(void *P, int len)
@@ -2188,7 +2184,7 @@ void TS7Worker::SZL_ID131_IDX003()
 	SZL.SZLDone=true;
 }
 
-bool TS7Worker::PerformNewGroupSZL()
+bool TS7Worker::PerformGroupSZLFromCache()
 {
   SZL.SZLDone                = false;
   // Setup pointers
@@ -2238,32 +2234,23 @@ bool TS7Worker::PerformNewGroupSZL()
    * there.
    *
    */
-  std::shared_ptr<std::vector<byte>> SZLAnswer;
   TSZLKey szl_key = 0;
 
   // Set ID and Index for SZL request
   szl_key = SZL.ID << 16;
   szl_key |= SZL.Index;
 
-  SZLAnswer = cache[szl_key];
-  if ( SZLAnswer == nullptr ) {
-      SZLAnswer = loadSZLDataFromFile();
-      if (SZLAnswer == nullptr){
-          //TODO optimize
-          SZLNotAvailable();
-          // We are done handling the SZL response, GOTO epilogue
-          goto epilogue;
-      }
-      cache[szl_key]  = SZLAnswer;
+  if (FServer->cache.count(szl_key) > 0){
+    std::vector<byte> &SZLAnswer = FServer->cache[szl_key];
+    SZLDataFromCache(SZLAnswer);
+  } else{
+    if (FServer->cache.count(toHeader(szl_key)) > 0){
+      std::vector<byte> &SZLAnswer = FServer->cache[toHeader(szl_key)];
+      SZLDataFromCache(SZLAnswer);
+    }
+    SZLNotAvailable();
   }
 
-  // At this point, we have not handled the SZL response, but we have the
-  // correct bytes in SZLAnswer.
-  SZLNewData(SZLAnswer);
-
-
-  // Event (Function epilogue)
-epilogue:
   if (SZL.SZLDone)
       DoEvent(evcReadSZL,evrNoError,SZL.ID,SZL.Index,0,0);
   else
@@ -2271,41 +2258,10 @@ epilogue:
   return true;
 }
 
-std::shared_ptr<std::vector<byte>> TS7Worker::loadSZLDataFromFile() {
-    //Try finding the SZL-answer in file data/szl/<ID>/all.bin first
-    std::string file_path = "data/szl/" +                // data directory
-        (boost::format("%04X") % SZL.ID).str() +         // SZL-ID
-        "/all.bin";                                      // "all"-file
-    std::shared_ptr<std::vector<byte>> result = nullptr;
-
-    // Find the correct file, or return nullptr
-    std::ifstream file;
-    file.open(file_path, std::ios::binary | std::ios::ate);
-    if (not file.good() ) {
-        // all.bin wasn't the solution, try data/szl/<ID>/<index>.bin
-        file_path = "data/szl/" +                               // data directory
-            (boost::format("%04X") % SZL.ID).str() + "/" +      // SZL ID
-            (boost::format("%04X") % SZL.Index).str() + ".bin"; // SZL index file
-
-        file.open(file_path, std::ios::binary | std::ios::ate);
-        if (not file.good() ) {
-            // This SZL-ID + Index do not exist in our filebase, return nullptr
-            return result;
-        }
-    }
-
-    // Write file into buffer
-    std::streamsize size = file.tellg();
-    file.seekg(0, std::ios::beg);
-
-    result.reset(new std::vector<byte> (size));
-    if (file.read(reinterpret_cast<char*> (result->data() ), size))
-    {
-        return result;
-    } else{
-        // Also a possibility: return SZLnotAVAIL as standard if not found
-        return nullptr;
-    }
+//Transforms the SZL key into a magic value for the cache to search for cases
+//where indices are irrelevant and only the SZL ID counts
+TSZLKey TS7Worker::toHeader(TSZLKey szl_key){
+    return ((szl_key >> 16) | 0xFFFF0000);
 }
 
 bool TS7Worker::PerformGroupSZL()
@@ -2978,6 +2934,15 @@ int TSnap7Server::SetParam(int ParamNumber, void *pValue)
 	default: return errSrvInvalidParamNumber;
     }
     return 0;
+}
+//------------------------------------------------------------------------------
+void TSnap7Server::UnsetUseSZLCache(){
+    useSZLCache = false;
+}
+//------------------------------------------------------------------------------
+void TSnap7Server::SetUseSZLCache(const SZLAnswerMap &cacheRef){
+    cache = cacheRef;
+    useSZLCache = true;
 }
 //------------------------------------------------------------------------------
 void TSnap7Server::SetSZL(int SZLID, pbyte Val, int Len)
