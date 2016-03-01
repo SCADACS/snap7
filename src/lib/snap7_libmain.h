@@ -149,6 +149,8 @@ EXPORTSPEC int S7API Srv_SetSZL(S7Object Server, int SZLID, pbyte Val, int len);
 EXPORTSPEC int S7API Srv_Start(S7Object Server);
 EXPORTSPEC int S7API Srv_StartTo(S7Object Server, const char *Address);
 EXPORTSPEC int S7API Srv_Stop(S7Object Server);
+EXPORTSPEC int S7API Srv_SetUseSZLCache(S7Object Server, const SZLAnswerMap& cacheRef);
+EXPORTSPEC int S7API Srv_UnsetUseSZLCache(S7Object Server);
 // Data
 EXPORTSPEC int S7API Srv_GetDiagRequest(S7Object Server, longword client_id, byte job_id, RequestDiag*& rd);
 EXPORTSPEC int S7API Srv_AddDiagResponse(S7Object Server, longword client_id, byte job_id, ResponseDiag* rd);

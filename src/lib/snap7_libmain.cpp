@@ -806,6 +806,28 @@ int S7API Srv_SetParam(S7Object Server, int ParamNumber, void *pValue)
         return errLibInvalidObject;
 }
 //---------------------------------------------------------------------------
+int S7API Srv_SetUseSZLCache(S7Object Server, const SZLAnswerMap& cache)
+{
+    if (Server){
+        PSnap7Server(Server)->SetUseSZLCache(cache);
+        return 0;
+    }
+    else {
+        return errLibInvalidObject;
+    }
+}
+//---------------------------------------------------------------------------
+int S7API Srv_UnsetUseSZLCache(S7Object Server)
+{
+    if (Server){
+        PSnap7Server(Server)->UnsetUseSZLCache();
+        return 0;
+    }
+    else {
+        return errLibInvalidObject;
+    }
+}
+//---------------------------------------------------------------------------
 int S7API Srv_SetSZL(S7Object Server, int SZLID, pbyte Val, int len)
 {
     if (Server) {
