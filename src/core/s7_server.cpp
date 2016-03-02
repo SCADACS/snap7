@@ -25,7 +25,6 @@
 |=============================================================================*/
 #include "s7_server.h"
 #include "s7_firmware.h"
-
 const byte BitMask[8] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};
 
 //---------------------------------------------------------------------------
@@ -2023,7 +2022,7 @@ void TS7Worker::SZLSystemState()
 
 }
 
-void TS7Worker::SZLDataFromCache(std::vector<byte>& buffer){
+void TS7Worker::SZLDataFromCache(const std::vector<byte>& buffer){
     // maximum size the result data can have without overflowing our buffer
 	word MaxSzl                           = FPDULength-22;
 
@@ -2241,14 +2240,13 @@ bool TS7Worker::PerformGroupSZLFromCache()
   szl_key |= SZL.Index;
 
   if (FServer->cache.count(szl_key) > 0){
-    std::vector<byte> &SZLAnswer = FServer->cache[szl_key];
-    SZLDataFromCache(SZLAnswer);
-  } else{
-    if (FServer->cache.count(toHeader(szl_key)) > 0){
+      std::vector<byte> &SZLAnswer = FServer->cache[szl_key];
+      SZLDataFromCache(SZLAnswer);
+  } else if (FServer->cache.count(toHeader(szl_key)) > 0) {
       std::vector<byte> &SZLAnswer = FServer->cache[toHeader(szl_key)];
       SZLDataFromCache(SZLAnswer);
-    }
-    SZLNotAvailable();
+  } else {
+      SZLNotAvailable();
   }
 
   if (SZL.SZLDone)
