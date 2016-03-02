@@ -2227,12 +2227,38 @@ bool TS7Worker::PerformGroupSZLFromCache()
 
   /*
    * To answer to SZL queries, we have dumped the answers of a real Siemens
-   * S7-300 PLC and saved them in our filesystem.
-   * To not load a file everytime we wish to answer an SZL request, we will
-   * cache already asked SZL-entries in a hashmap and return the results from
-   * there.
-   *
+   * S7-300 PLC and saved them in our filesystem. These are saved in a hashmap
+   * that has to be initialized from the outside.
+   * Since we answer some SZL entries dynamically, we'll look for them first
+   * and only if the SZL entry is not answered dynamically will we use the
+   * cache to answer
    */
+
+  // Answer dynamically if implemented
+  switch (SZL.ID)
+  {
+      //TODO szl cdata seems to just be an addition to the statical szl blocks
+      //if so, delete it from here
+    case 0x0011 :
+        SZLCData(SZL_ID_0011,&SZL_ID_0011_IDX_XXXX,sizeof(SZL_ID_0011_IDX_XXXX));
+        break;
+    case 0x001C :
+        SZLCData(SZL_ID_001C,&SZL_ID_001C_IDX_XXXX,sizeof(SZL_ID_001C_IDX_XXXX));
+        break;
+    case 0x00A0 : SZL_ID0A0();break;
+    case 0x0124 : SZL_ID124();break;
+    case 0x0424 : SZL_ID424();break;
+    case 0x0131 : switch(SZL.Index){
+                      case 0x0003 : SZL_ID131_IDX003();break;
+                  }
+    default : break;
+  }
+  if (SZL.SZLDone){
+      //We've answered dynamically, return from this method
+      DoEvent(evcReadSZL,evrNoError,SZL.ID,SZL.Index,0,0);
+      return true;
+  }
+
   TSZLKey szl_key = 0;
 
   // Set ID and Index for SZL request
