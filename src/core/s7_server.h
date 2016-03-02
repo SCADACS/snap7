@@ -271,7 +271,7 @@ protected:
     void SZLNotAvailable();
     void SZLSystemState();
     void SZLData(void *P, int len);
-    void SZLDataFromCache(std::vector<byte> &dataptr);
+    void SZLDataFromCache(const std::vector<byte> &dataptr);
     void SZLCData(int SZLID, void *P, int len);
     void SZL_ID0A0();
     void SZL_ID124();
