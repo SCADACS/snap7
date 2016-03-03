@@ -2281,7 +2281,7 @@ bool TS7Worker::PerformGroupSZLFromCache()
       DoEvent(evcReadSZL,evrInvalidSZL,SZL.ID,SZL.Index,0,0);
   return true;
 }
-
+//------------------------------------------------------------------------------
 //Transforms the SZL key into a magic value for the cache to search for cases
 //where indices are irrelevant and only the SZL ID counts
 TSZLKey TS7Worker::toHeader(TSZLKey szl_key){
@@ -2290,27 +2290,27 @@ TSZLKey TS7Worker::toHeader(TSZLKey szl_key){
 
 bool TS7Worker::PerformGroupSZL()
 {
-  SZL.SZLDone=false;
+  SZL.SZLDone                = false;
   // Setup pointers
-  SZL.ReqParams=PReqFunReadSZLFirst(pbyte(PDUH_in)+ReqHeaderSize);
-  SZL.ResParams=PS7ResParams7(pbyte(&SZL.Answer)+ResHeaderSize17);
-  SZL.ResData  =pbyte(&SZL.Answer)+ResHeaderSize17+sizeof(TS7Params7);
+  SZL.ReqParams              = PReqFunReadSZLFirst(pbyte(PDUH_in)+ReqHeaderSize);
+  SZL.ResParams              = PS7ResParams7(pbyte(&SZL.Answer)+ResHeaderSize17);
+  SZL.ResData                = pbyte(&SZL.Answer)+ResHeaderSize17+sizeof(TS7Params7);
   // Prepare Answer header
-  SZL.Answer.Header.P=0x32;
-  SZL.Answer.Header.PDUType=PduType_userdata;
-  SZL.Answer.Header.AB_EX=0x0000;
-  SZL.Answer.Header.Sequence=PDUH_in->Sequence;
-  SZL.Answer.Header.ParLen =SwapWord(sizeof(TS7Params7));
+  SZL.Answer.Header.P        = 0x32;
+  SZL.Answer.Header.PDUType  = PduType_userdata;
+  SZL.Answer.Header.AB_EX    = 0x0000;
+  SZL.Answer.Header.Sequence = PDUH_in->Sequence;
+  SZL.Answer.Header.ParLen   = SwapWord(sizeof(TS7Params7));
 
-  SZL.ResParams->Head[0]=SZL.ReqParams->Head[0];
-  SZL.ResParams->Head[1]=SZL.ReqParams->Head[1];
-  SZL.ResParams->Head[2]=SZL.ReqParams->Head[2];
-  SZL.ResParams->Plen  =0x08;
-  SZL.ResParams->Uk    =0x12;
-  SZL.ResParams->Tg    =0x84; // Type response + group szl
-  SZL.ResParams->SubFun=SZL.ReqParams->SubFun;
-  SZL.ResParams->Seq   =SZL.ReqParams->Seq;
-  SZL.ResParams->resvd=0x0000; // this is the end, no more packets
+  SZL.ResParams->Head[0]     = SZL.ReqParams->Head[0];
+  SZL.ResParams->Head[1]     = SZL.ReqParams->Head[1];
+  SZL.ResParams->Head[2]     = SZL.ReqParams->Head[2];
+  SZL.ResParams->Plen        = 0x08;
+  SZL.ResParams->Uk          = 0x12;
+  SZL.ResParams->Tg          = 0x84; // Type response + group szl
+  SZL.ResParams->SubFun      = SZL.ReqParams->SubFun;
+  SZL.ResParams->Seq         = SZL.ReqParams->Seq;
+  SZL.ResParams->resvd       = 0x0000; // this is the end, no more packets
 
   // only two subfunction are defined : 0x01 read, 0x02 system state
   if (SZL.ResParams->SubFun==0x02)   // 0x02 = subfunction system state
