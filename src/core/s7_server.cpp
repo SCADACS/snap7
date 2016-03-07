@@ -1715,7 +1715,7 @@ bool TS7Worker::PerformGroupCyclicData()
     }
 
     // TODO sent correct events
-    DoEvent(evcGroupCyclicData,evrNoError,0,0,0,0);
+    DoEvent(evcGroupCyclicData,evrNoError,evs,0,0,0);
     return true;
 }
 //==============================================================================
