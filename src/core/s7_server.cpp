@@ -1672,7 +1672,7 @@ bool TS7Worker::PerformGroupCyclicData()
     // Check request and send appropriate answer
 
     if (RequestParams->SubFun == SFun_Profinet) {
-
+        evs = evsGCRequestData;
         AnswerData->ReturnCode      = ReturnCode_Success;
         // Set transport size of Data to OCTET:
         AnswerData->TransportSize   = TS_ResOctet;
@@ -1693,8 +1693,7 @@ bool TS7Worker::PerformGroupCyclicData()
         0xb6, 0x00, 0x00, 0x00, 0x00 };
 
         // Fill Answer with Response Data
-        int i;
-        for (i = 0; i < sizeof(ResponseData); i++) {
+        for (size_t i = 0; i < sizeof(ResponseData); i++) {
             AnswerData->Data[i] = ResponseData[i];
         }
 
@@ -1716,7 +1715,7 @@ bool TS7Worker::PerformGroupCyclicData()
     }
 
     // TODO sent correct events
-    DoEvent(evcCyclicData,evrNotImplemented,grCyclicData,0,0,0);
+    DoEvent(evcGroupCyclicData,evrNoError,0,0,0,0);
     return true;
 }
 //==============================================================================

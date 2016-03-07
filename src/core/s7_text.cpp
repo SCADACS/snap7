@@ -523,6 +523,15 @@ static BaseString GroupProgrammerText(TSrvEvent &Event)
     };
 }
 //---------------------------------------------------------------------------
+static BaseString GroupCyclicDataText(TSrvEvent &Event)
+{
+    switch (Event.EvtParam1)
+    {
+        case evsGCRequestData : return "Group Cyclic Data: Request Cyclic Data";
+        default               : return "Group Cyclic Data: Unknown Subfunction";
+    };
+}
+//---------------------------------------------------------------------------
 BaseString EvtSrvText(TSrvEvent &Event)
 {
     BaseString S;
@@ -543,6 +552,7 @@ BaseString EvtSrvText(TSrvEvent &Event)
             case evcDirectory      : S=BlockInfoText(Event);break;
             case evcSecurity       : S=SecurityText(Event);break;
             case evcGroupProgrammer: S=GroupProgrammerText(Event);break;
+            case evcGroupCyclicData: S=GroupCyclicDataText(Event);break;
             default:               S="Unknown event ("+IntToString(Event.EvtCode)+")";break;
         }
         return SenderText(Event)+S;
