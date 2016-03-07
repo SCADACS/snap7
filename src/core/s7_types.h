@@ -106,7 +106,7 @@ const longword evcDirectory           = 0x01000000;
 const longword evcSecurity            = 0x02000000;
 const longword evcControl             = 0x04000000;
 const longword evcGroupProgrammer     = 0x08000000;
-const longword evcCyclicData          = 0x10000000;
+const longword evcGroupCyclicData     = 0x10000000;
 const longword evcReserved_20000000   = 0x20000000;
 const longword evcReserved_40000000   = 0x40000000;
 const longword evcReserved_80000000   = 0x80000000;
@@ -127,6 +127,7 @@ const word evsGPBlink                 = 0x0002;
 const word evsGPRequestDiag           = 0x0003;
 const word evsGPReadDiag              = 0x0004;
 const word evsGPRemoveDiag            = 0x0005;
+const word evsGCRequestData           = 0x0001;
 // Event Result
 const word evrNoError                 = 0;
 const word evrFragmentRejected        = 0x0001;
