@@ -2256,8 +2256,6 @@ bool TS7Worker::PerformGroupSZLFromCache()
   // Answer dynamically if implemented
   switch (SZL.ID)
   {
-      //TODO szl cdata seems to just be an addition to the statical szl blocks
-      //if so, delete it from here
     case 0x0011 :
         SZLCData(SZL_ID_0011,&SZL_ID_0011_IDX_XXXX,sizeof(SZL_ID_0011_IDX_XXXX));
         break;
