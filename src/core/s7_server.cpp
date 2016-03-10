@@ -2182,6 +2182,26 @@ void TS7Worker::SZL_ID131_IDX003()
 	SZL.SZLDone=true;
 }
 
+/*
+ * All we do here is update the timestamp to the current time
+ */
+void TS7Worker::SZL_ID0132_IDX0008()
+{
+	PS7Time PTime;
+	size_t len = sizeof(SZL_ID_0132_IDX_0008);
+
+	SZL.Answer.Header.DataLen=SwapWord(len);
+	SZL.ResParams->Err  =0x0000;
+    PTime=PS7Time(pbyte(SZL.ResData)+34);
+	SZL.ResParams->resvd=0x0000; // this is the end, no more packets
+	memcpy(SZL.ResData, &SZL_ID_0132_IDX_0008, len);
+    // Update Timestamp
+    FillTime(PTime);
+
+	isoSendBuffer(&SZL.Answer,22+len);
+	SZL.SZLDone=true;
+}
+
 bool TS7Worker::PerformGroupSZLFromCache()
 {
   SZL.SZLDone                = false;
