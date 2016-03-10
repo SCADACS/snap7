@@ -2169,7 +2169,7 @@ void TS7Worker::SZL_ID424()
 
 void TS7Worker::SZL_ID131_IDX003()
 {
-	word len = sizeof(SZL_ID_0131_IDX_0003);
+	size_t len = sizeof(SZL_ID_0131_IDX_0003);
 	SZL.Answer.Header.DataLen=SwapWord(len);
 	SZL.ResParams->Err  =0x0000;
 	SZL.ResParams->resvd=0x0000; // this is the end, no more packets
