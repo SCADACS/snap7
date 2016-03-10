@@ -2265,9 +2265,19 @@ bool TS7Worker::PerformGroupSZLFromCache()
     case 0x00A0 : SZL_ID0A0();break;
     case 0x0124 : SZL_ID124();break;
     case 0x0424 : SZL_ID424();break;
-    case 0x0131 : switch(SZL.Index){
-                      case 0x0003 : SZL_ID131_IDX003();break;
-                  }
+
+    // FROM HERE ON, WE DO STATIC SZLs FOR MEMORY DEBUG
+    // SZL 1A seems to be needed as to not crash on memory diagnosis
+    case 0x001A : SZLData(&SZL_ID_001A_IDX_XXXX,sizeof(SZL_ID_001A_IDX_XXXX));break;
+    case 0x0132 : switch(SZL.Index){
+                    // Dynamic Timestamp
+                    case 0x0008 : SZL_ID0132_IDX0008();break;
+    }
+    case 0x0222 : switch(SZL.Index){
+                    case 0x0001 : SZLData(&SZL_ID_0222_IDX_0001,sizeof(SZL_ID_0222_IDX_0001));break;
+                    case 0x0050 : SZLData(&SZL_ID_0222_IDX_0050,sizeof(SZL_ID_0222_IDX_0050));break;
+
+                  };break;
     default : break;
   }
   if (SZL.SZLDone){
