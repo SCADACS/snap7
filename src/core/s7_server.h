@@ -277,6 +277,7 @@ protected:
     void SZL_ID124();
     void SZL_ID424();
 	void SZL_ID131_IDX003();
+	void SZL_ID0132_IDX0008();
 public:
     TSnap7Server *FServer;
     int FPDULength;
