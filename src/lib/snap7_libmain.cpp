@@ -828,6 +828,18 @@ int S7API Srv_UnsetUseSZLCache(S7Object Server)
     }
 }
 //---------------------------------------------------------------------------
+int S7API Srv_SetForcePDU(S7Object Server, word size)
+{
+    if (Server) {
+        if ( PSnap7Server(Server)->SetForcePDU(size) ){
+            // An error occured
+            return errLibInvalidParam;
+        }
+        return 0;
+    } else
+        return errLibInvalidObject;
+}
+//---------------------------------------------------------------------------
 int S7API Srv_SetSZL(S7Object Server, int SZLID, pbyte Val, int len)
 {
     if (Server) {

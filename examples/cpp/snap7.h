@@ -707,6 +707,7 @@ void S7API Srv_Destroy(S7Object *Server);
 int S7API Srv_GetParam(S7Object Server, int ParamNumber, void *pValue);
 int S7API Srv_SetParam(S7Object Server, int ParamNumber, void *pValue);
 int S7API Srv_SetSZL(S7Object Server, int SZLID, pbyte Val, int len);
+int S7API Srv_SetForcePDU(S7Object Server, word size);
 int S7API Srv_SetUseSZLCache(S7Object Server, const SZLAnswerMap& cache);
 int S7API Srv_UnsetUseSZLCache(S7Object Server);
 int S7API Srv_StartTo(S7Object Server, const char *Address);
@@ -929,6 +930,7 @@ public:
     int GetParam(int ParamNumber, void *pValue);
     int SetParam(int ParamNumber, void *pValue);
     int SetSZL(int SZLID, pbyte val, int len);
+    int SetForcePDU(word size);
     int SetUseSZLCache(const SZLAnswerMap &cache);
     int UnsetUseSZLCache();
     // Events
