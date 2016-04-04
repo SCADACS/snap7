@@ -525,6 +525,10 @@ int TS7Server::UnsetUseSZLCache() {
     return Srv_UnsetUseSZLCache(Server);
 }
 //---------------------------------------------------------------------------
+int TS7Server::SetForcePDU(word size) {
+    return Srv_SetForcePDU(Server, size);
+}
+//---------------------------------------------------------------------------
 int TS7Server::SetSZL(int SZLID, pbyte val, int len) {
     return Srv_SetSZL(Server, SZLID, val, len);
 }

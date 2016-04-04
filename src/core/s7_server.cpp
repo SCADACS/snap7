@@ -3002,6 +3002,16 @@ void TSnap7Server::SetSZL(int SZLID, pbyte Val, int Len)
     SZLs[SZLID].Len = Len;
 }
 //------------------------------------------------------------------------------
+int TSnap7Server::SetForcePDU(word size)
+{
+    if (size < MinPduSize) {
+        return 1; // Error
+    }
+
+    ForcePDU = size;
+    return 0; // Success
+}
+//------------------------------------------------------------------------------
 void TSnap7Server::SetCpuStatus(byte State)
 {
     if (CpuStatus != State)

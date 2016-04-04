@@ -350,6 +350,18 @@ public:
     int GetParam(int ParamNumber, void *pValue);
     int SetParam(int ParamNumber, void *pValue);
     void SetSZL(int SZLID, pbyte val, int len);
+    /*
+     * Sets the PDU-size that should be forced from this server in PDU
+     * negotiation. This means this server will always use this PDU size for its
+     * packets.
+     * In case the PDU size can't be set to size (i.e. size is smaller than the
+     * minimum allowed PDU size) nothing is changed.
+     *
+     * Returns:
+     *          0 on Success
+     *          1 on Failure
+     */
+    int SetForcePDU(word size);
     // If set, this will use the new SZL cache for answering SZL-queries
     // Needs to be supplied a cache to use.
     void SetUseSZLCache(const SZLAnswerMap& cache);
