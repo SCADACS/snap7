@@ -25,6 +25,7 @@
 |=============================================================================*/
 #include "s7_server.h"
 #include "s7_firmware.h"
+#include <iostream> // TODO delete debug
 const byte BitMask[8] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};
 
 //---------------------------------------------------------------------------
@@ -2021,61 +2022,270 @@ void TS7Worker::SZLSystemState()
 
 }
 
-void TS7Worker::SZLDataFromCache(const std::vector<byte>& buffer){
-    // maximum size the result data can have without overflowing our buffer
-	word MaxSzl                           = FPDULength-22;
+/*
+ * Prepares various fields for an SZL answer and returns the actual length of
+ * the whole buffer that has to be send.
+ *
+ * bool first: True if this packet is the first one for this SZL-answer
+ * bool last : True if this packet is the last  one for this SZL-answer
+ * uint dataSize: The size of the remaining data following the SZL header.
+ *
+ *
+ * Result: The full buffer length of the S7-PDU with all headers included.
+ */
+uint16_t TS7Worker::SZLPrepareAnswerHeader(bool first, bool last, uint16_t dataSize){
 
-    // -1 because we skip 1 byte of data
-    word dataSize                         = (word) buffer.size() + 9 - 1;
-    word headerSize                       = 22;
+    /*
+     * This is the minimum amount of data that needs to be send.
+     *
+     * Size of buffer + 22 for Hdr + 4 for small version of DataHdr
+     */
+    uint16_t result = dataSize + 22 + 4;
 
-    // Size check, if too big send SZL not Available for now..
-    // TODO do something senseful here
-    if ( dataSize > MaxSzl ){
-        SZLNotAvailable();
-        return;
-    }else{
-        //FIXME SZLdump.cpp does not dump SZL entries correctly, as the 13th
-        //byte is an extra nullbyte. To negate this, we copy till the 12th
-        //byte and then from the 14th byte till the end..
-        if (dataSize > 4) {
-            memcpy(&SZL.ResData[9], buffer.data(), (sizeof(byte) * 4));
-            memcpy(&SZL.ResData[13], &buffer.data()[5], (sizeof(byte) *(buffer.size() - 5)));
-        }
-        else {
-            memcpy(&SZL.ResData[9], buffer.data(), (sizeof(byte) *(buffer.size())));
-        }
-    }
+    // Set SequenceNr.
+    SZL.ResParams->Seq = FServer->GetCurrentSeqNr();
 
-	SZL.Answer.Header.DataLen=SwapWord(dataSize);
-
-    // No error and no more packets TODO allow for more than one packet
-	SZL.ResParams->Err  =0x0000;
-	SZL.ResParams->resvd=0x0000; // this is the end, no more packets
+    // Set Errorcode
+    SZL.ResParams->Err   = 0x0000; // no error
 
     // Set Success Code and Transport Size
     SZL.ResData[0] = ReturnCode_Success;
     SZL.ResData[1] = 0x09;
 
-    // Compute the remaining data length for the SZL packet (-4 bytes) and save
-    // in Big Endian format
-	SZL.ResData[2]=((dataSize-4)>>8) & 0xFF;
-	SZL.ResData[3]=(dataSize -4) & 0xFF;
 
-    // Set SZL-ID and SZL-Index for response
-    SZL.ResData[4]= (SZL.ID >> 8) & 0xFF;
-    SZL.ResData[5]= SZL.ID & 0xFF;
-    SZL.ResData[6]= (SZL.Index >> 8) & 0xFF;
-    SZL.ResData[7]= SZL.Index & 0xFF;
+    // Set some things depending on which part of the answer we're preparing
+    if (first){
 
-    // SZL dump doesn't dump the upper byte for SZL partial list length
-    SZL.ResData[8]= 0x00;       // Upper Byte of partial list length
-                                // length TODO fix SZLDump to
-                                // dump this correctly, just assuming 0 here
+        // Set SZL-ID and SZL-Index for response
+        SZL.ResData[4] = (SZL.ID >> 8) & 0xFF;
+        SZL.ResData[5] = SZL.ID & 0xFF;
+        SZL.ResData[6] = (SZL.Index >> 8) & 0xFF;
+        SZL.ResData[7] = SZL.Index & 0xFF;
 
-    isoSendBuffer(&SZL.Answer,headerSize + dataSize);
+        // Compute the remaining data length for the SZL packet and save
+        // in Big Endian format
+        SZL.ResData[2] = ((dataSize + 4)>>8) & 0xFF;
+        SZL.ResData[3] = (dataSize  + 4) & 0xFF;
+
+        // Adjust header data len (+ 8 for "DataHdr")
+        SZL.Answer.Header.DataLen = SwapWord(dataSize + 8);
+
+        // Add 4 to complete result length, as Data-Header is longer in this
+        // case
+        result += 4;
+
+    } else {
+
+        // Compute the remaining data length for the SZL packet and save
+        // in Big Endian format
+        SZL.ResData[2] = ((dataSize)>>8) & 0xFF;
+        SZL.ResData[3] = (dataSize) & 0xFF;
+
+        // Adjust header data len (+ 4 for "DataHdr")
+        SZL.Answer.Header.DataLen = SwapWord(dataSize + 4);
+
+    }
+    if (last) {
+
+        // Decrease Sequence Number
+        FServer->DecrSeqNr();
+
+    }
+
+    // Set DURN correctly
+    if (first && last)
+        SZL.ResParams->resvd = 0x0000;
+    if (first && not last)
+        SZL.ResParams->resvd = ( 0x01 << 8 ) | ((FServer->GetNextDURN() & 0xFF) );
+    if (not first && not last)
+        SZL.ResParams->resvd = ( 0x01 << 8 ) | ((FServer->GetCurrentDURN() & 0xFF) );
+    if (not first && last)
+        SZL.ResParams->resvd = ( 0x00 << 8 ) | ((FServer->GetCurrentDURN() & 0xFF) );
+
+    return result;
+}
+
+/*
+ * This sends a continuation packet if an SZL had to be split into multiple
+ * fragments.
+ */
+void TS7Worker::SZLSendContinuation(const byte sequence){
+    //TODO delete debug
+    std::cout << "IN CONTINUATION" << std::endl;
+
+    bool is_last = true;
+
+    if (FragmentMap.count(sequence) > 0 ) {
+
+        std::list<std::vector<byte>> &fragments = FragmentMap[sequence];
+        // get the current fragment
+        std::vector<byte> &fragment             = fragments.front();
+
+        if (fragments.size() > 1){
+            is_last = false;
+        }
+
+        // No additional sizecheck! we are expecting here that the construction
+        // of the fragments was done properly!
+        // We start filling from the 5th byte, as the data-header fills up the
+        // first 4 bytes
+        memcpy(&SZL.ResData[4], fragment.data(), sizeof(byte) * fragment.size());
+
+        uint16_t size = SZLPrepareAnswerHeader(false, is_last, fragment.size());
+        isoSendBuffer(&SZL.Answer, size);
+
+        // Delete fragment. If it was the last one, free the seq-nr
+        fragments.pop_front();
+
+        if (is_last){
+            FragmentMap.erase(sequence);
+        }
+
+    } else {
+        std::cout <<"WRONG SEQNR!!!" << std::endl;
+        // TODO find out what actually happens when wrong seqNr is called for
+        SZLNotAvailable();
+    }
+
+    //TODO delete debug
+    std::cout << "OUT CONTINUATION" << std::endl;
+}
+
+/*
+ * Sends the answer packet to an SZL request.
+ * Split something that is too long into multiple packets and set the sequence
+ * number and data unit reference number accordingly.
+ *
+ * The buffer that is given to this function is expected to hold the SZL data
+ * as if it would be send in a continuous packet, starting at the SZL partial
+ * list length in byte.
+ */
+void TS7Worker::SZLSendAnswer(const pbyte buffer, const uint16_t buflen){
+    std::cout << "IN: SendAnswer, ID: " << SZL.ID << "IDX: "<< SZL.Index << std::endl;
+    // maximum size the result data can have without overflowing our buffer
+    // PDULength - (Header + Paramheader(22 Bytes)) - Data-Headersize (12 Bytes)
+    const word headerSize      = 22;
+	const word firstPacketLen  = FPDULength - headerSize - 8;
+    const word followPacketLen = FPDULength - headerSize - 4;
+    const byte sequence        = FServer->GetNextSeqNr();
+    word datalen;
+    bool is_last;
+
+    if (buflen > firstPacketLen){
+        std::cout << "BUFlen is > firstpacketlen" << std::endl;
+        std::cout << "firstpacketlen: "<< firstPacketLen << "\nBUflen: "<< buflen << std::endl;
+
+        // Need splitting
+
+        is_last = false;
+        datalen = firstPacketLen;
+
+        // Copy the pure data that can be send into the first packet.
+        memcpy(&SZL.ResData[8] , buffer, (sizeof(byte) * firstPacketLen));
+
+        // Prepare data for later packets and store them in fragment map
+        // Now, while we still have more data than can be send in 1 PDU, copy it
+        // into a buffer for the fragment list and decrease the amount of data until
+        // it fits
+        std::list<std::vector<byte>> fragments;
+
+        int leftover       = buflen - firstPacketLen;
+        uint16_t currentPos = firstPacketLen;
+
+        // Copy rest of buffer into vectors for later
+        // This only includes the pure data, headers have to be build on packet-send
+        do  {
+
+            std::vector<byte> fragment;
+
+            if (leftover < followPacketLen){
+
+                fragment.insert(fragment.end(), &buffer[currentPos], &buffer[currentPos+leftover]);
+
+                // Adjust how much we already handled
+                currentPos = currentPos + leftover;
+            } else {
+
+                fragment.insert(fragment.end(), &buffer[currentPos], &buffer[currentPos+followPacketLen]);
+
+                // Adjust how much we already handled
+                currentPos = currentPos + followPacketLen;
+            }
+
+            fragments.emplace_back(fragment);
+            leftover   = buflen - currentPos;
+
+        } while (leftover > 0);
+
+        FragmentMap[sequence] = fragments;
+
+    } else {
+        std::cout << "BUFlen is okay" << std::endl;
+
+        is_last = true;
+        datalen = buflen;
+
+        // One packet is enough to send all data, this is the easy part
+        memcpy(&SZL.ResData[8], buffer, (sizeof(byte) * (buflen)));
+
+    }
+    // Send first packet
+    uint16_t complete_length = SZLPrepareAnswerHeader(true, is_last, datalen);
+    std::cout << "Complete Length has been calculated as:" << (int) complete_length << std::endl;
+    //TODO delete Hexdump
+    {
+        unsigned int i, j;
+
+        for(i = 0; i < complete_length + ((complete_length % 16) ? (16 - complete_length % 16) : 0); i++)
+        {
+            /* print offset */
+            if(i % 16 == 0)
+            {
+                printf("0x%04x: ", i);
+            }
+
+            /* print hex data */
+            if(i < complete_length)
+            {
+                printf("%02x ", 0xFF & ((char*)&SZL.Answer)[i]);
+            }
+            else /* end of block, just aligning for ASCII dump */
+            {
+                printf("   ");
+            }
+
+            /* print ASCII dump */
+            if(i % 16 == (16 - 1))
+            {
+                for(j = i - (16 - 1); j <= i; j++)
+                {
+                    if(j >= complete_length) /* end of block, not really printing */
+                    {
+                        putchar(' ');
+                    }
+                    else if(isprint((((char*)&SZL.Answer)[j] & 0x7F))) /* printable char */
+                    {
+                        putchar(0xFF & ((char*)&SZL.Answer)[j]);
+                    }
+                    else /* other char */
+                    {
+                        putchar('.');
+                    }
+                }
+                putchar('\n');
+            }
+        }
+    }
+    isoSendBuffer(&SZL.Answer, complete_length);
     SZL.SZLDone=true;
-    return;
+
+    std::cout << "OUT: SendAnswer" << std::endl;
+}
+
+void TS7Worker::SZLDataFromCache(const std::vector<byte>& buffer){
+    std::cout << "IN: DataFromCache" << std::endl;
+    SZLSendAnswer( pbyte(buffer.data()), buffer.size());
+    std::cout << "OUT: DataFromCache" << std::endl;
 }
 
 void TS7Worker::SZLData(void *P, int len)
@@ -2083,7 +2293,11 @@ void TS7Worker::SZLData(void *P, int len)
 	int MaxSzl=FPDULength-22;
 
 	if (len>MaxSzl) {
-		len=MaxSzl;
+        // TODO this should be everything we need, check if we can delete the
+        // if clause completely
+        pbyte p = pbyte(P);
+        SZLSendAnswer((p+8), (len-8));
+        return;
 	}
 
 	SZL.Answer.Header.DataLen=SwapWord(word(len));
@@ -2204,6 +2418,8 @@ void TS7Worker::SZL_ID0132_IDX0008()
 
 bool TS7Worker::PerformGroupSZLFromCache()
 {
+    //TODO debug del
+    std::cout << "IN: GroupSZLFromCache" << std::endl;
   SZL.SZLDone                = false;
   // Setup pointers
   SZL.ReqParams              = PReqFunReadSZLFirst(pbyte(PDUH_in)+ReqHeaderSize);
@@ -2239,10 +2455,22 @@ bool TS7Worker::PerformGroupSZLFromCache()
       return true;
   };
   // From here we assume subfunction = 0x01
-  SZL.ReqData=PS7ReqSZLData(pbyte(PDUH_in)+ReqHeaderSize+sizeof(TReqFunReadSZLFirst));// Data after params
+  if (SZL.ReqParams->Seq == 0x00 && SZL.ReqParams->Plen == 0x04){
+    // This seems to be a new SZL request
+    SZL.ReqData=PS7ReqSZLData(pbyte(PDUH_in)+ReqHeaderSize+sizeof(TReqFunReadSZLFirst));// Data after params
+    SZL.ID=SwapWord(SZL.ReqData->ID);
+    SZL.Index=SwapWord(SZL.ReqData->Index);
 
-  SZL.ID=SwapWord(SZL.ReqData->ID);
-  SZL.Index=SwapWord(SZL.ReqData->Index);
+    // Prepare all needed packets to answer this SZL request and send the first
+    // one
+    SZLHandleRequest();
+
+  } else if (SZL.ReqParams->Seq > 0 && SZL.ReqParams->Plen == 0x08){
+    // We are receiving a packet that asks for continuation of a former SZL
+    // request. In this case, the data after the parameters is irrelevant, we
+    // send out what has been saved for this sequence number.
+    SZLSendContinuation(SZL.ReqParams->Seq);
+  }
 
   /*
    * To answer to SZL queries, we have dumped the answers of a real Siemens
@@ -2252,62 +2480,74 @@ bool TS7Worker::PerformGroupSZLFromCache()
    * and only if the SZL entry is not answered dynamically will we use the
    * cache to answer
    */
-
-  // Answer dynamically if implemented
-  switch (SZL.ID)
-  {
-    case 0x0011 :
-        SZLCData(SZL_ID_0011,&SZL_ID_0011_IDX_XXXX,sizeof(SZL_ID_0011_IDX_XXXX));
-        break;
-    case 0x001C :
-        SZLCData(SZL_ID_001C,&SZL_ID_001C_IDX_XXXX,sizeof(SZL_ID_001C_IDX_XXXX));
-        break;
-    case 0x00A0 : SZL_ID0A0();break;
-    case 0x0124 : SZL_ID124();break;
-    case 0x0424 : SZL_ID424();break;
-
-    // FROM HERE ON, WE DO STATIC SZLs FOR MEMORY DEBUG
-    // SZL 1A seems to be needed as to not crash on memory diagnosis
-    case 0x001A : SZLData(&SZL_ID_001A_IDX_XXXX,sizeof(SZL_ID_001A_IDX_XXXX));break;
-    case 0x0132 : switch(SZL.Index){
-                    // Dynamic Timestamp
-                    case 0x0008 : SZL_ID0132_IDX0008();break;
-    }
-    case 0x0222 : switch(SZL.Index){
-                    case 0x0001 : SZLData(&SZL_ID_0222_IDX_0001,sizeof(SZL_ID_0222_IDX_0001));break;
-                    case 0x0050 : SZLData(&SZL_ID_0222_IDX_0050,sizeof(SZL_ID_0222_IDX_0050));break;
-
-                  };break;
-    default : break;
-  }
-  if (SZL.SZLDone){
-      //We've answered dynamically, return from this method
-      DoEvent(evcReadSZL,evrNoError,SZL.ID,SZL.Index,0,0);
-      return true;
-  }
-
-  TSZLKey szl_key = 0;
-
-  // Set ID and Index for SZL request
-  szl_key = SZL.ID << 16;
-  szl_key |= SZL.Index;
-
-  if (FServer->cache.count(szl_key) > 0){
-      std::vector<byte> &SZLAnswer = FServer->cache[szl_key];
-      SZLDataFromCache(SZLAnswer);
-  } else if (FServer->cache.count(toHeader(szl_key)) > 0) {
-      std::vector<byte> &SZLAnswer = FServer->cache[toHeader(szl_key)];
-      SZLDataFromCache(SZLAnswer);
-  } else {
-      SZLNotAvailable();
-  }
-
   if (SZL.SZLDone)
       DoEvent(evcReadSZL,evrNoError,SZL.ID,SZL.Index,0,0);
   else
       DoEvent(evcReadSZL,evrInvalidSZL,SZL.ID,SZL.Index,0,0);
   return true;
+
+    //TODO debug del
+    std::cout << "OUT: GroupSZLFromCache" << std::endl;
 }
+
+void TS7Worker::SZLHandleRequest() {
+    //TODO debug del
+    std::cout << "IN: HANDLEREQ" << std::endl;
+    // Answer dynamically if implemented
+    switch (SZL.ID)
+    {
+      case 0x0011 :
+          SZLCData(SZL_ID_0011,&SZL_ID_0011_IDX_XXXX,sizeof(SZL_ID_0011_IDX_XXXX));
+          break;
+      case 0x001C :
+          SZLCData(SZL_ID_001C,&SZL_ID_001C_IDX_XXXX,sizeof(SZL_ID_001C_IDX_XXXX));
+          break;
+      case 0x00A0 : SZL_ID0A0();break;
+      case 0x0124 : SZL_ID124();break;
+      case 0x0424 : SZL_ID424();break;
+
+      // These static SZLs are needed for online diagnosis to work
+      case 0x001A : SZLData(&SZL_ID_001A_IDX_XXXX,sizeof(SZL_ID_001A_IDX_XXXX));break;
+      case 0x0132 : switch(SZL.Index){
+                      // Dynamic Timestamp
+                      case 0x0008 : SZL_ID0132_IDX0008();break;
+      }
+      case 0x0222 : switch(SZL.Index){
+                      case 0x0001 : SZLData(&SZL_ID_0222_IDX_0001,sizeof(SZL_ID_0222_IDX_0001));break;
+                      case 0x0050 : SZLData(&SZL_ID_0222_IDX_0050,sizeof(SZL_ID_0222_IDX_0050));break;
+
+                    };break;
+      default : break;
+    }
+    if (SZL.SZLDone){
+        //We've answered dynamically, return from this method
+        DoEvent(evcReadSZL,evrNoError,SZL.ID,SZL.Index,0,0);
+        return;
+    }
+
+    // In case we are not finished yet, take Answer from Cache
+    TSZLKey szl_key = 0;
+    // Set ID and Index for SZL request
+    szl_key = SZL.ID << 16;
+    szl_key |= SZL.Index;
+
+    if (FServer->cache.count(szl_key) > 0){
+        std::vector<byte> &SZLAnswer = FServer->cache[szl_key];
+        //TODO fix cache first, then use
+        // fixCache(SZLAnswer);
+        SZLDataFromCache(SZLAnswer);
+    } else if (FServer->cache.count(toHeader(szl_key)) > 0) {
+        std::vector<byte> &SZLAnswer = FServer->cache[toHeader(szl_key)];
+        //TODO fix cache first, then use
+        // fixCache(SZLAnswer);
+        SZLDataFromCache(SZLAnswer);
+    } else {
+        SZLNotAvailable();
+    }
+    //TODO debug del
+    std::cout << "OUT: HANDLEREQ" << std::endl;
+}
+
 //------------------------------------------------------------------------------
 //Transforms the SZL key into a magic value for the cache to search for cases
 //where indices are irrelevant and only the SZL ID counts
@@ -2797,6 +3037,42 @@ void TSnap7Server::AddDiagItem(pbyte Item)
 //------------------------------------------------------------------------------
 uint TSnap7Server::GetDiagItemCount() {
     return AddedDiagItemCount > MaxDiagBufferItems ? MaxDiagBufferItems : AddedDiagItemCount;
+}
+//------------------------------------------------------------------------------
+byte TSnap7Server::GetNextSeqNr() {
+    std::cout<<"+++++++++++++++SEQUENCE_NR_INCREASED++++++++++++++++++++"<<std::endl;
+    if (++sequence_nr == 0xFF){
+        sequence_nr = 0x00;
+        return 0xFF;
+    }
+    std::cout<<"Current SeqNr"<< (int)sequence_nr<<std::endl;
+    return sequence_nr;
+}
+//------------------------------------------------------------------------------
+byte TSnap7Server::GetCurrentSeqNr() {
+    std::cout<<"===============SEQUENCE_NR_REQUESTED===================="<< std::endl;
+    std::cout<<"Current SeqNr"<< (int)sequence_nr<<std::endl;
+    return sequence_nr;
+}
+//------------------------------------------------------------------------------
+void TSnap7Server::DecrSeqNr(){
+    std::cout<<"---------------SEQUENCE_NR_DECREASED--------------------"<<std::endl;
+    if (sequence_nr != 0x00){
+        sequence_nr--;
+    }
+    std::cout<<"Current SeqNr"<< (int)sequence_nr<<std::endl;
+}
+//------------------------------------------------------------------------------
+byte TSnap7Server::GetNextDURN(){
+    if (++DURN == 0xFF){
+        DURN = 0x00;
+        return 0xFF;
+    }
+    return DURN;
+}
+//------------------------------------------------------------------------------
+byte TSnap7Server::GetCurrentDURN(){
+    return DURN;
 }
 //------------------------------------------------------------------------------
 // target memory has at least (GetDiagItemCount() * MaxDiagBufferItems) bytes
