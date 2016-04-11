@@ -35,6 +35,7 @@
 #include <map>
 #include <unordered_map>
 #include <vector>
+#include <list>
 //---------------------------------------------------------------------------
 
 // Maximum number of DB, change it to increase/decrease the limit.
@@ -122,6 +123,11 @@ public:
 // S7 WORKER CLASS
 //------------------------------------------------------------------------------
 
+// Keeps SZL continuation data if SZL has to be send over multiple packets
+// because of PDU size
+typedef std::unordered_map
+    <byte, std::list<std::vector<byte>>> TSZLFragmentMap;
+
 // SZL frame
 typedef struct{
     TS7Answer17         Answer;
@@ -195,6 +201,7 @@ private:
 	int DBCnt;
     byte LastBlk;
     TSZL SZL;
+    TSZLFragmentMap FragmentMap;
     byte BCD(word Value);
     // Checks the consistence of the incoming PDU
     bool CheckPDU_in(int PayloadSize);
@@ -261,13 +268,35 @@ protected:
     bool PerformGroupSZL();
     // Will replace PerformGroupSZL() once done;
     bool PerformGroupSZLFromCache();
-    /*
-     * Takes an SZL key  ( A 32bit int representing <ID><Index> ) and transforms
-     * it into ( <0xFFFF><ID>)
-     *
-     */
-    TSZLKey toHeader(TSZLKey toTransform);
     // Subfunctions (called by PerformGroupSZL)
+
+
+    /*
+     * Handles an SZL request by calling the needed functions to answer it
+     */
+    void SZLHandleRequest();
+    /*
+     * Prepares the header for our SZL answer.
+     *
+     * Parameters:
+     *
+     *      bool is_first       : Is this the first packet for an SZL answer?
+     *      bool is_last        : Is this the last  packet for an SZL answer?
+     *      word dataSize       : The size of all the SZL data that is to be
+     *                            send in this packet.
+     *
+     * Returns:
+     *
+     *      uint16_t             : Complete size of the full S7-Com PDU for the
+     *                            SZL-answer packet.
+     */
+    uint16_t SZLPrepareAnswerHeader(bool is_first, bool is_last, uint16_t dataSize);
+    /*
+     * Sends the first packet of an Answer to an SZL request and prepares all
+     * other needed parts so they can be sent using SZLSendContinuation
+     */
+    void SZLSendAnswer(const pbyte buffer, const uint16_t buflen);
+    void SZLSendContinuation(const byte sequence_nr);
     void SZLNotAvailable();
     void SZLSystemState();
     void SZLData(void *P, int len);
@@ -278,6 +307,12 @@ protected:
     void SZL_ID424();
 	void SZL_ID131_IDX003();
 	void SZL_ID0132_IDX0008();
+    /*
+     * Takes an SZL key  ( A 32bit int representing <ID><Index> ) and transforms
+     * it into ( <0xFFFF><ID>)
+     *
+     */
+    TSZLKey toHeader(TSZLKey toTransform);
 public:
     TSnap7Server *FServer;
     int FPDULength;
@@ -322,6 +357,24 @@ private:
     // An unordered map with SZL answers keyed by ID and INDEX
     SZLAnswerMap cache;
     bool useSZLCache = false;
+    byte sequence_nr      = 0;
+    byte DURN             = 0;
+    // methods to get/free sequence numbers and get DUR numbers
+    // TODO right now, get/free seqnr is very primitive and does not account
+    // for multiple parallel sequence nr. in use, as well as freeing a seqnr
+    // "out of order". If this is needed, these methods need to be modified to
+    // account for that.
+    byte GetNextSeqNr();
+    byte GetCurrentSeqNr();
+    // Decrease Sequence nr by 1
+    void DecrSeqNr();
+    // TODO right now, get DURN methods are very primitive and don't account
+    // for having to manage multiple DURNs in parallel. If this is needed, these
+    // methods need to be adjusted for that.
+    // Increase DURN and return value
+    byte GetNextDURN();
+    // Return current DURN
+    byte GetCurrentDURN();
 protected:
     PS7AreaContainer *DBArea;
     PS7AreaContainer *OB, *FB, *FC, *SDB;
