@@ -25,7 +25,6 @@
 |=============================================================================*/
 #include "s7_server.h"
 #include "s7_firmware.h"
-#include <iostream> // TODO delete debug
 const byte BitMask[8] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};
 
 //---------------------------------------------------------------------------
@@ -2110,8 +2109,6 @@ uint16_t TS7Worker::SZLPrepareAnswerHeader(bool first, bool last, uint16_t dataS
  * fragments.
  */
 void TS7Worker::SZLSendContinuation(const byte sequence){
-    //TODO delete debug
-    std::cout << "IN CONTINUATION" << std::endl;
 
     bool is_last = true;
 
@@ -2142,13 +2139,9 @@ void TS7Worker::SZLSendContinuation(const byte sequence){
         }
 
     } else {
-        std::cout <<"WRONG SEQNR!!!" << std::endl;
         // TODO find out what actually happens when wrong seqNr is called for
         SZLNotAvailable();
     }
-
-    //TODO delete debug
-    std::cout << "OUT CONTINUATION" << std::endl;
 }
 
 /*
@@ -2161,7 +2154,6 @@ void TS7Worker::SZLSendContinuation(const byte sequence){
  * list length in byte.
  */
 void TS7Worker::SZLSendAnswer(const pbyte buffer, const uint16_t buflen){
-    std::cout << "IN: SendAnswer, ID: " << SZL.ID << "IDX: "<< SZL.Index << std::endl;
     // maximum size the result data can have without overflowing our buffer
     // PDULength - (Header + Paramheader(22 Bytes)) - Data-Headersize (12 Bytes)
     const word headerSize      = 22;
@@ -2172,9 +2164,6 @@ void TS7Worker::SZLSendAnswer(const pbyte buffer, const uint16_t buflen){
     bool is_last;
 
     if (buflen > firstPacketLen){
-        std::cout << "BUFlen is > firstpacketlen" << std::endl;
-        std::cout << "firstpacketlen: "<< firstPacketLen << "\nBUflen: "<< buflen << std::endl;
-
         // Need splitting
 
         is_last = false;
@@ -2189,7 +2178,7 @@ void TS7Worker::SZLSendAnswer(const pbyte buffer, const uint16_t buflen){
         // it fits
         std::list<std::vector<byte>> fragments;
 
-        int leftover       = buflen - firstPacketLen;
+        int leftover        = buflen - firstPacketLen;
         uint16_t currentPos = firstPacketLen;
 
         // Copy rest of buffer into vectors for later
@@ -2203,13 +2192,13 @@ void TS7Worker::SZLSendAnswer(const pbyte buffer, const uint16_t buflen){
                 fragment.insert(fragment.end(), &buffer[currentPos], &buffer[currentPos+leftover]);
 
                 // Adjust how much we already handled
-                currentPos = currentPos + leftover;
+                currentPos += leftover;
             } else {
 
                 fragment.insert(fragment.end(), &buffer[currentPos], &buffer[currentPos+followPacketLen]);
 
                 // Adjust how much we already handled
-                currentPos = currentPos + followPacketLen;
+                currentPos += followPacketLen;
             }
 
             fragments.emplace_back(fragment);
@@ -2220,7 +2209,6 @@ void TS7Worker::SZLSendAnswer(const pbyte buffer, const uint16_t buflen){
         FragmentMap[sequence] = fragments;
 
     } else {
-        std::cout << "BUFlen is okay" << std::endl;
 
         is_last = true;
         datalen = buflen;
@@ -2231,61 +2219,12 @@ void TS7Worker::SZLSendAnswer(const pbyte buffer, const uint16_t buflen){
     }
     // Send first packet
     uint16_t complete_length = SZLPrepareAnswerHeader(true, is_last, datalen);
-    std::cout << "Complete Length has been calculated as:" << (int) complete_length << std::endl;
-    //TODO delete Hexdump
-    {
-        unsigned int i, j;
-
-        for(i = 0; i < complete_length + ((complete_length % 16) ? (16 - complete_length % 16) : 0); i++)
-        {
-            /* print offset */
-            if(i % 16 == 0)
-            {
-                printf("0x%04x: ", i);
-            }
-
-            /* print hex data */
-            if(i < complete_length)
-            {
-                printf("%02x ", 0xFF & ((char*)&SZL.Answer)[i]);
-            }
-            else /* end of block, just aligning for ASCII dump */
-            {
-                printf("   ");
-            }
-
-            /* print ASCII dump */
-            if(i % 16 == (16 - 1))
-            {
-                for(j = i - (16 - 1); j <= i; j++)
-                {
-                    if(j >= complete_length) /* end of block, not really printing */
-                    {
-                        putchar(' ');
-                    }
-                    else if(isprint((((char*)&SZL.Answer)[j] & 0x7F))) /* printable char */
-                    {
-                        putchar(0xFF & ((char*)&SZL.Answer)[j]);
-                    }
-                    else /* other char */
-                    {
-                        putchar('.');
-                    }
-                }
-                putchar('\n');
-            }
-        }
-    }
     isoSendBuffer(&SZL.Answer, complete_length);
     SZL.SZLDone=true;
-
-    std::cout << "OUT: SendAnswer" << std::endl;
 }
 
 void TS7Worker::SZLDataFromCache(const std::vector<byte>& buffer){
-    std::cout << "IN: DataFromCache" << std::endl;
     SZLSendAnswer( pbyte(buffer.data()), buffer.size());
-    std::cout << "OUT: DataFromCache" << std::endl;
 }
 
 void TS7Worker::SZLData(void *P, int len)
@@ -2418,8 +2357,7 @@ void TS7Worker::SZL_ID0132_IDX0008()
 
 bool TS7Worker::PerformGroupSZLFromCache()
 {
-    //TODO debug del
-    std::cout << "IN: GroupSZLFromCache" << std::endl;
+
   SZL.SZLDone                = false;
   // Setup pointers
   SZL.ReqParams              = PReqFunReadSZLFirst(pbyte(PDUH_in)+ReqHeaderSize);
@@ -2472,27 +2410,26 @@ bool TS7Worker::PerformGroupSZLFromCache()
     SZLSendContinuation(SZL.ReqParams->Seq);
   }
 
-  /*
-   * To answer to SZL queries, we have dumped the answers of a real Siemens
-   * S7-300 PLC and saved them in our filesystem. These are saved in a hashmap
-   * that has to be initialized from the outside.
-   * Since we answer some SZL entries dynamically, we'll look for them first
-   * and only if the SZL entry is not answered dynamically will we use the
-   * cache to answer
-   */
   if (SZL.SZLDone)
       DoEvent(evcReadSZL,evrNoError,SZL.ID,SZL.Index,0,0);
   else
       DoEvent(evcReadSZL,evrInvalidSZL,SZL.ID,SZL.Index,0,0);
-  return true;
 
-    //TODO debug del
-    std::cout << "OUT: GroupSZLFromCache" << std::endl;
+  return true;
 }
 
 void TS7Worker::SZLHandleRequest() {
-    //TODO debug del
-    std::cout << "IN: HANDLEREQ" << std::endl;
+   /*
+    * To answer to SZL queries, we have dumped the answers of a real Siemens
+    * S7-300 PLC and saved them in our filesystem. These are saved in a hashmap
+    * that has to be initialized from the outside.
+    * Since we answer some SZL entries dynamically, we'll look for them first
+    * and only if the SZL entry is not answered dynamically will we use the
+    * cache to answer
+    */
+
+    TSZLKey szl_key;
+
     // Answer dynamically if implemented
     switch (SZL.ID)
     {
@@ -2525,27 +2462,24 @@ void TS7Worker::SZLHandleRequest() {
         return;
     }
 
-    // In case we are not finished yet, take Answer from Cache
-    TSZLKey szl_key = 0;
     // Set ID and Index for SZL request
-    szl_key = SZL.ID << 16;
-    szl_key |= SZL.Index;
+    szl_key = ( SZL.ID << 16 ) | SZL.Index;
 
     if (FServer->cache.count(szl_key) > 0){
+
         std::vector<byte> &SZLAnswer = FServer->cache[szl_key];
-        //TODO fix cache first, then use
-        // fixCache(SZLAnswer);
         SZLDataFromCache(SZLAnswer);
+
     } else if (FServer->cache.count(toHeader(szl_key)) > 0) {
+
         std::vector<byte> &SZLAnswer = FServer->cache[toHeader(szl_key)];
-        //TODO fix cache first, then use
-        // fixCache(SZLAnswer);
         SZLDataFromCache(SZLAnswer);
+
     } else {
+
         SZLNotAvailable();
+
     }
-    //TODO debug del
-    std::cout << "OUT: HANDLEREQ" << std::endl;
 }
 
 //------------------------------------------------------------------------------
@@ -3040,27 +2974,21 @@ uint TSnap7Server::GetDiagItemCount() {
 }
 //------------------------------------------------------------------------------
 byte TSnap7Server::GetNextSeqNr() {
-    std::cout<<"+++++++++++++++SEQUENCE_NR_INCREASED++++++++++++++++++++"<<std::endl;
     if (++sequence_nr == 0xFF){
         sequence_nr = 0x00;
         return 0xFF;
     }
-    std::cout<<"Current SeqNr"<< (int)sequence_nr<<std::endl;
     return sequence_nr;
 }
 //------------------------------------------------------------------------------
 byte TSnap7Server::GetCurrentSeqNr() {
-    std::cout<<"===============SEQUENCE_NR_REQUESTED===================="<< std::endl;
-    std::cout<<"Current SeqNr"<< (int)sequence_nr<<std::endl;
     return sequence_nr;
 }
 //------------------------------------------------------------------------------
 void TSnap7Server::DecrSeqNr(){
-    std::cout<<"---------------SEQUENCE_NR_DECREASED--------------------"<<std::endl;
     if (sequence_nr != 0x00){
         sequence_nr--;
     }
-    std::cout<<"Current SeqNr"<< (int)sequence_nr<<std::endl;
 }
 //------------------------------------------------------------------------------
 byte TSnap7Server::GetNextDURN(){
