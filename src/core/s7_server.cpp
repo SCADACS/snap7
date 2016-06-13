@@ -371,12 +371,7 @@ bool TS7Worker::PerformPDUUsrData(int &Size)
           break;
       case grBlocksInfo : Result=PerformGroupBlockInfo();
           break;
-      case grSZL        :
-            if (this->FServer->useSZLCache){
-                          Result=PerformGroupSZLFromCache();
-            } else{
-                          Result=PerformGroupSZL();
-            }
+      case grSZL        : Result=PerformGroupSZL();
           break;
       case grPassword   : Result=PerformGroupSecurity();
           break;
@@ -2137,6 +2132,8 @@ void TS7Worker::SZLSendContinuation(const byte sequence){
         if (is_last){
             FragmentMap.erase(sequence);
         }
+        // TODO generate different events for SZL-fragments
+        SZL.SZLDone = true;
 
     } else {
         // TODO find out what actually happens when wrong seqNr is called for
@@ -2355,9 +2352,7 @@ void TS7Worker::SZL_ID0132_IDX0008()
 	SZL.SZLDone=true;
 }
 
-bool TS7Worker::PerformGroupSZLFromCache()
-{
-
+void TS7Worker::SZLSetup(){
   SZL.SZLDone                = false;
   // Setup pointers
   SZL.ReqParams              = PReqFunReadSZLFirst(pbyte(PDUH_in)+ReqHeaderSize);
@@ -2380,45 +2375,23 @@ bool TS7Worker::PerformGroupSZLFromCache()
   SZL.ResParams->Seq         = SZL.ReqParams->Seq;
   SZL.ResParams->Err         = 0x0000; // If any errors occur, they will be set
   SZL.ResParams->resvd       = 0x0000; // this is the end, no more packets
+}
 
+bool TS7Worker::SZLSubFuncRead() {
   // only two subfunction are defined : 0x01 read, 0x02 system state
   if (SZL.ResParams->SubFun==0x02)   // 0x02 = subfunction system state
   {
       SZLSystemState();
-      return true;
+      return false;
   };
   if (SZL.ResParams->SubFun!=0x01)
   {
       SZLNotAvailable();
-      return true;
+      return false;
   };
-  // From here we assume subfunction = 0x01
-  if (SZL.ReqParams->Seq == 0x00 && SZL.ReqParams->Plen == 0x04){
-    // This seems to be a new SZL request
-    SZL.ReqData=PS7ReqSZLData(pbyte(PDUH_in)+ReqHeaderSize+sizeof(TReqFunReadSZLFirst));// Data after params
-    SZL.ID=SwapWord(SZL.ReqData->ID);
-    SZL.Index=SwapWord(SZL.ReqData->Index);
-
-    // Prepare all needed packets to answer this SZL request and send the first
-    // one
-    SZLHandleRequest();
-
-  } else if (SZL.ReqParams->Seq > 0 && SZL.ReqParams->Plen == 0x08){
-    // We are receiving a packet that asks for continuation of a former SZL
-    // request. In this case, the data after the parameters is irrelevant, we
-    // send out what has been saved for this sequence number.
-    SZLSendContinuation(SZL.ReqParams->Seq);
-  }
-
-  if (SZL.SZLDone)
-      DoEvent(evcReadSZL,evrNoError,SZL.ID,SZL.Index,0,0);
-  else
-      DoEvent(evcReadSZL,evrInvalidSZL,SZL.ID,SZL.Index,0,0);
-
-  return true;
 }
 
-void TS7Worker::SZLHandleRequest() {
+void TS7Worker::SZLUseCacheFile() {
    /*
     * To answer to SZL queries, we have dumped the answers of a real Siemens
     * S7-300 PLC and saved them in our filesystem. These are saved in a hashmap
@@ -2458,7 +2431,6 @@ void TS7Worker::SZLHandleRequest() {
     }
     if (SZL.SZLDone){
         //We've answered dynamically, return from this method
-        DoEvent(evcReadSZL,evrNoError,SZL.ID,SZL.Index,0,0);
         return;
     }
 
@@ -2489,42 +2461,7 @@ TSZLKey TS7Worker::toHeader(TSZLKey szl_key){
     return ((szl_key >> 16) | 0xFFFF0000);
 }
 
-bool TS7Worker::PerformGroupSZL()
-{
-  SZL.SZLDone                = false;
-  // Setup pointers
-  SZL.ReqParams              = PReqFunReadSZLFirst(pbyte(PDUH_in)+ReqHeaderSize);
-  SZL.ResParams              = PS7ResParams7(pbyte(&SZL.Answer)+ResHeaderSize17);
-  SZL.ResData                = pbyte(&SZL.Answer)+ResHeaderSize17+sizeof(TS7Params7);
-  // Prepare Answer header
-  SZL.Answer.Header.P        = 0x32;
-  SZL.Answer.Header.PDUType  = PduType_userdata;
-  SZL.Answer.Header.AB_EX    = 0x0000;
-  SZL.Answer.Header.Sequence = PDUH_in->Sequence;
-  SZL.Answer.Header.ParLen   = SwapWord(sizeof(TS7Params7));
-
-  SZL.ResParams->Head[0]     = SZL.ReqParams->Head[0];
-  SZL.ResParams->Head[1]     = SZL.ReqParams->Head[1];
-  SZL.ResParams->Head[2]     = SZL.ReqParams->Head[2];
-  SZL.ResParams->Plen        = 0x08;
-  SZL.ResParams->Uk          = 0x12;
-  SZL.ResParams->Tg          = 0x84; // Type response + group szl
-  SZL.ResParams->SubFun      = SZL.ReqParams->SubFun;
-  SZL.ResParams->Seq         = SZL.ReqParams->Seq;
-  SZL.ResParams->resvd       = 0x0000; // this is the end, no more packets
-
-  // only two subfunction are defined : 0x01 read, 0x02 system state
-  if (SZL.ResParams->SubFun==0x02)   // 0x02 = subfunction system state
-  {
-      SZLSystemState();
-      return true;
-  };
-  if (SZL.ResParams->SubFun!=0x01)
-  {
-      SZLNotAvailable();
-      return true;
-  };
-  // From here we assume subfunction = 0x01
+void TS7Worker::SZLUseSnap7SZLs(){
   SZL.ReqData=PS7ReqSZLData(pbyte(PDUH_in)+ReqHeaderSize+sizeof(TReqFunReadSZLFirst));// Data after params
 
   SZL.ID=SwapWord(SZL.ReqData->ID);
@@ -2774,6 +2711,39 @@ bool TS7Worker::PerformGroupSZL()
                   };break;
     default : SZLNotAvailable();break;
   }
+}
+//------------------------------------------------------------------------------
+bool TS7Worker::PerformGroupSZL()
+{
+  SZLSetup();
+
+  if (not SZLSubFuncRead()) {
+    return true;
+  }
+
+
+  if (SZL.ReqParams->Seq == 0x00 && SZL.ReqParams->Plen == 0x04){
+    // This seems to be a new SZL request
+    SZL.ReqData=PS7ReqSZLData(pbyte(PDUH_in)+ReqHeaderSize+sizeof(TReqFunReadSZLFirst));// Data after params
+    SZL.ID=SwapWord(SZL.ReqData->ID);
+    SZL.Index=SwapWord(SZL.ReqData->Index);
+
+    // Prepare all needed packets to answer this SZL request and send the first
+    // one
+    if( FServer->useSZLCache ) {
+        SZLUseCacheFile();
+    } else {
+        SZLUseSnap7SZLs();
+    }
+
+  } else if (SZL.ReqParams->Seq > 0 && SZL.ReqParams->Plen == 0x08){
+    // We are receiving a packet that asks for continuation of a former SZL
+    // request. In this case, the data after the parameters is irrelevant, we
+    // send out what has been saved for this sequence number.
+    SZLSendContinuation(SZL.ReqParams->Seq);
+  }
+
+
   // Event
   if (SZL.SZLDone)
       DoEvent(evcReadSZL,evrNoError,SZL.ID,SZL.Index,0,0);

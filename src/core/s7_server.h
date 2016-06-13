@@ -266,15 +266,22 @@ protected:
     bool PerformSetClock();
     // SZL Group
     bool PerformGroupSZL();
-    // Will replace PerformGroupSZL() once done;
-    bool PerformGroupSZLFromCache();
     // Subfunctions (called by PerformGroupSZL)
-
-
+    //
     /*
-     * Handles an SZL request by calling the needed functions to answer it
+     * Set up some fields needed for the SZL answer
      */
-    void SZLHandleRequest();
+    void SZLSetup(void);
+    /* Returns true if the subfunction for an SZL request is for "read SZL" */
+    bool SZLSubFuncRead(void);
+    /*
+     * Handles an SZL request using an external Cache file for answers
+     */
+    void SZLUseCacheFile();
+    /*
+     * Handles an SZL request using the SNAP7 SZL entries for answers
+     */
+    void SZLUseSnap7SZLs();
     /*
      * Prepares the header for our SZL answer.
      *
