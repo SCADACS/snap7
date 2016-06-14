@@ -1541,7 +1541,7 @@ bool TS7Worker::PerformGroupProgrammer()
     }
 
     send_gp:
-    TotalSize = 10 + sizeof(PGPResParams) + dlen;
+    TotalSize = 10 + 12 + dlen;
     isoSendBuffer(&Answer,TotalSize);
 
     if (evs != evsGPReadDiag)
