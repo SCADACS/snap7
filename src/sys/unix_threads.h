@@ -34,6 +34,7 @@
 #include "snap_sysutils.h"
 #include <semaphore.h>
 #include <pthread.h>
+#include <cxxabi.h>
 //---------------------------------------------------------------------------
 
 class TSnapCriticalSection 

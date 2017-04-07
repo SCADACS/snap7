@@ -46,7 +46,14 @@ void* ThreadProc(void* param)
         try
         {
             Thread->Execute();
-        } catch (...)
+        }
+#if (defined(POSIX) || defined(OS_OSX))
+        catch (abi::__forced_unwind&)
+        {
+            throw;
+        }
+#endif
+        catch (...)
         {
         };
     Thread->Closed = true;
