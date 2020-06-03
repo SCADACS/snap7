@@ -54,7 +54,7 @@ void FillTime(PS7Time PTime)
 //------------------------------------------------------------------------------
 PS7AreaContainer::PS7AreaContainer(size_t size) : size(size) {
     area = new PS7Area[size];
-    memset(area, 0, size);
+    memset(area, 0, size * sizeof(PS7Area));
     count = 0;
     limit = 0;
 }
@@ -153,8 +153,7 @@ void PS7AreaContainer::Dispose() {
         }
     }
     count=0;
-    limit=0;
-    delete area;
+    delete [] area;     
 }
 //------------------------------------------------------------------------------
 // ISO/TCP WORKER  CLASS
