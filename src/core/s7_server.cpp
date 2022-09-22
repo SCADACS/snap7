@@ -4,6 +4,12 @@
 |  Copyright (C) 2013, 2015 Davide Nardella                                    |
 |  All rights reserved.                                                        |
 |==============================================================================|
+|  Change Log:                                                                 |
+|  - 2020-06-03 - Mikel Negugogor - PS7AreaContainer bugfix: memset was not    |
+|                 covering the allocated array properly, and scalar delete was |
+|                 used instead of vector delete - change comment added on      |
+|                 2022-09-22 by Ricky Wyman                                    |
+|==============================================================================|
 |  SNAP7 is free software: you can redistribute it and/or modify               |
 |  it under the terms of the Lesser GNU General Public License as published by |
 |  the Free Software Foundation, either version 3 of the License, or           |
@@ -54,7 +60,7 @@ void FillTime(PS7Time PTime)
 //------------------------------------------------------------------------------
 PS7AreaContainer::PS7AreaContainer(size_t size) : size(size) {
     area = new PS7Area[size];
-    memset(area, 0, size);
+    memset(area, 0, size * sizeof(PS7Area));
     count = 0;
     limit = 0;
 }
@@ -153,8 +159,7 @@ void PS7AreaContainer::Dispose() {
         }
     }
     count=0;
-    limit=0;
-    delete area;
+    delete [] area;     
 }
 //------------------------------------------------------------------------------
 // ISO/TCP WORKER  CLASS
